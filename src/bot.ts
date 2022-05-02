@@ -6,7 +6,13 @@ import config from './config';
 console.log('Bot is starting...');
 
 const client = new Client({
-  intents: ["DIRECT_MESSAGES", "GUILD_MESSAGES"]
+  intents: [
+    'GUILDS',
+    'GUILD_MESSAGES',
+    'GUILD_MESSAGE_TYPING',
+    'GUILD_MESSAGE_REACTIONS',
+    'DIRECT_MESSAGE_TYPING'
+  ]
 });
 
 ready(client);

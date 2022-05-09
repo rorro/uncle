@@ -25,8 +25,6 @@ export const acceptApplicationCommand: Command = {
   ],
 
   run: async (client: Client, interaction: BaseCommandInteraction) => {
-    interaction.deferReply();
-
     if (!interaction.inCachedGuild()) return;
     if (!isApplicationManager(interaction.member)) {
       await interaction.reply({
@@ -36,6 +34,7 @@ export const acceptApplicationCommand: Command = {
       return;
     }
 
+    interaction.deferReply();
     const rsn = interaction.options.get('rsn', true).value as string;
     const discordUser = interaction.options.getMember('discord_user', true);
 
@@ -76,7 +75,7 @@ export const acceptApplicationCommand: Command = {
         embeds: [reply]
       });
     } catch (e) {
-      interaction.followUp({ content: `Something went wrong: ${e}`, ephemeral: true });
+      interaction.followUp({ content: `Something went wrong: ${e}` });
     }
   }
 };

@@ -142,3 +142,6 @@ dist
 
 # dotenv
 .env
+
+# Google credentials
+unclebot-credentials.json

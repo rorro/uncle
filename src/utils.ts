@@ -1,4 +1,4 @@
-import { GuildMember } from 'discord.js';
+import { Client, GuildMember } from 'discord.js';
 import config from './config';
 
 export const MAX_LEVEL = 99;
@@ -61,9 +61,37 @@ function getXpDifferenceTo(level: number): number {
 export function isApplicationManager(member: GuildMember): boolean {
   if (!member) return false;
 
-  const roleId = config.developmentGuild.applicationManagerRole
-    ? config.developmentGuild.applicationManagerRole
-    : config.productionGuild.applicationManagerRole;
+  const roleId = config.developmentGuild.ranks.applicationManager
+    ? config.developmentGuild.ranks.applicationManager
+    : config.productionGuild.ranks.applicationManager;
 
   return member.roles.cache.has(roleId);
+}
+
+// Get the roles that a new clan applicant should get based on Legacy Diary tasks completed.
+export function getApplicantRoles(tasksCompleted: number) {
+  const isDev = config.developmentGuild.ranks.applicationManager;
+  const ranks = isDev ? config.developmentGuild.ranks : config.productionGuild.ranks;
+  const ranksToGive = [ranks.member as string];
+
+  tasksCompleted < 10
+    ? ranksToGive.push(ranks.protector as string)
+    : ranksToGive.push(ranks.bulwark as string);
+  return ranksToGive;
+}
+
+// Where to welcome the new members
+function getNewMembersChannel(): string {
+  return config.developmentGuild.channels.newMembers
+    ? config.developmentGuild.channels.newMembers
+    : config.productionGuild.channels.newMembers;
+}
+
+// Send a message in a specific channel
+export async function sendMessageInChannel(client: Client, message: string) {
+  const channelId = getNewMembersChannel();
+  const channel = client.channels.cache.get(channelId);
+  if (!channel?.isText()) return;
+
+  await channel.send({ content: message });
 }

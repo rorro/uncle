@@ -3,11 +3,10 @@ import { Command } from 'src/types';
 
 export const helpCommand: Command = {
   name: 'help',
-  description: 'Help a poor soul',
+  description: 'All the helpful information about the bot',
   type: 'CHAT_INPUT',
   run: async (client: Client, interaction: BaseCommandInteraction) => {
-    const content =
-      "I don't do anything yet. I will do loads of cool stuff soon, but for now I'm just your uncle.";
+    const content = 'So far I only do stuff for the staff members.';
 
     await interaction.reply({
       ephemeral: true,

@@ -19,7 +19,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "ts-node src/bot.ts",
+    "start": "pm2 start dist/bot.js --watch",
+    "deploy": "npm run build && bash deploy.sh",
     "dev": "nodemon src/bot.ts"
   }
 }

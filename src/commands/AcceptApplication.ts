@@ -7,7 +7,7 @@ import config from '../config';
 
 export const acceptApplicationCommand: Command = {
   name: 'accept_application',
-  description: 'Edit a google sheet',
+  description: 'Accept an applicant into the clan',
   type: 'CHAT_INPUT',
   options: [
     {
@@ -39,8 +39,6 @@ export const acceptApplicationCommand: Command = {
     const discordUser = interaction.options.getMember('discord_user', true);
 
     try {
-      await discordUser.setNickname(rsn);
-
       // Copy the diary sheet and give the user the correct roles
       const diaryId = (await copyDiary(rsn)) as string;
       await changePermissions(diaryId);
@@ -48,6 +46,7 @@ export const acceptApplicationCommand: Command = {
       const applicantRoles = getApplicantRoles(tasksCompleted);
       const webViewLink = await getWebViewLink(diaryId);
 
+      await discordUser.setNickname(rsn);
       await discordUser.roles.add(applicantRoles);
 
       const reply = new MessageEmbed()
@@ -56,7 +55,7 @@ export const acceptApplicationCommand: Command = {
         .addField('Roles Given', applicantRoles.map(roleId => `<@&${roleId}>`).join(' '))
         .addField('Diary Sheet Link', webViewLink ? webViewLink : 'No link could be created.');
 
-      const DM = `Hi, the official Uncle of Legacy here, I'm giving you a copy of our Legacy Diary. Completing tasks and submitting this sheet is required for most of our rank ups. I have already filled in your main account and some tasks have automatically been completed but others will require screenshot evidence of personal bests. Talk to any of our staff if you have any questions!\n\nYour sheet can be found here: ${webViewLink}`;
+      const DM = `Hi! I'm the official bot of Legacy, Uncle. I'm giving you a copy of our Legacy Diary. Completing tasks and submitting this sheet is required for most of our rank ups. I have already filled in your main account and some tasks have automatically been completed but others will require screenshot evidence of personal bests. Talk to any of our staff if you have any questions!\n\nYour sheet can be found here: ${webViewLink}`;
       let introMessage = `Welcome <@${discordUser.id}>!\nFeel free to introduce yourself a little in this channel. Please check out <#${config.productionGuild.channels.assignRoles}> and read <#${config.productionGuild.channels.rules}>.\nA staff member can meet you in-game to invite you to the clan. Until then you should join the in-game clan "Legacy" as a guest. If you see a staff member <:burnt:953065386130145331> online, ask them to meet you.\n`;
 
       await discordUser

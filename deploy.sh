@@ -6,8 +6,8 @@ read_var() {
     echo ${VAR[1]}
 }
 
-SSH_PORT=$(read_var SSH_PORT .env)
-SSH_IP=$(read_var SSH_IP .env)
-REMOTE_DESTINATION=$(read_var REMOTE_DESTINATION .env)
+SSH_PORT=$(read_var SSH_PORT .env.development)
+SSH_IP=$(read_var SSH_IP .env.development)
+REMOTE_DESTINATION=$(read_var REMOTE_DESTINATION .env.development)
 
 scp -P $SSH_PORT -r dist/ $SSH_IP:$REMOTE_DESTINATION

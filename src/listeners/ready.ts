@@ -10,7 +10,7 @@ export default (client: Client): void => {
 
     // Re-register commands on every start up.
     // Maybe change this even if it's just guild commands.
-    const guild = config.developmentGuild.id ? config.developmentGuild.id : config.productionGuild.id;
+    const guild = config.guild.id;
     // const guilds = client.guilds.cache.get(guild);
     // await guilds?.commands.set(commands);
 

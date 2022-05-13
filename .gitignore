@@ -141,7 +141,7 @@ dist
 # End of https://www.toptal.com/developers/gitignore/api/node
 
 # dotenv
-.env
+.env*
 
 # Google credentials
 unclebot-credentials.json

@@ -1,36 +1,38 @@
-import 'dotenv/config';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+let path;
+switch (process.env.NODE_ENV) {
+  case 'development':
+    path = `${__dirname}/../.env.development`;
+    break;
+  case 'production':
+    path = `${__dirname}/../.env.production`;
+    break;
+  default:
+    throw `Unhandled environment variable: ${process.env.NODE_ENV}`;
+}
+dotenv.config({ path: path });
 
 export default {
-  token: process.env.DISCORD_TOKEN,
-  developmentGuild: {
-    id: process.env.DEV ? process.env.DEV_GUILD : '',
-    channels: {
-      newMembers: process.env.DEV ? process.env.DEV_NEW_MEMBERS_CHANNEL : ''
-    },
-    ranks: {
-      applicationManager: process.env.DEV_APP_MANAGER,
-      member: process.env.DEV_MEMBER,
-      protector: process.env.DEV_PROTECTOR,
-      bulwark: process.env.DEV_BULWARK
-    }
-  },
-  productionGuild: {
-    id: '274570008737218562',
-    channels: {
-      newMembers: '692650808751423488',
-      assignRoles: '754716010023616542',
-      rules: '704163136009273424',
-      legacyDiary: '701551813366644816'
-    },
-    ranks: {
-      applicationManager: '691419580438020168',
-      member: '691353910757163047',
-      protector: '856252027587002408',
-      bulwark: '885720219308396564'
-    }
-  },
+  token: process.env.DISCORD_TOKEN as string,
   wiseoldmanAPI: 'https://api.wiseoldman.net',
   runewatchAPI: 'https://runewatch.com/api/v2/rsn/',
+  guild: {
+    id: process.env.GUILD_ID as string,
+    channels: {
+      newMembers: process.env.NEW_MEMBERS_CHANNEL as string,
+      assignRoles: process.env.ASSIGN_ROLES_CHANNEL as string,
+      rules: process.env.RULES_CHANNEL as string,
+      legacyDiary: process.env.DIARY_CHANNEL as string
+    },
+    roles: {
+      applicationManager: process.env.APPLICATION_MANAGER_ROLE as string,
+      member: process.env.MEMBER_ROLE as string,
+      protector: process.env.PROTECTOR_ROLE as string,
+      bulwark: process.env.BULWARK_ROLE as string
+    }
+  },
   requirements: {
     // requirements to join the clan
     chambers_of_xeric: 50,
@@ -44,8 +46,8 @@ export default {
     herblore: 78
   },
   googleDrive: {
-    diarySheetsFolder: '1BJf6o6HyK6bqP0mDXxeayBU9slp_bFcI',
-    diarySheet: '1ppb2JGT_c1-lrTQ0udo-uMSyl5WQatpIBJa7tZl7Xwg',
+    diarySheetsFolder: process.env.DIARY_SHEETS_FOLDER as string,
+    diarySheet: process.env.DIARY_SHEET as string,
     diarySheetMainName: 'Diary!B5',
     diarySheetTasksComplete: 'Diary!J3'
   }

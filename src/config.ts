@@ -39,11 +39,11 @@ export default {
     theatre_of_blood: 50,
     combatLevel: 120,
     totalLevel: 1750,
-    prayer: 77,
     ranged: 94,
     magic: 94,
     agility: 70,
-    herblore: 78
+    herblore: 78,
+    construction: 82
   },
   googleDrive: {
     diarySheetsFolder: process.env.DIARY_SHEETS_FOLDER as string,

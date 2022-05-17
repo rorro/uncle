@@ -79,10 +79,6 @@ export const checkApplicantRequirementsCommand: Command = {
         },
         // Skills
         {
-          name: `${config.requirements.prayer} Prayer`,
-          value: getLevel(snapshot.prayer.experience) >= config.requirements.prayer
-        },
-        {
           name: `${config.requirements.ranged} Ranged`,
           value: getLevel(snapshot.ranged.experience) >= config.requirements.ranged
         },
@@ -98,16 +94,24 @@ export const checkApplicantRequirementsCommand: Command = {
           name: `${config.requirements.herblore} Herblore`,
           value: getLevel(snapshot.herblore.experience) >= config.requirements.herblore
         },
+        {
+          name: `${config.requirements.construction} Construction`,
+          value: getLevel(snapshot.construction.experience) >= config.requirements.construction
+        },
         // Bosses
         {
-          name: `${config.requirements.chambers_of_xeric}kc CoX or ${config.requirements.theatre_of_blood}kc ToB`,
+          name: `${config.requirements.chambers_of_xeric}kc Chambers of Xeric`,
           value:
             Math.max(snapshot.chambers_of_xeric.kills, 0) +
               Math.max(snapshot.chambers_of_xeric_challenge_mode.kills, 0) >=
-              config.requirements.chambers_of_xeric ||
+            config.requirements.chambers_of_xeric
+        },
+        {
+          name: `${config.requirements.theatre_of_blood}kc Theatre of Blood`,
+          value:
             Math.max(snapshot.theatre_of_blood.kills, 0) +
               Math.max(snapshot.theatre_of_blood_hard_mode.kills, 0) >=
-              config.requirements.theatre_of_blood
+            config.requirements.theatre_of_blood
         }
       ];
 

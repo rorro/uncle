@@ -37,6 +37,7 @@ RULES_CHANNEL={channel_id}
 DIARY_CHANNEL={channel_id}
 
 APPLICATION_MANAGER_ROLE={role_id}
+STAFF_ROLE={role_id}
 MEMBER_ROLE={role_id}
 PROTECTOR_ROLE={role_id}
 BULWARK_ROLE={role_id}

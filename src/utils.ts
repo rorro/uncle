@@ -58,10 +58,8 @@ function getXpDifferenceTo(level: number): number {
   return Math.floor(level - 1 + 300 * 2 ** ((level - 1) / 7)) / 4;
 }
 
-export function isApplicationManager(member: GuildMember): boolean {
+export function hasRole(member: GuildMember, roleId: string): boolean {
   if (!member) return false;
-
-  const roleId = config.guild.roles.applicationManager;
 
   return roleId ? member.roles.cache.has(roleId) : false;
 }
@@ -86,4 +84,14 @@ export async function sendMessageInChannel(
   if (!channel?.isText()) return;
 
   await channel.send({ content: message });
+}
+
+export function parseMessage(message: string): string {
+  const split = message.split('\\n');
+  let result = '';
+  split.forEach(line => {
+    result += line + '\n';
+  });
+
+  return result;
 }

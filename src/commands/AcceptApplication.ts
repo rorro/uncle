@@ -1,7 +1,7 @@
-import { BaseCommandInteraction, Client, MessageEmbed, RoleManager, RoleResolvable } from 'discord.js';
+import { BaseCommandInteraction, Client, MessageEmbed } from 'discord.js';
 import { ApplicationCommandOptionTypes } from 'discord.js/typings/enums';
 import { Command } from 'src/types';
-import { getApplicantRoles, isApplicationManager, sendMessageInChannel } from '../utils';
+import { getApplicantRoles, hasRole, sendMessageInChannel } from '../utils';
 import { copyDiary, changePermissions, getTasksCompleted, getWebViewLink } from '../api/googleHandler';
 import config from '../config';
 
@@ -25,8 +25,8 @@ export const acceptApplicationCommand: Command = {
   ],
 
   run: async (client: Client, interaction: BaseCommandInteraction) => {
-    if (!interaction.inCachedGuild()) return;
-    if (!isApplicationManager(interaction.member)) {
+    if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
+    if (!hasRole(interaction.member, config.guild.roles.applicationManager)) {
       await interaction.reply({
         ephemeral: true,
         content: 'You need to be an application manager to use this command!'
@@ -34,8 +34,8 @@ export const acceptApplicationCommand: Command = {
       return;
     }
 
-    interaction.deferReply();
-    const rsn = interaction.options.get('rsn', true).value as string;
+    await interaction.deferReply();
+    const rsn = interaction.options.getString('rsn', true);
     const discordUser = interaction.options.getMember('discord_user', true);
 
     try {

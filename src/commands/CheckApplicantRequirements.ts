@@ -4,7 +4,7 @@ import { SnapshotSkill } from '../api/types';
 import { Command } from 'src/types';
 import { WOMAPI, RWAPI } from '../api/handler';
 import config from '../config';
-import { getLevel, isApplicationManager, SKILLS } from '../utils';
+import { getLevel, hasRole, SKILLS } from '../utils';
 
 export const checkApplicantRequirementsCommand: Command = {
   name: 'check_requirements',
@@ -20,9 +20,9 @@ export const checkApplicantRequirementsCommand: Command = {
   ],
 
   run: async (client: Client, interaction: BaseCommandInteraction) => {
-    if (!interaction.inCachedGuild()) return;
+    if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
 
-    if (!isApplicationManager(interaction.member)) {
+    if (!hasRole(interaction.member, config.guild.roles.applicationManager)) {
       await interaction.reply({
         ephemeral: true,
         content: 'You need to be an application manager to use this command!'
@@ -31,7 +31,7 @@ export const checkApplicantRequirementsCommand: Command = {
     }
 
     await interaction.deferReply();
-    const rsn = interaction.options.get('rsn', true).value;
+    const rsn = interaction.options.getString('rsn', true);
     const trackUrl = `${config.wiseoldmanAPI}/players/track`;
     const getUrl = `${config.wiseoldmanAPI}/players/username/${rsn}`;
 

@@ -28,6 +28,7 @@ export default {
     },
     roles: {
       applicationManager: process.env.APPLICATION_MANAGER_ROLE as string,
+      staff: process.env.STAFF_ROLE as string,
       member: process.env.MEMBER_ROLE as string,
       protector: process.env.PROTECTOR_ROLE as string,
       bulwark: process.env.BULWARK_ROLE as string

@@ -2,7 +2,7 @@ import { BaseCommandInteraction, Client, Guild } from 'discord.js';
 import { ApplicationCommandOptionTypes, ChannelTypes } from 'discord.js/typings/enums';
 import config from '../config';
 import { Command } from 'src/types';
-import { hasRole, parseMessage, sendMessageInChannel } from '../utils';
+import { formatMessage, hasRole, parseMessage, sendMessageInChannel } from '../utils';
 
 export const messageCommand: Command = {
   name: 'message',
@@ -74,12 +74,32 @@ export const messageCommand: Command = {
           channelTypes: [ChannelTypes.GUILD_TEXT]
         }
       ]
+    },
+    {
+      type: ApplicationCommandOptionTypes.SUB_COMMAND,
+      name: 'copy',
+      description: 'Display a message including the formatting',
+      options: [
+        {
+          type: ApplicationCommandOptionTypes.STRING,
+          name: 'message_id',
+          description: 'The message id of the message you want to copy',
+          required: true
+        },
+        {
+          type: ApplicationCommandOptionTypes.CHANNEL,
+          name: 'channel',
+          description: 'The channel where the message to copy is',
+          required: true,
+          channelTypes: [ChannelTypes.GUILD_TEXT]
+        }
+      ]
     }
   ],
   run: async (client: Client, interaction: BaseCommandInteraction) => {
-    await interaction.deferReply({ ephemeral: true });
     if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
 
+    await interaction.deferReply({ ephemeral: true });
     if (!hasRole(interaction.member, config.guild.roles.staff)) {
       await interaction.reply({
         ephemeral: true,
@@ -116,6 +136,12 @@ export const messageCommand: Command = {
 
           await channel.messages.delete(deleteMessageId);
           response += 'deleted message.';
+          break;
+        case 'copy':
+          const copyMessageId = interaction.options.getString('message_id', true);
+          const msg = await channel.messages.fetch(copyMessageId);
+          response = formatMessage(msg.content);
+          //console.log(response);
           break;
       }
       await interaction.followUp({

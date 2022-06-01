@@ -1,4 +1,5 @@
 import { Client, GuildMember } from 'discord.js';
+import { resourceLimits } from 'worker_threads';
 import config from './config';
 
 export const MAX_LEVEL = 99;
@@ -94,4 +95,16 @@ export function parseMessage(message: string): string {
   });
 
   return result;
+}
+
+export function formatMessage(message: string): string {
+  return message
+    .replaceAll('`', '\\`') // inline code
+    .replaceAll('```', '\\```') // code
+    .replaceAll('*', '\\*') // italics and bold
+    .replaceAll('~~', '\\~~') // strike through
+    .replaceAll('>', '\\>') // quote
+    .replaceAll('||', '\\||') // spoiler
+    .split('\n')
+    .join('\\n\n');
 }

@@ -1,4 +1,4 @@
-import { BaseCommandInteraction, Client, Guild } from 'discord.js';
+import { BaseCommandInteraction, Client } from 'discord.js';
 import { ApplicationCommandOptionTypes, ChannelTypes } from 'discord.js/typings/enums';
 import config from '../config';
 import { Command } from 'src/types';
@@ -99,7 +99,6 @@ export const messageCommand: Command = {
   run: async (client: Client, interaction: BaseCommandInteraction) => {
     if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
 
-    await interaction.deferReply({ ephemeral: true });
     if (!hasRole(interaction.member, config.guild.roles.staff)) {
       await interaction.reply({
         ephemeral: true,
@@ -107,8 +106,8 @@ export const messageCommand: Command = {
       });
       return;
     }
-    if (!interaction.isCommand()) return;
 
+    await interaction.deferReply({ ephemeral: true });
     const subCommand = interaction.options.getSubcommand();
     const channel = interaction.options.getChannel('channel', true);
     if (!channel.isText()) return;
@@ -141,7 +140,6 @@ export const messageCommand: Command = {
           const copyMessageId = interaction.options.getString('message_id', true);
           const msg = await channel.messages.fetch(copyMessageId);
           response = formatMessage(msg.content);
-          //console.log(response);
           break;
       }
       await interaction.followUp({

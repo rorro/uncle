@@ -88,7 +88,7 @@ export async function sendMessageInChannel(
 }
 
 export function parseMessage(message: string): string {
-  const split = message.split('\\n');
+  const split = message.split('\\n ');
   let result = '';
   split.forEach(line => {
     result += line + '\n';
@@ -99,12 +99,12 @@ export function parseMessage(message: string): string {
 
 export function formatMessage(message: string): string {
   return message
-    .replaceAll('`', '\\`') // inline code
-    .replaceAll('```', '\\```') // code
+    .replaceAll('`', '\\`') // code
     .replaceAll('*', '\\*') // italics and bold
-    .replaceAll('~~', '\\~~') // strike through
+    .replaceAll('~', '\\~') // strikethrough
     .replaceAll('>', '\\>') // quote
-    .replaceAll('||', '\\||') // spoiler
+    .replaceAll('|', '\\|') // spoiler
+    .replaceAll('_', '\\_') // underline
     .split('\n')
     .join('\\n\n');
 }

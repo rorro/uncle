@@ -78,3 +78,13 @@ export async function getWebViewLink(sheetId: string): Promise<string> {
   if (webViewLink.data.webViewLink) return webViewLink.data.webViewLink;
   else return '';
 }
+
+// Fetch the pets data from pets sheet
+export async function getPetData(sheetId: string) {
+  const topThree = await sheetsService.spreadsheets.values.get({
+    spreadsheetId: sheetId,
+    range: config.googleDrive.petSheetRange
+  });
+
+  return topThree.data.values;
+}

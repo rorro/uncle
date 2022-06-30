@@ -145,3 +145,6 @@ dist
 
 # Google credentials
 unclebot-credentials.json
+
+# db
+.db.json

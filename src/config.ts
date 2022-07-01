@@ -24,7 +24,8 @@ export default {
       newMembers: process.env.NEW_MEMBERS_CHANNEL as string,
       assignRoles: process.env.ASSIGN_ROLES_CHANNEL as string,
       rules: process.env.RULES_CHANNEL as string,
-      legacyDiary: process.env.DIARY_CHANNEL as string
+      legacyDiary: process.env.DIARY_CHANNEL as string,
+      leaderboard: process.env.LEADERBOARD_CHANNEL as string
     },
     roles: {
       applicationManager: process.env.APPLICATION_MANAGER_ROLE as string,
@@ -49,7 +50,12 @@ export default {
   googleDrive: {
     diarySheetsFolder: process.env.DIARY_SHEETS_FOLDER as string,
     diarySheet: process.env.DIARY_SHEET as string,
+    petsSheet: process.env.PETS_SHEET as string,
     diarySheetMainName: 'Diary!B5',
-    diarySheetTasksComplete: 'Diary!J3'
+    diarySheetTasksComplete: 'Diary!J3',
+    petSheetRange: 'Pet Hunters!A3:BH',
+    petDataOffset: 3,
+    petsAmount: 50,
+    petPlusAmount: 7
   }
 };

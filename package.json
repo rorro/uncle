@@ -9,7 +9,8 @@
     "axios": "^0.27.2",
     "discord.js": "^13.6.0",
     "dotenv": "^16.0.0",
-    "googleapis": "^100.0.0"
+    "googleapis": "^100.0.0",
+    "node-json-db": "^1.5.0"
   },
   "devDependencies": {
     "@types/node": "^17.0.31",

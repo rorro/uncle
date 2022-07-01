@@ -35,6 +35,7 @@ NEW_MEMBERS_CHANNEL={channel_id}
 ASSIGN_ROLES_CHANNEL={channel_id}
 RULES_CHANNEL={channel_id}
 DIARY_CHANNEL={channel_id}
+LEADERBOARD_CHANNEL={channel_id}
 
 APPLICATION_MANAGER_ROLE={role_id}
 STAFF_ROLE={role_id}
@@ -44,6 +45,9 @@ BULWARK_ROLE={role_id}
 
 DIARY_SHEETS_FOLDER={google_drive_folder_id}
 DIARY_SHEET={google_sheets_sheet_id}
+
+PETS_SHEET={google_sheets_sheet_id}
+
 ```
 
 2. For some commands to work, you will need to create access credentials for Google Workspace APIs. Follow [this link](https://developers.google.com/workspace/guides/create-credentials) and create a service account. After creating a servie account, download the credentials as a JSON file, rename the file to `unclebot-credentials.json` and add it to the root folder of the project.

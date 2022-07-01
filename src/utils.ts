@@ -1,5 +1,4 @@
 import { Client, GuildMember } from 'discord.js';
-import { resourceLimits } from 'worker_threads';
 import config from './config';
 
 export const MAX_LEVEL = 99;
@@ -84,7 +83,8 @@ export async function sendMessageInChannel(
   const channel = client.channels.cache.get(channelId);
   if (!channel?.isText()) return;
 
-  await channel.send({ content: message });
+  const sent = await channel.send({ content: message });
+  return sent.id;
 }
 
 export function parseMessage(message: string): string {

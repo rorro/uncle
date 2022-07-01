@@ -11,3 +11,4 @@ SSH_IP=$(read_var SSH_IP .env.development)
 REMOTE_DESTINATION=$(read_var REMOTE_DESTINATION .env.development)
 
 scp -P $SSH_PORT -r dist/ $SSH_IP:$REMOTE_DESTINATION
+scp -P $SSH_PORT -r .env.production $SSH_IP:$REMOTE_DESTINATION

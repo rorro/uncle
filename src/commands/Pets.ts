@@ -156,7 +156,7 @@ function getTopPetsIndex(petData: any): [PetRecord, string[]] {
     }
   }
 
-  const topPets = Object.keys(petsAmount).sort().reverse().slice(0, 3);
+  const topPets = Object.keys(petsAmount).sort().reverse().slice(0, 5);
   for (const j in petsAmount) {
     if (!topPets.includes(j)) {
       delete petsAmount[j];

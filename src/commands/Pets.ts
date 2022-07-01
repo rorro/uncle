@@ -13,8 +13,8 @@ export const petsCommand: Command = {
   options: [
     {
       type: ApplicationCommandOptionTypes.SUB_COMMAND,
-      name: 'updatetop3',
-      description: 'Get top 3 pet leaderboard'
+      name: 'updatetop5',
+      description: 'Update pet leaderboard'
     },
     {
       type: ApplicationCommandOptionTypes.SUB_COMMAND,
@@ -41,7 +41,7 @@ export const petsCommand: Command = {
     const emojis = petData?.at(0);
 
     switch (subCommand) {
-      case 'updatetop3':
+      case 'updatetop5':
         if (!hasRole(interaction.member, config.guild.roles.staff)) {
           await interaction.followUp({
             content: 'You need to be a staff member to use this command!'
@@ -145,7 +145,7 @@ function buildMessage(emojiData: any, data: any, rank: number): string {
   return content;
 }
 
-function getTopPetsIndex(petData: any): [PetRecord, string[]] {
+function getTopPetsIndex(petData: any): [PetRecord, number[]] {
   let petsAmount: PetRecord = {};
   for (let i: number = 1; i < petData.length; i++) {
     const pets = petData[i].at(1);
@@ -156,11 +156,10 @@ function getTopPetsIndex(petData: any): [PetRecord, string[]] {
     }
   }
 
-  const topPets = Object.keys(petsAmount).sort().reverse().slice(0, 5);
-  for (const j in petsAmount) {
-    if (!topPets.includes(j)) {
-      delete petsAmount[j];
-    }
-  }
+  const topPets = Object.keys(petsAmount)
+    .map(Number)
+    .sort((a, b) => b - a)
+    .slice(0, 5);
+
   return [petsAmount, topPets];
 }

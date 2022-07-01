@@ -22,6 +22,7 @@
     "build": "tsc",
     "start": "NODE_ENV=production pm2 start dist/bot.js --watch",
     "deploy": "npm run build && bash deploy.sh",
-    "dev": "NODE_ENV=development nodemon src/bot.ts"
+    "dev": "NODE_ENV=development nodemon src/bot.ts",
+    "dev-win": "set NODE_ENV=development&&nodemon src/bot.ts"
   }
 }

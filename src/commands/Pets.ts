@@ -123,7 +123,11 @@ function buildMessage(emojiData: any, data: any, rank: number): string {
 
   //Pets
   let petEmojis = '';
-  for (let i = config.googleDrive.petDataOffset; i < config.googleDrive.petsAmount; i++) {
+  for (
+    let i = config.googleDrive.petDataOffset;
+    i < config.googleDrive.petsAmount + config.googleDrive.petDataOffset;
+    i++
+  ) {
     const gotPet = data?.at(i) === 'TRUE';
     petEmojis += gotPet ? emojiData.at(i) + ' ' : '';
   }
@@ -133,7 +137,7 @@ function buildMessage(emojiData: any, data: any, rank: number): string {
   for (
     let i = config.googleDrive.petsAmount + config.googleDrive.petDataOffset;
     i <
-    config.googleDrive.petsAmount + config.googleDrive.petPlusAmount + +config.googleDrive.petDataOffset;
+    config.googleDrive.petsAmount + config.googleDrive.petPlusAmount + config.googleDrive.petDataOffset;
     i++
   ) {
     const gotPlus = data?.at(i) === 'TRUE';

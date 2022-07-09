@@ -51,6 +51,7 @@ export default {
     diarySheetsFolder: process.env.DIARY_SHEETS_FOLDER as string,
     diarySheet: process.env.DIARY_SHEET as string,
     petsSheet: process.env.PETS_SHEET as string,
+    splitsSheet: process.env.SPLITS_SHEET as string,
     diarySheetMainName: 'Diary!B5',
     diarySheetTasksComplete: 'Diary!J3',
     petSheetRange: 'Pet Hunters!A3:BH',

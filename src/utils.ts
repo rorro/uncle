@@ -29,6 +29,19 @@ export const SKILLS = [
   'farming'
 ];
 
+enum Ranks {
+  templar = '<:templar:996045854962102342>',
+  vanguard = '<:vanguard:996045856291704912>',
+  warden = '<:warden:996045857633882223>',
+  guardian = '<:guardian:996045849639518358>',
+  sentry = '<:sentry:996045853557006456>',
+  justiciar = '<:justicear:996045850759397437>',
+  bulwark = '<:bulwark:996045848557387866>',
+  protector = '<:protector:996045852013498489>',
+  trialist = '<:trialist:996048382789423174>',
+  staff = '<:staff:995767143159304252>'
+}
+
 export function getLevel(experience: number): number {
   // Unranked
   if (experience === -1) {
@@ -107,4 +120,9 @@ export function formatMessage(message: string): string {
     .replaceAll('_', '\\_') // underline
     .split('\n')
     .join('\\n\n');
+}
+
+export function getRank(rank: string): string {
+  const r = (<any>Ranks)[rank.toLowerCase()];
+  return r || '❌';
 }

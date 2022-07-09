@@ -4,11 +4,15 @@ import { checkApplicantRequirementsCommand } from './commands/CheckApplicantRequ
 import { acceptApplicationCommand } from './commands/AcceptApplication';
 import { messageCommand } from './commands/Message';
 import { petsCommand } from './commands/Pets';
+import { splitsCommand } from './commands/Splits';
+import { diaryCommand } from './commands/Diary';
 
 export const commands: Command[] = [
   helpCommand,
   checkApplicantRequirementsCommand,
   acceptApplicationCommand,
   messageCommand,
-  petsCommand
+  petsCommand,
+  splitsCommand,
+  diaryCommand
 ];

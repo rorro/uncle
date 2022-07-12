@@ -1,6 +1,6 @@
 import { BaseCommandInteraction, Client } from 'discord.js';
 import { ApplicationCommandOptionTypes } from 'discord.js/typings/enums';
-import { getPetData } from '../api/googleHandler';
+import { getSheetData } from '../api/googleHandler';
 import { Command, PetRecord } from '../types';
 import config from '../config';
 import { hasRole, sendMessageInChannel } from '../utils';
@@ -37,7 +37,7 @@ export const petsCommand: Command = {
 
     const subCommand = interaction.options.getSubcommand();
     let content = '';
-    const petData = await getPetData(config.googleDrive.petsSheet);
+    const petData = await getSheetData(config.googleDrive.petsSheet, config.googleDrive.petSheetRange);
     const emojis = petData?.at(0);
 
     switch (subCommand) {

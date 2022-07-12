@@ -7,3 +7,10 @@ export interface Command extends ChatInputApplicationCommandData {
 export interface PetRecord {
   [key: number]: [number];
 }
+
+export interface PlayerSummary {
+  name: string;
+  points: number;
+  diaryTasks: number;
+  rank: string;
+}

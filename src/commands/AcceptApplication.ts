@@ -51,6 +51,7 @@ export const acceptApplicationCommand: Command = {
 
       const reply = new MessageEmbed()
         .setTitle(`Successfully accepted ${rsn}`)
+        .setThumbnail('https://i.imgur.com/GtMFrRf.png')
         .addField('Diary Tasks Completed', tasksCompleted)
         .addField('Roles Given', applicantRoles.map(roleId => `<@&${roleId}>`).join(' '))
         .addField('Diary Sheet Link', webViewLink ? webViewLink : 'No link could be created.');

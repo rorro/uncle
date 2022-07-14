@@ -35,7 +35,9 @@ export const checkApplicantRequirementsCommand: Command = {
     const trackUrl = `${config.wiseoldmanAPI}/players/track`;
     const getUrl = `${config.wiseoldmanAPI}/players/username/${rsn}`;
 
-    const reply = new MessageEmbed().setTitle(`Requirements check for ${rsn}`);
+    const reply = new MessageEmbed()
+      .setTitle(`Requirements check for ${rsn}`)
+      .setThumbnail('https://i.imgur.com/GtMFrRf.png');
 
     let rwResult = '';
     try {

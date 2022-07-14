@@ -30,6 +30,7 @@ export const SKILLS = [
 ];
 
 enum Ranks {
+  marshal = '<:marshal:997273187412881470>',
   templar = '<:templar:996045854962102342>',
   vanguard = '<:vanguard:996045856291704912>',
   warden = '<:warden:996045857633882223>',

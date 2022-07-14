@@ -32,7 +32,8 @@ export default {
       staff: process.env.STAFF_ROLE as string,
       member: process.env.MEMBER_ROLE as string,
       protector: process.env.PROTECTOR_ROLE as string,
-      bulwark: process.env.BULWARK_ROLE as string
+      bulwark: process.env.BULWARK_ROLE as string,
+      justiciar: process.env.JUSTICIAR_ROLE as string
     }
   },
   requirements: {

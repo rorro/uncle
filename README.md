@@ -42,6 +42,7 @@ STAFF_ROLE={role_id}
 MEMBER_ROLE={role_id}
 PROTECTOR_ROLE={role_id}
 BULWARK_ROLE={role_id}
+JUSTICIAR_ROLE={role_id}
 
 DIARY_SHEETS_FOLDER={google_drive_folder_id}
 DIARY_SHEET={google_sheets_sheet_id}

@@ -82,7 +82,12 @@ export function getApplicantRoles(tasksCompleted: number) {
   const roles = config.guild.roles;
   const ranksToGive: string[] = [roles.member];
 
-  tasksCompleted < 10 ? ranksToGive.push(roles.protector) : ranksToGive.push(roles.bulwark);
+  tasksCompleted < 10
+    ? ranksToGive.push(roles.protector)
+    : tasksCompleted < 15
+    ? ranksToGive.push(roles.bulwark)
+    : ranksToGive.push(roles.justiciar);
+
   return ranksToGive;
 }
 

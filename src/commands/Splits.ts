@@ -107,14 +107,14 @@ export const splitsCommand: Command = {
               botw
             ] = [
               value.at(3),
+              value.at(12),
+              value.at(13),
+              value.at(15),
+              value.at(16),
               value.at(4),
               value.at(5),
-              value.at(7),
-              value.at(8),
-              value.at(9),
-              value.at(10),
-              value.at(11),
-              value.slice(12, 15)
+              value.at(17),
+              value.slice(18, 21)
             ];
 
             const embed = new MessageEmbed()

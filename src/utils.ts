@@ -132,3 +132,8 @@ export function getRank(rank: string): string {
   const r = (<any>Ranks)[rank.toLowerCase()];
   return r || '❌';
 }
+
+export function getRoleName(roleId: string): string {
+  const roles = config.guild.roles;
+  return roleId === roles.protector ? 'Protector' : roleId === roles.bulwark ? 'Bulwark' : 'Justiciar';
+}

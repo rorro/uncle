@@ -40,7 +40,11 @@ export const splitsCommand: Command = {
     switch (subCommand) {
       case 'summary':
         try {
-          const summaryData = await getSheetData(config.googleDrive.splitsSheet, 'Summary!A2:AA');
+          const summaryData = await getSheetData(
+            config.googleDrive.splitsSheet,
+            'Summary!A2:AA',
+            'FORMATTED_VALUE'
+          );
           const totalSplits = summaryData?.at(1)?.at(2);
           const currentMonthTotalSplits = summaryData?.at(4)?.at(2);
           const currentMonth = summaryData?.at(4)?.at(4);
@@ -90,7 +94,7 @@ export const splitsCommand: Command = {
         return;
       case 'search':
         const username = interaction.options.getString('rsn', true).toLowerCase();
-        const data = await getSheetData(config.googleDrive.splitsSheet, 'Data!1:900');
+        const data = await getSheetData(config.googleDrive.splitsSheet, 'Data!1:900', 'FORMATTED_VALUE');
         const players = data?.slice(3);
 
         for (const { index, value } of (players as any[][]).map((value, index) => ({ index, value }))) {

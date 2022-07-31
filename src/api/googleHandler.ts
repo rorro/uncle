@@ -80,11 +80,23 @@ export async function getWebViewLink(sheetId: string): Promise<string> {
 }
 
 // Fetch data from a sheet
-export async function getSheetData(sheetId: string, range: string) {
+export async function getSheetData(sheetId: string, range: string, renderOption: string) {
   const data = await sheetsService.spreadsheets.values.get({
     spreadsheetId: sheetId,
-    range: range
+    range: range,
+    valueRenderOption: renderOption
   });
 
   return data.data.values;
+}
+
+export async function insertIntoSheet(sheetId: string, range: string, values: string[][]) {
+  await sheetsService.spreadsheets.values.update({
+    spreadsheetId: sheetId,
+    range: range,
+    valueInputOption: 'USER_ENTERED',
+    requestBody: {
+      values
+    }
+  });
 }

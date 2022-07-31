@@ -1,4 +1,4 @@
-import { BaseCommandInteraction, Client, Message, MessageEmbed } from 'discord.js';
+import { BaseCommandInteraction, Client, MessageEmbed } from 'discord.js';
 import { ApplicationCommandOptionTypes } from 'discord.js/typings/enums';
 import { getSheetData } from '../api/googleHandler';
 import { Command, PlayerSummary } from '../types';
@@ -61,7 +61,11 @@ export const diaryCommand: Command = {
 
         try {
           const messageId = db.leaderboard.getData('/diarytop10');
-          const summaryData = await getSheetData(config.googleDrive.splitsSheet, 'Summary!A2:AA');
+          const summaryData = await getSheetData(
+            config.googleDrive.splitsSheet,
+            'Summary!A2:AA',
+            'FORMATTED_VALUE'
+          );
           const players = Object.values((summaryData as any[]).slice(12))
             .map(
               v => <PlayerSummary>{ name: v.at(0), points: v.at(1), diaryTasks: v.at(2), rank: v.at(4) }

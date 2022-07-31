@@ -1,9 +1,17 @@
 import { BaseCommandInteraction, Client, MessageEmbed } from 'discord.js';
 import { ApplicationCommandOptionTypes } from 'discord.js/typings/enums';
 import { Command } from 'src/types';
-import { getApplicantRoles, hasRole, sendMessageInChannel } from '../utils';
-import { copyDiary, changePermissions, getTasksCompleted, getWebViewLink } from '../api/googleHandler';
+import { getApplicantRoles, getRoleName, hasRole, sendMessageInChannel } from '../utils';
+import {
+  copyDiary,
+  changePermissions,
+  getTasksCompleted,
+  getWebViewLink,
+  getSheetData,
+  insertIntoSheet
+} from '../api/googleHandler';
 import config from '../config';
+import dayjs from 'dayjs';
 
 export const acceptApplicationCommand: Command = {
   name: 'accept_application',
@@ -45,6 +53,81 @@ export const acceptApplicationCommand: Command = {
       const tasksCompleted = await getTasksCompleted(diaryId, rsn);
       const applicantRoles = getApplicantRoles(tasksCompleted);
       const webViewLink = await getWebViewLink(diaryId);
+      const todaysDate = `=DATE(${dayjs().format('YYYY,MM,DD')})`;
+
+      const data = await getSheetData(config.googleDrive.splitsSheet, 'Data!1:900', 'FORMULA');
+      const usernames = await getSheetData(
+        config.googleDrive.splitsSheet,
+        'Data!A1:A',
+        'FORMATTED_VALUE'
+      );
+      const players = data?.slice(3);
+
+      let inSplitsSheet = false;
+      for (const { index, value } of (players as any[][]).map((value, index) => ({ index, value }))) {
+        if (value.at(0).toString().toLowerCase() === rsn.toLowerCase()) {
+          inSplitsSheet = true;
+          const [rank, diaryTasks, totalPoints, altAccount] = [
+            value.at(3),
+            value.at(12),
+            value.at(17),
+            value.at(6)
+          ];
+
+          let inputValues = [
+            value.at(0),
+            value.at(1),
+            value.at(2),
+            rank,
+            'FALSE',
+            'FALSE',
+            altAccount,
+            'FALSE',
+            'FALSE',
+            value.at(9),
+            value.at(10),
+            value.at(11),
+            diaryTasks,
+            todaysDate,
+            value.at(14),
+            value.at(15),
+            value.at(16),
+            totalPoints
+          ];
+
+          for (let j = 18; j < value.length; j++) {
+            inputValues.push(value.at(j));
+          }
+
+          insertIntoSheet(config.googleDrive.splitsSheet, `Data!A${index + 4}`, [inputValues]);
+        }
+      }
+
+      if (!inSplitsSheet) {
+        const rowToInsertInto = usernames?.slice(3).length as number;
+        const inputValues = [
+          rsn,
+          players?.at(rowToInsertInto)?.at(1),
+          players?.at(rowToInsertInto)?.at(2),
+          getRoleName(applicantRoles[1]),
+          'FALSE',
+          'FALSE',
+          '',
+          'FALSE',
+          'FALSE',
+          players?.at(rowToInsertInto)?.at(9),
+          players?.at(rowToInsertInto)?.at(10),
+          players?.at(rowToInsertInto)?.at(11),
+          tasksCompleted,
+          todaysDate,
+          webViewLink,
+          'FALSE',
+          'FALSE',
+          players?.at(rowToInsertInto)?.at(17)
+        ];
+
+        insertIntoSheet(config.googleDrive.splitsSheet, `Data!A${rowToInsertInto + 4}`, [inputValues]);
+      }
 
       await discordUser.setNickname(rsn);
       await discordUser.roles.add(applicantRoles);
@@ -76,6 +159,7 @@ export const acceptApplicationCommand: Command = {
       });
     } catch (e) {
       interaction.followUp({ content: `Something went wrong: ${e}` });
+      console.log(e);
     }
   }
 };

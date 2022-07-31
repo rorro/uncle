@@ -37,7 +37,11 @@ export const petsCommand: Command = {
 
     const subCommand = interaction.options.getSubcommand();
     let content = '';
-    const petData = await getSheetData(config.googleDrive.petsSheet, config.googleDrive.petSheetRange);
+    const petData = await getSheetData(
+      config.googleDrive.petsSheet,
+      config.googleDrive.petSheetRange,
+      'FORMATTED_VALUE'
+    );
     const emojis = petData?.at(0);
 
     switch (subCommand) {

@@ -51,7 +51,7 @@ export default {
   googleDrive: {
     diarySheetsFolder: process.env.DIARY_SHEETS_FOLDER as string,
     diarySheet: process.env.DIARY_SHEET as string,
-    petsSheet: process.env.PETS_SHEET as string,
+    leaderboardSheet: process.env.LEADERBOARD_SHEET as string,
     splitsSheet: process.env.SPLITS_SHEET as string,
     diarySheetMainName: 'Diary!B5',
     diarySheetTasksComplete: 'Diary!J3',

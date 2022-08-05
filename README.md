@@ -47,7 +47,7 @@ JUSTICIAR_ROLE={role_id}
 DIARY_SHEETS_FOLDER={google_drive_folder_id}
 DIARY_SHEET={google_sheets_sheet_id}
 
-PETS_SHEET={google_sheets_sheet_id}
+LEADERBOARD_SHEET={google_sheets_sheet_id}
 
 SPLITS_SHEET={google_sheets_sheet_id}
 ```

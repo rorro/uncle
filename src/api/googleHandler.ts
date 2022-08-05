@@ -79,7 +79,13 @@ export async function getWebViewLink(sheetId: string): Promise<string> {
   else return '';
 }
 
-// Fetch data from a sheet
+/**
+ * Fetch sheet data from a sheet
+ * @param sheetId ID of a Google sheet
+ * @param range The ranges to retrieve from the spreadsheet.Example 'Sheet1!A1:A1'.
+ * @param renderOption 'FORMATTED_VALUE', 'UNFORMATTED_VALUE' or 'FORMULA'
+ * @returns returns a string version of bar
+ */
 export async function getSheetData(sheetId: string, range: string, renderOption: string) {
   const data = await sheetsService.spreadsheets.values.get({
     spreadsheetId: sheetId,

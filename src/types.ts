@@ -4,7 +4,7 @@ export interface Command extends ChatInputApplicationCommandData {
   run: (client: Client, interaction: BaseCommandInteraction) => void;
 }
 
-export interface PetRecord {
+export interface LeaderboardRecord {
   [key: number]: [number];
 }
 

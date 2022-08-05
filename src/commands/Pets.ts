@@ -1,7 +1,7 @@
 import { BaseCommandInteraction, Client } from 'discord.js';
 import { ApplicationCommandOptionTypes } from 'discord.js/typings/enums';
 import { getSheetData } from '../api/googleHandler';
-import { Command, PetRecord } from '../types';
+import { Command, LeaderboardRecord } from '../types';
 import config from '../config';
 import { hasRole, sendMessageInChannel } from '../utils';
 import db from '../db';
@@ -38,7 +38,7 @@ export const petsCommand: Command = {
     const subCommand = interaction.options.getSubcommand();
     let content = '';
     const petData = await getSheetData(
-      config.googleDrive.petsSheet,
+      config.googleDrive.leaderboardSheet,
       config.googleDrive.petSheetRange,
       'FORMATTED_VALUE'
     );
@@ -153,8 +153,8 @@ function buildMessage(emojiData: any, data: any, rank: number): string {
   return content;
 }
 
-function getTopPetsIndex(petData: any): [PetRecord, number[]] {
-  let petsAmount: PetRecord = {};
+function getTopPetsIndex(petData: any): [LeaderboardRecord, number[]] {
+  let petsAmount: LeaderboardRecord = {};
   for (let i: number = 1; i < petData.length; i++) {
     const pets = petData[i].at(1);
     if (petsAmount[pets]) {

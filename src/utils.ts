@@ -3,6 +3,13 @@ import config from './config';
 
 export const MAX_LEVEL = 99;
 
+export enum periodsInMillseconds {
+  hour = 60 * 60 * 1000,
+  minute = 60 * 1000,
+  second = 1000,
+  tick = 600
+}
+
 export const SKILLS = [
   'attack',
   'strength',
@@ -27,6 +34,28 @@ export const SKILLS = [
   'firemaking',
   'woodcutting',
   'farming'
+];
+
+export const SPEED_CATEGORIES = [
+  'Chambers of Xeric (Solo)',
+  'Chambers of Xeric (Teams)',
+  'Chambers of Xeric: Challenge Mode (Solo)',
+  'Chambers of Xeric: Challenge Mode (Teams)',
+  'Theatre of Blood: Normal Mode',
+  'Theatre of Blood: Hard Mode',
+  'Gauntlet',
+  'Corrupted Gauntlet',
+  'Zulrah',
+  'Vorkath',
+  'Jad (On task)',
+  'Jad (Off task)',
+  'Zuk',
+  'Nightmare of Ashihama',
+  "Phosani's Nightmare",
+  'Alchemical Hydra',
+  'Grotesque Guardians',
+  'Hespori',
+  'The Mimic'
 ];
 
 enum Ranks {

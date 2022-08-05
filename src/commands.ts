@@ -6,6 +6,7 @@ import { messageCommand } from './commands/Message';
 import { petsCommand } from './commands/Pets';
 import { splitsCommand } from './commands/Splits';
 import { diaryCommand } from './commands/Diary';
+import { leaderboardCommand } from './commands/Leaderboard';
 
 export const commands: Command[] = [
   helpCommand,
@@ -14,5 +15,6 @@ export const commands: Command[] = [
   messageCommand,
   petsCommand,
   splitsCommand,
-  diaryCommand
+  diaryCommand,
+  leaderboardCommand
 ];

@@ -214,8 +214,8 @@ function timeInHumanReadable(time: number): string {
     10;
 
   let humanReadable = '';
-  humanReadable += minutes > 0 ? `${padNumber(hours)}:` : '';
-  humanReadable += seconds > 0 ? `${padNumber(minutes)}:` : '';
+  humanReadable += minutes > 0 || hours > 0 ? `${padNumber(hours)}:` : '';
+  humanReadable += seconds > 0 || minutes > 0 ? `${padNumber(minutes)}:` : '';
   humanReadable += `${padNumber(seconds)}`;
   humanReadable += milliseconds === 0 ? '' : `.${padNumber(milliseconds)}`;
 

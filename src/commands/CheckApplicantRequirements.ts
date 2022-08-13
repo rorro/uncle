@@ -37,6 +37,7 @@ export const checkApplicantRequirementsCommand: Command = {
 
     const reply = new MessageEmbed()
       .setTitle(`Requirements check for ${rsn}`)
+      .setURL(`https://wiseoldman.net/players/${rsn.replace(' ', '%20')}`)
       .setThumbnail('https://i.imgur.com/GtMFrRf.png');
 
     let rwResult = '';
@@ -68,58 +69,35 @@ export const checkApplicantRequirementsCommand: Command = {
         }
       });
 
-      const data = response.data;
+      let data = response.data;
       const snapshot = data.latestSnapshot;
-      const requirements = [
-        {
-          name: `${config.requirements.combatLevel}+ Combat`,
-          value: data.combatLevel >= config.requirements.combatLevel
-        },
-        {
-          name: `${config.requirements.totalLevel}+ Total`,
-          value: totalLevel >= config.requirements.totalLevel
-        },
-        // Skills
-        {
-          name: `${config.requirements.ranged} Ranged`,
-          value: getLevel(snapshot.ranged.experience) >= config.requirements.ranged
-        },
-        {
-          name: `${config.requirements.magic} Magic`,
-          value: getLevel(snapshot.magic.experience) >= config.requirements.magic
-        },
-        {
-          name: `${config.requirements.agility} Agility`,
-          value: getLevel(snapshot.agility.experience) >= config.requirements.agility
-        },
-        {
-          name: `${config.requirements.herblore} Herblore`,
-          value: getLevel(snapshot.herblore.experience) >= config.requirements.herblore
-        },
-        {
-          name: `${config.requirements.construction} Construction`,
-          value: getLevel(snapshot.construction.experience) >= config.requirements.construction
-        },
-        // Bosses
-        {
-          name: `${config.requirements.chambers_of_xeric}kc Chambers of Xeric`,
-          value:
-            Math.max(snapshot.chambers_of_xeric.kills, 0) +
-              Math.max(snapshot.chambers_of_xeric_challenge_mode.kills, 0) >=
-            config.requirements.chambers_of_xeric
-        },
-        {
-          name: `${config.requirements.theatre_of_blood}kc Theatre of Blood`,
-          value:
-            Math.max(snapshot.theatre_of_blood.kills, 0) +
-              Math.max(snapshot.theatre_of_blood_hard_mode.kills, 0) >=
-            config.requirements.theatre_of_blood
-        }
-      ];
+      data['totalLevel'] = totalLevel; // Add it here to make the loop below with less edge cases
 
       let description = '**Skills and Kill Counts**\n';
-      requirements.forEach(requirement => {
-        description += `${requirement.value ? '✅' : '❌'} ${requirement.name}\n`;
+
+      config.requirements.forEach(requirement => {
+        switch (requirement.type) {
+          case 'other':
+            description += `${data[requirement.metric] >= requirement.threshold ? '✅' : '❌'} ${
+              requirement.threshold
+            }${requirement.name} (${data[requirement.metric]})\n`;
+            break;
+          case 'skill':
+            const level = getLevel(snapshot[requirement.metric].experience);
+            description += `${level >= requirement.threshold ? '✅' : '❌'} ${requirement.threshold} ${
+              requirement.name
+            } (${level})\n`;
+            break;
+          case 'boss':
+            const bossKc = Math.max(snapshot[requirement.metric].kills, 0);
+            const alternativeKc = requirement.alternative
+              ? Math.max(snapshot[requirement.alternative].kills, 0)
+              : 0;
+            description += `${bossKc + alternativeKc >= requirement.threshold ? '✅' : '❌'} ${
+              requirement.threshold
+            }kc ${requirement.name} (${bossKc}, ${alternativeKc})\n`;
+            break;
+        }
       });
 
       description += `\n**RuneWatch**\n${rwResult}`;

@@ -36,18 +36,35 @@ export default {
       justiciar: process.env.JUSTICIAR_ROLE as string
     }
   },
-  requirements: {
+  // All valid metrics can be found here https://wiseoldman.net/docs/records
+  requirements: [
     // requirements to join the clan
-    chambers_of_xeric: 50,
-    theatre_of_blood: 50,
-    combatLevel: 120,
-    totalLevel: 1750,
-    ranged: 94,
-    magic: 94,
-    agility: 70,
-    herblore: 78,
-    construction: 82
-  },
+    { metric: 'combatLevel', type: 'other', name: '+ Combat', threshold: 120 },
+    { metric: 'totalLevel', type: 'other', name: '+ Total', threshold: 1750 },
+
+    // Skills
+    { metric: 'ranged', type: 'skill', name: 'Ranged', threshold: 94 },
+    { metric: 'magic', type: 'skill', name: 'Magic', threshold: 94 },
+    { metric: 'agility', type: 'skill', name: 'Agility', threshold: 70 },
+    { metric: 'herblore', type: 'skill', name: 'Herblore', threshold: 78 },
+    { metric: 'construction', type: 'skill', name: 'Construction', threshold: 82 },
+
+    // Bosses
+    {
+      metric: 'chambers_of_xeric',
+      type: 'boss',
+      name: 'Chambers of Xeric (+CM)',
+      alternative: 'chambers_of_xeric_challenge_mode',
+      threshold: 50
+    },
+    {
+      metric: 'theatre_of_blood',
+      type: 'boss',
+      name: 'Theatre of Blood (+HM)',
+      alternative: 'theatre_of_blood_hard_mode',
+      threshold: 50
+    }
+  ],
   googleDrive: {
     diarySheetsFolder: process.env.DIARY_SHEETS_FOLDER as string,
     diarySheet: process.env.DIARY_SHEET as string,

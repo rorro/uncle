@@ -111,10 +111,10 @@ export const splitsCommand: Command = {
               botw
             ] = [
               value.at(3),
-              value.at(12),
-              value.at(13),
+              value.at(14),
               value.at(15),
-              value.at(16),
+              value.at(6),
+              value.at(7),
               value.at(4),
               value.at(5),
               value.at(17),

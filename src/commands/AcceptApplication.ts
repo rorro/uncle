@@ -69,30 +69,30 @@ export const acceptApplicationCommand: Command = {
           inSplitsSheet = true;
           const [rank, diaryTasks, totalPoints, altAccount] = [
             value.at(3),
-            value.at(12),
+            value.at(14),
             value.at(17),
-            value.at(6)
+            value.at(8)
           ];
 
           let inputValues = [
-            value.at(0),
-            value.at(1),
-            value.at(2),
-            rank,
-            'FALSE',
-            'FALSE',
-            altAccount,
-            'FALSE',
-            'FALSE',
-            value.at(9),
-            value.at(10),
-            value.at(11),
-            diaryTasks,
-            todaysDate,
-            value.at(14),
-            value.at(15),
-            value.at(16),
-            totalPoints
+            value.at(0), // name
+            value.at(1), // rank icon
+            value.at(2), // rank
+            rank, // old rank
+            'FALSE', // adv gear
+            'FALSE', // max gear
+            value.at(6), // adv cox/tob kc
+            value.at(7), // max cox/tob kc
+            altAccount, // alt account name
+            value.at(9), // alt adv gear
+            value.at(10), // alt max gear
+            value.at(11), // alt rank icon
+            value.at(12), // alt rank
+            value.at(13), // alt old rank
+            diaryTasks, // diary tasks
+            todaysDate, // join date
+            value.at(16), // diary link
+            totalPoints // clan points
           ];
 
           for (let j = 18; j < value.length; j++) {
@@ -106,24 +106,23 @@ export const acceptApplicationCommand: Command = {
       if (!inSplitsSheet) {
         const rowToInsertInto = usernames?.slice(3).length as number;
         const inputValues = [
-          rsn,
-          players?.at(rowToInsertInto)?.at(1),
-          players?.at(rowToInsertInto)?.at(2),
-          getRoleName(applicantRoles[1]),
-          'FALSE',
-          'FALSE',
-          '',
-          'FALSE',
-          'FALSE',
-          players?.at(rowToInsertInto)?.at(9),
-          players?.at(rowToInsertInto)?.at(10),
-          players?.at(rowToInsertInto)?.at(11),
-          tasksCompleted,
-          todaysDate,
-          webViewLink,
-          'FALSE',
-          'FALSE',
-          players?.at(rowToInsertInto)?.at(17)
+          rsn, // name
+          players?.at(rowToInsertInto)?.at(1), // icon
+          players?.at(rowToInsertInto)?.at(2), // rank
+          getRoleName(applicantRoles[1]), // old rank
+          'FALSE', // adv gear
+          'FALSE', // max gear
+          'FALSE', // adv cox&tob kc
+          'FALSE', // max cox/tob kc
+          '', // alt account name
+          'FALSE', // alt adv gear
+          'FALSE', // alt max gear
+          players?.at(rowToInsertInto)?.at(11), //alt rank icon
+          players?.at(rowToInsertInto)?.at(12), // alt rank
+          players?.at(rowToInsertInto)?.at(13), // alt old rank
+          tasksCompleted, // diary tasks
+          todaysDate, // join date
+          webViewLink // diary link
         ];
 
         insertIntoSheet(config.googleDrive.splitsSheet, `Data!A${rowToInsertInto + 4}`, [inputValues]);

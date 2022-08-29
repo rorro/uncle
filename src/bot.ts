@@ -1,7 +1,8 @@
 import { Client } from 'discord.js';
+import * as api from './api/index';
+import config from './config';
 import interactionCreate from './listeners/interactionCreate';
 import ready from './listeners/ready';
-import config from './config';
 
 console.log('Bot is starting...');
 
@@ -19,3 +20,4 @@ ready(client);
 interactionCreate(client);
 
 client.login(config.token);
+api.init();

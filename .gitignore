@@ -148,3 +148,6 @@ unclebot-credentials.json
 
 # db
 .db.json
+
+# transcripts folder
+transcripts

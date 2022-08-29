@@ -1,7 +1,12 @@
-import { ApplicationCommandOptionChoice, BaseCommandInteraction, Client, Interaction } from 'discord.js';
-import { getSheetData } from '../api/googleHandler';
+import { BaseCommandInteraction, Client, Interaction } from 'discord.js';
 import { commands } from '../commands';
-import config from '../config';
+import {
+  cancelClose,
+  closeApplication,
+  comfirmClose,
+  deleteApplication,
+  startApplication
+} from '../interactions/application';
 import { SPEED_CATEGORIES } from '../utils';
 
 export default (client: Client): void => {
@@ -19,6 +24,24 @@ export default (client: Client): void => {
         }));
 
         interaction.respond(options.slice(0, 25));
+      }
+    } else if (interaction.isButton()) {
+      switch (interaction.customId) {
+        case 'start_application':
+          await startApplication(interaction);
+          break;
+        case 'application_close':
+          await closeApplication(client, interaction);
+          break;
+        case 'close_close':
+          await comfirmClose(client, interaction);
+          break;
+        case 'close_cancel':
+          await cancelClose(interaction);
+          break;
+        case 'delete_application':
+          await deleteApplication(interaction);
+          break;
       }
     }
 

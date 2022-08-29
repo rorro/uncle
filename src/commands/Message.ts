@@ -1,8 +1,9 @@
 import { BaseCommandInteraction, Client } from 'discord.js';
 import { ApplicationCommandOptionTypes, ChannelTypes } from 'discord.js/typings/enums';
-import config from '../config';
 import { Command } from 'src/types';
-import { formatMessage, hasRole, parseMessage, sendMessageInChannel } from '../utils';
+import config from '../config';
+import { sendMessageInChannel } from '../discord';
+import { formatMessage, hasRole, parseMessage } from '../utils';
 
 export const messageCommand: Command = {
   name: 'message',
@@ -119,7 +120,7 @@ export const messageCommand: Command = {
           const sendMessage = interaction.options.getString('message', true);
           const parsedSend = parseMessage(sendMessage);
 
-          await sendMessageInChannel(client, channel.id, parsedSend);
+          await sendMessageInChannel(client, channel.id, { message: parsedSend });
           response += 'sent message.';
           break;
         case 'edit':

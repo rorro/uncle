@@ -1,12 +1,13 @@
-import { Command } from './types';
-import { helpCommand } from './commands/Help';
-import { checkApplicantRequirementsCommand } from './commands/CheckApplicantRequirements';
 import { acceptApplicationCommand } from './commands/AcceptApplication';
+import { applicationCommand } from './commands/Application';
+import { checkApplicantRequirementsCommand } from './commands/CheckApplicantRequirements';
+import { diaryCommand } from './commands/Diary';
+import { helpCommand } from './commands/Help';
+import { leaderboardCommand } from './commands/Leaderboard';
 import { messageCommand } from './commands/Message';
 import { petsCommand } from './commands/Pets';
 import { splitsCommand } from './commands/Splits';
-import { diaryCommand } from './commands/Diary';
-import { leaderboardCommand } from './commands/Leaderboard';
+import { Command } from './types';
 
 export const commands: Command[] = [
   helpCommand,
@@ -16,5 +17,6 @@ export const commands: Command[] = [
   petsCommand,
   splitsCommand,
   diaryCommand,
-  leaderboardCommand
+  leaderboardCommand,
+  applicationCommand
 ];

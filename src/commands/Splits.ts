@@ -1,8 +1,8 @@
 import { BaseCommandInteraction, Client, MessageEmbed } from 'discord.js';
 import { ApplicationCommandOptionTypes } from 'discord.js/typings/enums';
 import { getSheetData } from '../api/googleHandler';
-import { Command, PlayerSummary } from '../types';
 import config from '../config';
+import { Command, PlayerSummary } from '../types';
 import { getRank } from '../utils';
 
 export const splitsCommand: Command = {

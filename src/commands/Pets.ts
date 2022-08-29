@@ -1,10 +1,11 @@
 import { BaseCommandInteraction, Client } from 'discord.js';
 import { ApplicationCommandOptionTypes } from 'discord.js/typings/enums';
 import { getSheetData } from '../api/googleHandler';
-import { Command, LeaderboardRecord } from '../types';
 import config from '../config';
-import { hasRole, sendMessageInChannel } from '../utils';
 import db from '../db';
+import { sendMessageInChannel } from '../discord';
+import { Command, LeaderboardRecord } from '../types';
+import { hasRole } from '../utils';
 
 export const petsCommand: Command = {
   name: 'pets',
@@ -57,7 +58,7 @@ export const petsCommand: Command = {
         if (!channel?.isText()) return;
 
         try {
-          const messages = db.leaderboard.getData('/pets');
+          const messages = db.database.getData('/pets');
           for (const index in messages) {
             try {
               // Delete the old pet hiscore messages
@@ -77,16 +78,14 @@ export const petsCommand: Command = {
           for (const j in petHiscores[+scores[i]]) {
             const index = petHiscores[+scores[i]][j];
             const petMessage = buildMessage(emojis, petData?.at(index), +i + 1);
-            const messageId = await sendMessageInChannel(
-              client,
-              config.guild.channels.leaderboard,
-              petMessage
-            );
+            const messageId = await sendMessageInChannel(client, config.guild.channels.leaderboard, {
+              message: petMessage
+            });
             leaderboardMessages.push(messageId);
             content = 'Pets hiscores updated.';
           }
         }
-        db.leaderboard.push('/pets', leaderboardMessages);
+        db.database.push('/pets', leaderboardMessages);
         break;
       case 'search':
         const username = interaction.options.getString('rsn', true).toLowerCase();

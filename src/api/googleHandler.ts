@@ -17,7 +17,7 @@ const sheetsService = google.sheets({ version: 'v4', auth });
 
 // Makes a copy of the Legacy Diary sheet
 export async function copyDiary(username: string) {
-  const fileMetaData = {
+  const requestBody = {
     name: `${username} Legacy Diary`,
     parents: [config.googleDrive.diarySheetsFolder]
   };
@@ -25,7 +25,7 @@ export async function copyDiary(username: string) {
   try {
     const fileCopyResponse = await driveService.files.copy({
       fileId: config.googleDrive.diarySheet,
-      requestBody: fileMetaData
+      requestBody: requestBody
     });
     return fileCopyResponse.data.id;
   } catch (e) {

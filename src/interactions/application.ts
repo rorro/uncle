@@ -101,7 +101,9 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
     : undefined;
   if (applicantId !== undefined) {
     await channel.edit({
-      permissionOverwrites: [{ id: applicantId, deny: [Permissions.FLAGS.VIEW_CHANNEL] }]
+      permissionOverwrites: [
+        { id: interaction.guild.roles.everyone, deny: [Permissions.FLAGS.VIEW_CHANNEL] }
+      ]
     });
   }
 
@@ -152,7 +154,7 @@ async function saveTranscript(
   });
 
   const transcriptName = `transcript-${channel.name}.html`;
-  fs.writeFileSync(path.join('transcripts', transcriptName), transcript);
+  fs.writeFileSync(path.join('.transcripts', transcriptName), transcript);
 
   const URL = config.API.url;
   const PORT = config.API.port;

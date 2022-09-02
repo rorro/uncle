@@ -46,6 +46,10 @@ export async function createChannel(guild: Guild, categoryId: string, user: User
       parent: categoryId,
       permissionOverwrites: [
         {
+          id: guild.roles.everyone,
+          deny: [Permissions.FLAGS.VIEW_CHANNEL]
+        },
+        {
           id: user.id,
           allow: [
             Permissions.FLAGS.VIEW_CHANNEL,

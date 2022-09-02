@@ -81,6 +81,9 @@ export const applicationCommand: Command = {
         );
 
         await selectedChannel.send({ embeds: [embed], components: [row] });
+        await interaction.followUp({
+          content: `A new application message has been sent in ${selectedChannel}.`
+        });
         return;
       case 'set_transcript_channel':
         const transcriptsChannel = interaction.options.getChannel('transcripts_channel', true);

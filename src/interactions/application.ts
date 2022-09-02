@@ -11,6 +11,7 @@ import {
 } from 'discord.js';
 import * as fs from 'fs';
 import path from 'path';
+import config from '../config';
 import db from '../db';
 import { createChannel } from '../discord';
 
@@ -153,8 +154,8 @@ async function saveTranscript(
   const transcriptName = `transcript-${channel.name}.html`;
   fs.writeFileSync(path.join('transcripts', transcriptName), transcript);
 
-  const URL = process.env.URL || 'localhost';
-  const PORT = process.env.PORT || '7373';
+  const URL = config.API.url;
+  const PORT = config.API.port;
   const transcriptUrl = `http://${URL}:${PORT}/transcripts/${transcriptName}`;
 
   const embed = new MessageEmbed()

@@ -76,5 +76,9 @@ export default {
     petDataOffset: 3,
     petsAmount: 51,
     petPlusAmount: 7
+  },
+  API: {
+    url: process.env.URL as string,
+    port: process.env.PORT as string
   }
 };

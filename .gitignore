@@ -150,4 +150,4 @@ unclebot-credentials.json
 .db.json
 
 # transcripts folder
-transcripts
+.transcripts

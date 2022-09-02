@@ -1,11 +1,11 @@
+import dayjs from 'dayjs';
 import { BaseCommandInteraction, Client, MessageEmbed } from 'discord.js';
 import { ApplicationCommandOptionTypes } from 'discord.js/typings/enums';
 import { getSheetData } from '../api/googleHandler';
-import { Command, PlayerSummary } from '../types';
 import config from '../config';
-import { getRank, hasRole } from '../utils';
 import db from '../db';
-import dayjs from 'dayjs';
+import { Command, PlayerSummary } from '../types';
+import { getRank, hasRole } from '../utils';
 
 export const diaryCommand: Command = {
   name: 'diary',
@@ -49,7 +49,7 @@ export const diaryCommand: Command = {
     switch (subCommand) {
       case 'setmessage':
         const editMessageId = interaction.options.getString('message_id', true);
-        db.leaderboard.push('/diarytop10', editMessageId);
+        db.database.push('/diarytop10', editMessageId);
 
         await interaction.followUp({
           content: `Top 10 diary message has been set to ${editMessageId}. Make sure this message is in <#${config.guild.channels.legacyDiary}>. If it's not, re-do this command.`
@@ -60,7 +60,7 @@ export const diaryCommand: Command = {
         if (!channel?.isText()) return;
 
         try {
-          const messageId = db.leaderboard.getData('/diarytop10');
+          const messageId = db.database.getData('/diarytop10');
           const summaryData = await getSheetData(
             config.googleDrive.splitsSheet,
             'Summary!A2:AA',

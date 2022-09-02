@@ -1,4 +1,4 @@
-import { Client, GuildMember } from 'discord.js';
+import { GuildMember } from 'discord.js';
 import config from './config';
 
 export const MAX_LEVEL = 99;
@@ -119,20 +119,6 @@ export function getApplicantRoles(tasksCompleted: number) {
     : ranksToGive.push(roles.justiciar);
 
   return ranksToGive;
-}
-
-// Send a message in a specific channel
-export async function sendMessageInChannel(
-  client: Client,
-  channelId: string | undefined,
-  message: string
-) {
-  if (channelId === undefined) return;
-  const channel = client.channels.cache.get(channelId);
-  if (!channel?.isText()) return;
-
-  const sent = await channel.send({ content: message });
-  return sent.id;
 }
 
 export function parseMessage(message: string): string {

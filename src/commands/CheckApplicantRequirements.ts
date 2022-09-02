@@ -1,8 +1,8 @@
 import { BaseCommandInteraction, Client, MessageEmbed } from 'discord.js';
 import { ApplicationCommandOptionTypes } from 'discord.js/typings/enums';
-import { SnapshotSkill } from '../api/types';
 import { Command } from 'src/types';
-import { WOMAPI, RWAPI } from '../api/handler';
+import { RWAPI, WOMAPI } from '../api/handler';
+import { SnapshotSkill } from '../api/types';
 import config from '../config';
 import { getLevel, hasRole, SKILLS } from '../utils';
 

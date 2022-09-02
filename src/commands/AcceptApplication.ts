@@ -1,17 +1,18 @@
+import dayjs from 'dayjs';
 import { BaseCommandInteraction, Client, MessageEmbed } from 'discord.js';
 import { ApplicationCommandOptionTypes } from 'discord.js/typings/enums';
 import { Command } from 'src/types';
-import { getApplicantRoles, getRoleName, hasRole, sendMessageInChannel } from '../utils';
 import {
-  copyDiary,
   changePermissions,
+  copyDiary,
+  getSheetData,
   getTasksCompleted,
   getWebViewLink,
-  getSheetData,
   insertIntoSheet
 } from '../api/googleHandler';
 import config from '../config';
-import dayjs from 'dayjs';
+import { sendMessageInChannel } from '../discord';
+import { getApplicantRoles, getRoleName, hasRole } from '../utils';
 
 export const acceptApplicationCommand: Command = {
   name: 'accept_application',
@@ -150,7 +151,9 @@ export const acceptApplicationCommand: Command = {
           introMessage += `\nI wasn't able to send you a PM with the diary sheet link. Under privacy settings for the server, enable direct messages and a staff member will PM you the link.`;
         })
         .then(async () => {
-          await sendMessageInChannel(client, config.guild.channels.newMembers, introMessage);
+          await sendMessageInChannel(client, config.guild.channels.newMembers, {
+            message: introMessage
+          });
         });
 
       interaction.followUp({

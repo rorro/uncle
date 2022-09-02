@@ -1,10 +1,11 @@
 import { BaseCommandInteraction, Client } from 'discord.js';
 import { ApplicationCommandOptionTypes } from 'discord.js/typings/enums';
-import { getSheetData } from '../api/googleHandler';
 import { Command, LeaderboardRecord } from 'src/types';
+import { getSheetData } from '../api/googleHandler';
 import config from '../config';
-import { hasRole, sendMessageInChannel, periodsInMillseconds } from '../utils';
 import db from '../db';
+import { sendMessageInChannel } from '../discord';
+import { hasRole, periodsInMillseconds } from '../utils';
 
 export const leaderboardCommand: Command = {
   name: 'leaderboard',
@@ -112,7 +113,7 @@ export const leaderboardCommand: Command = {
         }
 
         try {
-          const messageId = db.leaderboard.getData(`/speeds/${metricName}`);
+          const messageId = db.database.getData(`/speeds/${metricName}`);
           // Discord message exists and should be edited instead
           const channel = client.channels.cache.get(config.guild.channels.leaderboard);
           if (!channel?.isText()) return;
@@ -120,12 +121,10 @@ export const leaderboardCommand: Command = {
           await channel.messages.edit(messageId, { content: message });
         } catch {
           // message not found, send it and store message id
-          const messageId = await sendMessageInChannel(
-            client,
-            config.guild.channels.leaderboard,
-            message
-          );
-          db.leaderboard.push(`/speeds/${metricName}`, messageId);
+          const messageId = await sendMessageInChannel(client, config.guild.channels.leaderboard, {
+            message: message
+          });
+          db.database.push(`/speeds/${metricName}`, messageId);
         }
 
         await interaction.followUp({

@@ -74,7 +74,7 @@ export default {
     diarySheetTasksComplete: 'Diary!J3',
     petSheetRange: 'Pet Hunters!A3:BH',
     petDataOffset: 3,
-    petsAmount: 50,
+    petsAmount: 51,
     petPlusAmount: 7
   }
 };

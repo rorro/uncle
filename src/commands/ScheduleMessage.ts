@@ -13,7 +13,7 @@ dayjs.extend(utc);
 
 export const scheduleCommand: Command = {
   name: 'schedule',
-  description: 'Schedules a message',
+  description: 'Schedules a message in UTC time',
   type: 'CHAT_INPUT',
   options: [
     {
@@ -109,7 +109,7 @@ export const scheduleCommand: Command = {
       return;
     }
 
-    const scheduledDate = dayjs(date).utc();
+    const scheduledDate = dayjs(date);
 
     if (scheduledDate.diff(dayjs().utc().format(DATE_FORMAT), 'minute') <= 0) {
       await interaction.followUp(`Given date has already passed.`);

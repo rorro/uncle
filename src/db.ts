@@ -16,10 +16,10 @@ class DB {
   getPassedMessages(): ScheduledMessage[] {
     const messages = this.scheduledMessages.getData('/messages');
     const pastMessages = messages.filter(
-      (m: ScheduledMessage) => dayjs(m.date).utc().diff(dayjs().utc().format(DATE_FORMAT)) <= 0
+      (m: ScheduledMessage) => dayjs(m.date).diff(dayjs().utc().format(DATE_FORMAT), 'minute') <= 0
     );
     const futureMessages = messages.filter(
-      (m: ScheduledMessage) => dayjs(m.date).diff(dayjs().utc().format(DATE_FORMAT)) > 0
+      (m: ScheduledMessage) => dayjs(m.date).diff(dayjs().utc().format(DATE_FORMAT), 'minute') > 0
     );
 
     this.scheduledMessages.push('/messages', futureMessages);

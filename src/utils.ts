@@ -2,6 +2,7 @@ import { GuildMember } from 'discord.js';
 import config from './config';
 
 export const MAX_LEVEL = 99;
+export const DATE_FORMAT = 'YYYY-MM-DD HH:mm';
 
 export enum periodsInMillseconds {
   hour = 60 * 60 * 1000,

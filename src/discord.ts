@@ -1,27 +1,11 @@
-import {
-  Client,
-  Guild,
-  MessageActionRow,
-  MessageAttachment,
-  MessageEmbed,
-  Permissions,
-  User
-} from 'discord.js';
+import { Client, Guild, MessageEmbed, Permissions, User } from 'discord.js';
 import { ChannelTypes } from 'discord.js/typings/enums';
 import db from './db';
 import config from './config';
+import { ScheduledMessage, MessageOptions } from './types';
 
 // Send a message in a specific channel
-export async function sendMessageInChannel(
-  client: Client,
-  channelId: string,
-  options?: {
-    message?: string;
-    embeds?: MessageEmbed[];
-    components?: MessageActionRow[];
-    files?: MessageAttachment[];
-  }
-) {
+export async function sendMessageInChannel(client: Client, channelId: string, options?: MessageOptions) {
   if (channelId === undefined) return;
   const channel = client.channels.cache.get(channelId);
   if (!channel?.isText()) return;
@@ -69,4 +53,20 @@ export async function createChannel(guild: Guild, categoryId: string, user: User
   );
   db.database.push('/applicationId', applicationId);
   return channel;
+}
+
+export function sendScheduledMessages(client: Client) {
+  const messages = db.getPassedMessages();
+  messages.forEach((m: ScheduledMessage) => {
+    let options: MessageOptions = {};
+    switch (m.type) {
+      case 'embed':
+        options.embeds = [new MessageEmbed(JSON.parse(m.message))];
+        break;
+      case 'simple':
+        options.message = m.message;
+        break;
+    }
+    sendMessageInChannel(client, m.channel, options);
+  });
 }

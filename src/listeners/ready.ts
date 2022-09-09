@@ -1,6 +1,7 @@
 import { Client } from 'discord.js';
 import { commands } from '../commands';
 import config from '../config';
+import { sendScheduledMessages } from '../discord';
 
 export default (client: Client): void => {
   client.on('ready', async () => {
@@ -8,13 +9,10 @@ export default (client: Client): void => {
       return;
     }
 
-    // Re-register commands on every start up.
-    // Maybe change this even if it's just guild commands.
-    const guild = config.guild.id;
-    // const guilds = client.guilds.cache.get(guild);
-    // await guilds?.commands.set(commands);
+    await client.application.commands.set(commands, config.guild.id);
 
-    await client.application.commands.set(commands, guild);
+    // Send scheduled messages once a minute
+    setInterval(sendScheduledMessages, 1 * 60 * 1000, client);
 
     console.log(`${client.user.username} is online`);
   });

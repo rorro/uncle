@@ -1,4 +1,11 @@
-import { BaseCommandInteraction, ChatInputApplicationCommandData, Client } from 'discord.js';
+import {
+  BaseCommandInteraction,
+  ChatInputApplicationCommandData,
+  Client,
+  MessageActionRow,
+  MessageAttachment,
+  MessageEmbed
+} from 'discord.js';
 
 export interface Command extends ChatInputApplicationCommandData {
   run: (client: Client, interaction: BaseCommandInteraction) => void;
@@ -13,4 +20,18 @@ export interface PlayerSummary {
   points: number;
   diaryTasks: number;
   rank: string;
+}
+
+export interface ScheduledMessage {
+  date: string;
+  channel: string;
+  message: string;
+  type: string;
+}
+
+export interface MessageOptions {
+  message?: string;
+  embeds?: MessageEmbed[];
+  components?: MessageActionRow[];
+  files?: MessageAttachment[];
 }

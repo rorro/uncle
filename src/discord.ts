@@ -9,6 +9,7 @@ import {
 } from 'discord.js';
 import { ChannelTypes } from 'discord.js/typings/enums';
 import db from './db';
+import config from './config';
 
 // Send a message in a specific channel
 export async function sendMessageInChannel(
@@ -45,6 +46,10 @@ export async function createChannel(guild: Guild, categoryId: string, user: User
       type: ChannelTypes.GUILD_TEXT,
       parent: categoryId,
       permissionOverwrites: [
+        {
+          id: config.guild.roles.staff,
+          allow: [Permissions.FLAGS.VIEW_CHANNEL]
+        },
         {
           id: guild.roles.everyone,
           deny: [Permissions.FLAGS.VIEW_CHANNEL]

@@ -102,6 +102,7 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
   if (applicantId !== undefined) {
     await channel.edit({
       permissionOverwrites: [
+        { id: config.guild.roles.staff, allow: [Permissions.FLAGS.VIEW_CHANNEL] },
         { id: interaction.guild.roles.everyone, deny: [Permissions.FLAGS.VIEW_CHANNEL] }
       ]
     });

@@ -5,6 +5,7 @@ import { RWAPI, WOMAPI } from '../api/handler';
 import { SnapshotSkill } from '../api/types';
 import config from '../config';
 import { getLevel, hasRole, SKILLS } from '../utils';
+import db from '../db';
 
 export const checkApplicantRequirementsCommand: Command = {
   name: 'check_requirements',
@@ -38,7 +39,7 @@ export const checkApplicantRequirementsCommand: Command = {
     const reply = new MessageEmbed()
       .setTitle(`Requirements check for ${rsn}`)
       .setURL(`https://wiseoldman.net/players/${rsn.replace(' ', '%20')}`)
-      .setThumbnail('https://i.imgur.com/GtMFrRf.png');
+      .setThumbnail(db.database.getData('/config/clanIcon'));
 
     try {
       await WOMAPI.post(trackUrl, { username: rsn });

@@ -70,7 +70,7 @@ export const applicationCommand: Command = {
           .setTitle('Legacy Application')
           .setColor('DARK_PURPLE')
           .setDescription('If you wish to apply, click the "Start Application" button below.')
-          .setThumbnail('https://i.imgur.com/a6cXmdO.png');
+          .setThumbnail(db.database.getData('/config/clanIcon'));
 
         const row = new MessageActionRow().addComponents(
           new MessageButton()

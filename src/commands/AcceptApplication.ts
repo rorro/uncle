@@ -13,6 +13,7 @@ import {
 import config from '../config';
 import { sendMessageInChannel } from '../discord';
 import { getApplicantRoles, getRoleName, hasRole } from '../utils';
+import db from '../db';
 
 export const acceptApplicationCommand: Command = {
   name: 'accept_application',
@@ -134,7 +135,7 @@ export const acceptApplicationCommand: Command = {
 
       const reply = new MessageEmbed()
         .setTitle(`Successfully accepted ${rsn}`)
-        .setThumbnail('https://i.imgur.com/GtMFrRf.png')
+        .setThumbnail(db.database.getData('/config/clanIcon'))
         .addField('Diary Tasks Completed', tasksCompleted)
         .addField('Roles Given', applicantRoles.map(roleId => `<@&${roleId}>`).join(' '))
         .addField('Diary Sheet Link', webViewLink ? webViewLink : 'No link could be created.');

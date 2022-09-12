@@ -4,6 +4,7 @@ import { getSheetData } from '../api/googleHandler';
 import config from '../config';
 import { Command, PlayerSummary } from '../types';
 import { getRank } from '../utils';
+import db from '../db';
 
 export const splitsCommand: Command = {
   name: 'splits',
@@ -73,7 +74,7 @@ export const splitsCommand: Command = {
           const embed = new MessageEmbed()
             .setTitle('Legacy Splits Summary')
             .setFooter({ text: `Current month: ${currentMonth}` })
-            .setThumbnail('https://i.imgur.com/GtMFrRf.png')
+            .setThumbnail(db.database.getData('/config/clanIcon'))
             .setURL(
               'https://docs.google.com/spreadsheets/d/1Cuc6_MB9E1-6nFXbv6pDxKlwCjS9mXDG5kaPV4B_Wq8/edit?usp=sharing'
             )
@@ -123,7 +124,7 @@ export const splitsCommand: Command = {
 
             const embed = new MessageEmbed()
               .setTitle(`Showing player data for ${value.at(0)}`)
-              .setThumbnail('https://i.imgur.com/GtMFrRf.png')
+              .setThumbnail(db.database.getData('/config/clanIcon'))
               .setFooter({ text: `Joined Legacy at ${joinDate}` })
               .setURL(
                 'https://docs.google.com/spreadsheets/d/1Cuc6_MB9E1-6nFXbv6pDxKlwCjS9mXDG5kaPV4B_Wq8/edit?usp=sharing'

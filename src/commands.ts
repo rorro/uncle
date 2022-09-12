@@ -1,6 +1,7 @@
 import { acceptApplicationCommand } from './commands/AcceptApplication';
 import { applicationCommand } from './commands/Application';
 import { checkApplicantRequirementsCommand } from './commands/CheckApplicantRequirements';
+import { configCommand } from './commands/Config';
 import { diaryCommand } from './commands/Diary';
 import { helpCommand } from './commands/Help';
 import { leaderboardCommand } from './commands/Leaderboard';
@@ -20,5 +21,6 @@ export const commands: Command[] = [
   diaryCommand,
   leaderboardCommand,
   applicationCommand,
-  scheduleCommand
+  scheduleCommand,
+  configCommand
 ];

@@ -39,8 +39,8 @@ export async function startApplication(interaction: ButtonInteraction) {
 
   const embed = new MessageEmbed()
     .setColor('DARK_PURPLE')
-    .setThumbnail('https://i.imgur.com/a6cXmdO.png')
-    .setImage('https://i.imgur.com/iHCPPDo.png')
+    .setThumbnail(db.database.getData('/config/clanIcon'))
+    .setImage(db.database.getData('/config/requirements'))
     .setDescription(
       `Post screenshots of **ONLY** the required items and prayers. Every screenshot **must** show your username.
 

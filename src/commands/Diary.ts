@@ -77,7 +77,7 @@ export const diaryCommand: Command = {
           let description = '';
           const embed = new MessageEmbed()
             .setTitle('Diary top 10 completion list')
-            .setThumbnail('https://i.imgur.com/GtMFrRf.png')
+            .setThumbnail(db.database.getData('/config/clanIcon'))
             .setFooter({ text: `Last updated: ${dayjs().format('MMMM DD, YYYY')}` });
 
           for (let i in players) {

@@ -40,6 +40,19 @@ export const checkApplicantRequirementsCommand: Command = {
       .setURL(`https://wiseoldman.net/players/${rsn.replace(' ', '%20')}`)
       .setThumbnail('https://i.imgur.com/GtMFrRf.png');
 
+    try {
+      await WOMAPI.post(trackUrl, { username: rsn });
+    } catch (e: any) {
+      if (e.response?.data?.message) {
+        reply.setDescription(e.response?.data?.message);
+      } else {
+        reply.setDescription(`${e.name}\n${e.message}`);
+      }
+      reply.setColor('#FF0000');
+      await interaction.editReply({ embeds: [reply] });
+      return;
+    }
+
     let rwResult = '';
     try {
       const rwSearch = await RWAPI.get(`${config.runewatchAPI}${rsn}`);
@@ -48,14 +61,6 @@ export const checkApplicantRequirementsCommand: Command = {
         .slice(0, 10)}\nLink: ${rwSearch.data[0].url}`;
     } catch (e: any) {
       rwResult = 'No case found for that username';
-    }
-
-    try {
-      await WOMAPI.post(trackUrl, { username: rsn });
-    } catch (e: any) {
-      reply.setDescription(e.response?.data?.message);
-      reply.setColor('#FF0000');
-      await interaction.editReply({ embeds: [reply] });
     }
 
     try {
@@ -110,9 +115,11 @@ export const checkApplicantRequirementsCommand: Command = {
         embeds: [reply]
       });
     } catch (e: any) {
-      reply.setDescription(
-        e.response?.data?.message || "Something went wrong. Maybe the username doesn't exist."
-      );
+      if (e.response?.data?.message) {
+        reply.setDescription(e.response?.data?.message);
+      } else {
+        reply.setDescription(`${e.name}\n${e.message}`);
+      }
       reply.setColor('#FF0000');
       await interaction.editReply({ embeds: [reply] });
     }

@@ -151,7 +151,8 @@ async function saveTranscript(
   const transcript = await discordTranscripts.createTranscript(channel, {
     returnType: 'buffer',
     minify: true,
-    useCDN: true
+    useCDN: true,
+    saveImages: true
   });
 
   const transcriptName = `transcript-${channel.name}.html`;

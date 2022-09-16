@@ -1,11 +1,11 @@
-import { BaseCommandInteraction, Client } from 'discord.js';
+import { BaseCommandInteraction, Client, MessageEmbed } from 'discord.js';
 import { ApplicationCommandOptionTypes } from 'discord.js/typings/enums';
-import { Command, LeaderboardRecord } from 'src/types';
+import { Command, LeaderboardRecord, LeaderboardType } from '../types';
 import { getSheetData } from '../api/googleHandler';
 import config from '../config';
 import db from '../db';
 import { sendMessageInChannel } from '../discord';
-import { hasRole, periodsInMillseconds } from '../utils';
+import { hasRole, PeriodsInMillseconds } from '../utils';
 
 export const leaderboardCommand: Command = {
   name: 'leaderboard',
@@ -34,7 +34,6 @@ export const leaderboardCommand: Command = {
     await interaction.deferReply({ ephemeral: true });
 
     const subCommand = interaction.options.getSubcommand();
-    let content = '';
 
     switch (subCommand) {
       case 'update':
@@ -79,11 +78,15 @@ export const leaderboardCommand: Command = {
             if (data.top[i] === undefined) {
               message += `[#${+i + 1}] \n`;
             } else {
-              message += `[#${+i + 1}] ( ${timeInHumanReadable(data.top[i])} )\n`;
+              message += `[#${+i + 1}] ( ${
+                data.leaderboardType === LeaderboardType.TIME
+                  ? timeInHumanReadable(data.top[i])
+                  : data.top[i]
+              } )\n`;
               let names = [];
               for (let j in data.indexes[data.top[i]]) {
                 const index = data.indexes[data.top[i]][j];
-                const leaderboardEntry = data.times[index];
+                const leaderboardEntry = data.values[index];
                 names.push('  ' + leaderboardEntry.name);
               }
 
@@ -94,16 +97,24 @@ export const leaderboardCommand: Command = {
           message += `\`\`\``;
         } else {
           for (let i = 1; i < metricData.metric.length; i++) {
-            const top = getTopLeaderboardIndex(metricData.metric[i], 1);
             const category = metricData.metric[i][0].split(': ')[1];
-            message += `[${category}] ${
-              top.top[0] === undefined ? '' : '( ' + timeInHumanReadable(top.top[0]) + ' )'
-            }\n`;
+
+            if (!metricData.metric[i][3]) {
+              message += `[${category}]\n`;
+              continue;
+            }
+
+            const data = getTopLeaderboardIndex(metricData.metric[i], 1);
+            message += `[${category}] ${`( ${
+              data.leaderboardType === LeaderboardType.TIME
+                ? timeInHumanReadable(data.top[0])
+                : data.top[0]
+            } )`}\n`;
 
             let names = [];
-            for (let i = 0; i < top.times.length; i++) {
-              if (top.times[i].time === top.top[0]) {
-                names.push('  ' + top.times[i].name);
+            for (let i = 0; i < data.values.length; i++) {
+              if (data.values[i].value === data.top[0]) {
+                names.push('  ' + data.values[i].name);
               }
             }
 
@@ -112,8 +123,9 @@ export const leaderboardCommand: Command = {
           message += `\`\`\``;
         }
 
+        let messageId = '';
         try {
-          const messageId = db.database.getData(`/speeds/${metricName}`);
+          messageId = db.database.getData(`/speeds/${metricName}`);
           // Discord message exists and should be edited instead
           const channel = client.channels.cache.get(config.guild.channels.leaderboard);
           if (!channel?.isText()) return;
@@ -121,14 +133,25 @@ export const leaderboardCommand: Command = {
           await channel.messages.edit(messageId, { content: message });
         } catch {
           // message not found, send it and store message id
-          const messageId = await sendMessageInChannel(client, config.guild.channels.leaderboard, {
+          const mId = await sendMessageInChannel(client, config.guild.channels.leaderboard, {
             message: message
           });
+          if (!mId) {
+            await interaction.followUp({
+              content: 'Something went wrong when sending the leaderboard message.'
+            });
+            return;
+          }
+          messageId = mId;
           db.database.push(`/speeds/${metricName}`, messageId);
         }
 
         await interaction.followUp({
-          content: `Leaderboard for **${metricName}** has been updated`
+          embeds: [
+            new MessageEmbed().setDescription(
+              `Leaderboard for ${metricEmoji} **${metricName}** ${metricEmoji} has been updated.\n[Quick hop to the leaderboard](https://discord.com/channels/${interaction.guildId}/${config.guild.channels.leaderboard}/${messageId})`
+            )
+          ]
         });
         break;
     }
@@ -147,7 +170,8 @@ function findMetric(leaderboardData: any[][], metric: string) {
         // 10 is just a random number because I don't think we'll ever have
         // more than 10 categories for a metric.
         for (let j = 1; j < 10; j++) {
-          if (!(leaderboardData[index + j][0] as string).toLowerCase().includes('category')) {
+          const nextLine = leaderboardData[index + j];
+          if (!nextLine || !nextLine[0].toLowerCase().includes('category')) {
             return { category: true, metric: leaderboardData.slice(index, index + j) };
           }
         }
@@ -157,39 +181,50 @@ function findMetric(leaderboardData: any[][], metric: string) {
 }
 
 function getTopLeaderboardIndex(data: string[], places: number) {
-  const times = data
+  const leaderboardType = data[3].split('/')[1].includes(':')
+    ? LeaderboardType.TIME
+    : LeaderboardType.REGULAR;
+  const values = data
     .slice(3)
-    .map(entry => ({ name: entry.split('/')[0], time: timeInMilliseconds(entry.split('/')[1]) }))
-    .sort((e1, e2) => e1.time - e2.time);
+    .map(entry => ({
+      name: entry.split('/')[0],
+      value:
+        leaderboardType === LeaderboardType.TIME
+          ? timeInMilliseconds(entry.split('/')[1])
+          : parseInt(entry.split('/')[1])
+    }))
+    .sort((e1, e2) =>
+      leaderboardType === LeaderboardType.TIME ? e1.value - e2.value : e2.value - e1.value
+    );
 
   let indexes: LeaderboardRecord = {};
-  for (let i: number = 0; i < times.length; i++) {
-    const { name, time } = times[i];
-    if (indexes[time]) {
-      indexes[time].push(i);
+  for (let i: number = 0; i < values.length; i++) {
+    const { name, value } = values[i];
+    if (indexes[value]) {
+      indexes[value].push(i);
     } else {
-      indexes[time] = [i];
+      indexes[value] = [i];
     }
   }
 
   const top = Object.keys(indexes)
     .map(Number)
-    .sort((a, b) => a - b)
+    .sort((a, b) => (leaderboardType === LeaderboardType.TIME ? a - b : b - a))
     .slice(0, places);
 
-  return { times, indexes, top };
+  return { values, indexes, top, leaderboardType };
 }
 
 function timeInMilliseconds(time: string) {
   const splitTime = time.split(':');
   const hours: number = Number(splitTime.at(-3))
-    ? Number(splitTime.at(-3)) * periodsInMillseconds.hour
+    ? Number(splitTime.at(-3)) * PeriodsInMillseconds.hour
     : 0;
   const minutes: number = Number(splitTime.at(-2))
-    ? Number(splitTime.at(-2)) * periodsInMillseconds.minute
+    ? Number(splitTime.at(-2)) * PeriodsInMillseconds.minute
     : 0;
   const seconds: number = Number(splitTime.at(-1)?.split('.')[0])
-    ? Number(splitTime.at(-1)?.split('.')[0]) * periodsInMillseconds.second
+    ? Number(splitTime.at(-1)?.split('.')[0]) * PeriodsInMillseconds.second
     : 0;
   const milliseconds: number = Number(splitTime.at(-1)?.split('.')[1])
     ? Number(splitTime.at(-1)?.split('.')[1]) * 10
@@ -199,17 +234,17 @@ function timeInMilliseconds(time: string) {
 }
 
 function timeInHumanReadable(time: number): string {
-  const hours = Math.floor(time / periodsInMillseconds.hour);
-  const minutes = Math.floor((time - hours * periodsInMillseconds.hour) / periodsInMillseconds.minute);
+  const hours = Math.floor(time / PeriodsInMillseconds.hour);
+  const minutes = Math.floor((time - hours * PeriodsInMillseconds.hour) / PeriodsInMillseconds.minute);
   const seconds = Math.floor(
-    (time - hours * periodsInMillseconds.hour - minutes * periodsInMillseconds.minute) /
-      periodsInMillseconds.second
+    (time - hours * PeriodsInMillseconds.hour - minutes * PeriodsInMillseconds.minute) /
+      PeriodsInMillseconds.second
   );
   const milliseconds =
     (time -
-      hours * periodsInMillseconds.hour -
-      minutes * periodsInMillseconds.minute -
-      seconds * periodsInMillseconds.second) /
+      hours * PeriodsInMillseconds.hour -
+      minutes * PeriodsInMillseconds.minute -
+      seconds * PeriodsInMillseconds.second) /
     10;
 
   let humanReadable = '';

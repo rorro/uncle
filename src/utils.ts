@@ -4,7 +4,7 @@ import config from './config';
 export const MAX_LEVEL = 99;
 export const DATE_FORMAT = 'YYYY-MM-DD HH:mm';
 
-export enum periodsInMillseconds {
+export enum PeriodsInMillseconds {
   hour = 60 * 60 * 1000,
   minute = 60 * 1000,
   second = 1000,
@@ -56,7 +56,12 @@ export const SPEED_CATEGORIES = [
   'Alchemical Hydra',
   'Grotesque Guardians',
   'Hespori',
-  'The Mimic'
+  'The Mimic',
+  'Tombs of Amascut: Normal (Solo)',
+  'Tombs of Amascut: Normal (Teams)',
+  'Tombs of Amascut: Expert (Solo)',
+  'Tombs of Amascut: Expert (Teams)',
+  'Tombs of Amascut: Raid Level'
 ];
 
 enum Ranks {

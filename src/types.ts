@@ -35,3 +35,8 @@ export interface MessageOptions {
   components?: MessageActionRow[];
   files?: MessageAttachment[];
 }
+
+export enum LeaderboardType {
+  TIME,
+  REGULAR
+}

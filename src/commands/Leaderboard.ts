@@ -72,25 +72,31 @@ export const leaderboardCommand: Command = {
         let message = `${metricEmoji} ${metricName} ${metricEmoji}\n\`\`\`ini\n`;
 
         if (!metricData.category) {
-          const data = getTopLeaderboardIndex(metricData.metric, 3);
-
-          for (let i = 0; i < 3; i++) {
-            if (data.top[i] === undefined) {
+          if (!metricData.metric[3]) {
+            for (let i = 0; i < 3; i++) {
               message += `[#${+i + 1}] \n`;
-            } else {
-              message += `[#${+i + 1}] ( ${
-                data.leaderboardType === LeaderboardType.TIME
-                  ? timeInHumanReadable(data.top[i])
-                  : data.top[i]
-              } )\n`;
-              let names = [];
-              for (let j in data.indexes[data.top[i]]) {
-                const index = data.indexes[data.top[i]][j];
-                const leaderboardEntry = data.values[index];
-                names.push('  ' + leaderboardEntry.name);
-              }
+            }
+          } else {
+            const data = getTopLeaderboardIndex(metricData.metric, 3);
 
-              message += `${names.join('\n')}\n`;
+            for (let i = 0; i < 3; i++) {
+              if (data.top[i] === undefined) {
+                message += `[#${+i + 1}] \n`;
+              } else {
+                message += `[#${+i + 1}] ( ${
+                  data.leaderboardType === LeaderboardType.TIME
+                    ? timeInHumanReadable(data.top[i])
+                    : data.top[i]
+                } )\n`;
+                let names = [];
+                for (let j in data.indexes[data.top[i]]) {
+                  const index = data.indexes[data.top[i]][j];
+                  const leaderboardEntry = data.values[index];
+                  names.push('  ' + leaderboardEntry.name);
+                }
+
+                message += `${names.join('\n')}\n`;
+              }
             }
           }
 

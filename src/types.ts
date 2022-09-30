@@ -25,7 +25,8 @@ export interface PlayerSummary {
 export interface ScheduledMessage {
   date: string;
   channel: string;
-  message: string;
+  content?: string;
+  embed?: any;
   type: string;
 }
 

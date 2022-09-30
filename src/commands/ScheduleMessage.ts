@@ -122,7 +122,6 @@ export const scheduleCommand: Command = {
     const messageToSchedule: ScheduledMessage = {
       date: scheduledDate.format(DATE_FORMAT),
       channel: channel.id,
-      message: message,
       type: 'simple'
     };
 
@@ -135,9 +134,20 @@ export const scheduleCommand: Command = {
     switch (subCommand) {
       case 'embed':
         try {
-          const embed = new MessageEmbed(JSON.parse(message));
+          const jsonMessage = JSON.parse(message);
+          const embedData = jsonMessage['embed'];
+
+          if (!embedData) throw new Error();
+
+          const embed = new MessageEmbed(embedData);
+          const content = jsonMessage['content'] ? jsonMessage['content'] : '';
+
           messageToSchedule.type = 'embed';
+          messageToSchedule.embed = embed;
+          messageToSchedule.content = content;
+
           options.embeds = [embed];
+          options.content += content;
         } catch {
           interaction.followUp({
             content:
@@ -148,6 +158,7 @@ export const scheduleCommand: Command = {
         break;
       case 'simple':
         options.content += message;
+        messageToSchedule.content = message;
         break;
     }
 

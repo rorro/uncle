@@ -61,10 +61,11 @@ export function sendScheduledMessages(client: Client) {
     let options: MessageOptions = {};
     switch (m.type) {
       case 'embed':
-        options.embeds = [new MessageEmbed(JSON.parse(m.message))];
+        options.message = m.content ? m.content : '';
+        options.embeds = m.embed ? [new MessageEmbed(m.embed)] : [];
         break;
       case 'simple':
-        options.message = m.message;
+        options.message = m.content;
         break;
     }
     sendMessageInChannel(client, m.channel, options);

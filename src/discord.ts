@@ -1,5 +1,12 @@
-import { Client, Guild, MessageEmbed, Permissions, User } from 'discord.js';
-import { ChannelTypes } from 'discord.js/typings/enums';
+import {
+  Client,
+  Guild,
+  EmbedBuilder,
+  Permissions,
+  User,
+  ChannelType,
+  PermissionFlagsBits
+} from 'discord.js';
 import db from './db';
 import config from './config';
 import { ScheduledMessage, MessageOptions } from './types';
@@ -8,7 +15,7 @@ import { ScheduledMessage, MessageOptions } from './types';
 export async function sendMessageInChannel(client: Client, channelId: string, options?: MessageOptions) {
   if (channelId === undefined) return;
   const channel = client.channels.cache.get(channelId);
-  if (!channel?.isText()) return;
+  if (channel?.type !== ChannelType.GuildText) return;
 
   const sent = await channel.send({
     content: options?.message ? options?.message : '\u200b',
@@ -24,33 +31,31 @@ export async function createChannel(guild: Guild, categoryId: string, user: User
     ? 1
     : db.database.getData('/applicationId') + 1;
 
-  const channel = await guild.channels.create(
-    `${user.username}${user.discriminator}-app-${applicationId}`,
-    {
-      type: ChannelTypes.GUILD_TEXT,
-      parent: categoryId,
-      permissionOverwrites: [
-        {
-          id: config.guild.roles.staff,
-          allow: [Permissions.FLAGS.VIEW_CHANNEL]
-        },
-        {
-          id: guild.roles.everyone,
-          deny: [Permissions.FLAGS.VIEW_CHANNEL]
-        },
-        {
-          id: user.id,
-          allow: [
-            Permissions.FLAGS.VIEW_CHANNEL,
-            Permissions.FLAGS.SEND_MESSAGES,
-            Permissions.FLAGS.EMBED_LINKS,
-            Permissions.FLAGS.READ_MESSAGE_HISTORY,
-            Permissions.FLAGS.ATTACH_FILES
-          ]
-        }
-      ]
-    }
-  );
+  const channel = await guild.channels.create({
+    name: `${user.username}${user.discriminator}-app-${applicationId}`,
+    type: ChannelType.GuildText,
+    parent: categoryId,
+    permissionOverwrites: [
+      {
+        id: config.guild.roles.staff,
+        allow: [PermissionFlagsBits.ViewChannel]
+      },
+      {
+        id: guild.roles.everyone,
+        deny: [PermissionFlagsBits.ViewChannel]
+      },
+      {
+        id: user.id,
+        allow: [
+          PermissionFlagsBits.ViewChannel,
+          PermissionFlagsBits.SendMessages,
+          PermissionFlagsBits.EmbedLinks,
+          PermissionFlagsBits.ReadMessageHistory,
+          PermissionFlagsBits.AttachFiles
+        ]
+      }
+    ]
+  });
   db.database.push('/applicationId', applicationId);
   return channel;
 }
@@ -62,7 +67,7 @@ export function sendScheduledMessages(client: Client) {
     switch (m.type) {
       case 'embed':
         options.message = m.content ? m.content : '';
-        options.embeds = m.embed ? [new MessageEmbed(m.embed)] : [];
+        options.embeds = m.embed ? [new EmbedBuilder(m.embed)] : [];
         break;
       case 'simple':
         options.message = m.content;

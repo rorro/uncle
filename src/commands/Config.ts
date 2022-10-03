@@ -1,20 +1,24 @@
-import { BaseCommandInteraction, Client } from 'discord.js';
+import {
+  ChatInputCommandInteraction,
+  Client,
+  ApplicationCommandType,
+  ApplicationCommandOptionType
+} from 'discord.js';
 import { Command } from '../types';
 import { hasRole } from '../utils';
 import config from '../config';
 import db from '../db';
-import { ApplicationCommandOptionTypes } from 'discord.js/typings/enums';
 import { URL } from 'url';
 
 export const configCommand: Command = {
   name: 'config',
   description: 'Configure various links',
-  type: 'CHAT_INPUT',
+  type: ApplicationCommandType.ChatInput,
   options: [
     {
       name: 'item',
       description: `What to configure`,
-      type: ApplicationCommandOptionTypes.STRING,
+      type: ApplicationCommandOptionType.String,
       required: true,
       choices: [
         { name: 'Clan Icon', value: 'clanIcon' },
@@ -24,11 +28,11 @@ export const configCommand: Command = {
     {
       name: 'link',
       description: 'An imgur link works best',
-      type: ApplicationCommandOptionTypes.STRING,
+      type: ApplicationCommandOptionType.String,
       required: true
     }
   ],
-  run: async (client: Client, interaction: BaseCommandInteraction) => {
+  run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
 
     if (!hasRole(interaction.member, config.guild.roles.staff)) {

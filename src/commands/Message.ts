@@ -1,5 +1,10 @@
-import { BaseCommandInteraction, Client } from 'discord.js';
-import { ApplicationCommandOptionTypes, ChannelTypes } from 'discord.js/typings/enums';
+import {
+  ChatInputCommandInteraction,
+  Client,
+  ApplicationCommandType,
+  ApplicationCommandOptionType,
+  ChannelType
+} from 'discord.js';
 import { Command } from 'src/types';
 import config from '../config';
 import { sendMessageInChannel } from '../discord';
@@ -8,22 +13,22 @@ import { formatMessage, hasRole, parseMessage } from '../utils';
 export const messageCommand: Command = {
   name: 'message',
   description: 'Send, edit or delete a message',
-  type: 'CHAT_INPUT',
+  type: ApplicationCommandType.ChatInput,
   options: [
     {
-      type: ApplicationCommandOptionTypes.SUB_COMMAND,
+      type: ApplicationCommandOptionType.Subcommand,
       name: 'send',
       description: 'Send a message in a channel',
       options: [
         {
-          type: ApplicationCommandOptionTypes.CHANNEL,
+          type: ApplicationCommandOptionType.Channel,
           name: 'channel',
           description: 'The channel to send the message in',
           required: true,
-          channelTypes: [ChannelTypes.GUILD_TEXT]
+          channelTypes: [ChannelType.GuildText]
         },
         {
-          type: ApplicationCommandOptionTypes.STRING,
+          type: ApplicationCommandOptionType.String,
           name: 'message',
           description: 'Message to send',
           required: true
@@ -31,25 +36,25 @@ export const messageCommand: Command = {
       ]
     },
     {
-      type: ApplicationCommandOptionTypes.SUB_COMMAND,
+      type: ApplicationCommandOptionType.Subcommand,
       name: 'edit',
       description: 'Edit a message',
       options: [
         {
-          type: ApplicationCommandOptionTypes.STRING,
+          type: ApplicationCommandOptionType.String,
           name: 'message_id',
           description: 'The message id of the message you want to edit',
           required: true
         },
         {
-          type: ApplicationCommandOptionTypes.CHANNEL,
+          type: ApplicationCommandOptionType.Channel,
           name: 'channel',
           description: 'The channel where the message to edit is',
           required: true,
-          channelTypes: [ChannelTypes.GUILD_TEXT]
+          channelTypes: [ChannelType.GuildText]
         },
         {
-          type: ApplicationCommandOptionTypes.STRING,
+          type: ApplicationCommandOptionType.String,
           name: 'message',
           description: 'The new message',
           required: true
@@ -57,47 +62,47 @@ export const messageCommand: Command = {
       ]
     },
     {
-      type: ApplicationCommandOptionTypes.SUB_COMMAND,
+      type: ApplicationCommandOptionType.Subcommand,
       name: 'delete',
       description: 'Delete a message',
       options: [
         {
-          type: ApplicationCommandOptionTypes.STRING,
+          type: ApplicationCommandOptionType.String,
           name: 'message_id',
           description: 'The message id of the message you want to delete',
           required: true
         },
         {
-          type: ApplicationCommandOptionTypes.CHANNEL,
+          type: ApplicationCommandOptionType.Channel,
           name: 'channel',
           description: 'The channel where the message to delete is',
           required: true,
-          channelTypes: [ChannelTypes.GUILD_TEXT]
+          channelTypes: [ChannelType.GuildText]
         }
       ]
     },
     {
-      type: ApplicationCommandOptionTypes.SUB_COMMAND,
+      type: ApplicationCommandOptionType.Subcommand,
       name: 'copy',
       description: 'Display a message including the formatting',
       options: [
         {
-          type: ApplicationCommandOptionTypes.STRING,
+          type: ApplicationCommandOptionType.String,
           name: 'message_id',
           description: 'The message id of the message you want to copy',
           required: true
         },
         {
-          type: ApplicationCommandOptionTypes.CHANNEL,
+          type: ApplicationCommandOptionType.Channel,
           name: 'channel',
           description: 'The channel where the message to copy is',
           required: true,
-          channelTypes: [ChannelTypes.GUILD_TEXT]
+          channelTypes: [ChannelType.GuildText]
         }
       ]
     }
   ],
-  run: async (client: Client, interaction: BaseCommandInteraction) => {
+  run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
 
     if (!hasRole(interaction.member, config.guild.roles.staff)) {
@@ -111,7 +116,7 @@ export const messageCommand: Command = {
     await interaction.deferReply({ ephemeral: true });
     const subCommand = interaction.options.getSubcommand();
     const channel = interaction.options.getChannel('channel', true);
-    if (!channel.isText()) return;
+    if (channel.type !== ChannelType.GuildText) return;
 
     try {
       let response = 'Successfully ';

@@ -1,5 +1,10 @@
-import { BaseCommandInteraction, Client } from 'discord.js';
-import { ApplicationCommandOptionTypes } from 'discord.js/typings/enums';
+import {
+  ChatInputCommandInteraction,
+  Client,
+  ApplicationCommandType,
+  ApplicationCommandOptionType,
+  ChannelType
+} from 'discord.js';
 import { getSheetData } from '../api/googleHandler';
 import config from '../config';
 import db from '../db';
@@ -10,28 +15,28 @@ import { hasRole } from '../utils';
 export const petsCommand: Command = {
   name: 'pets',
   description: 'Show all pet emotes',
-  type: 'CHAT_INPUT',
+  type: ApplicationCommandType.ChatInput,
   options: [
     {
-      type: ApplicationCommandOptionTypes.SUB_COMMAND,
+      type: ApplicationCommandOptionType.Subcommand,
       name: 'updatetop5',
       description: 'Update pet leaderboard'
     },
     {
-      type: ApplicationCommandOptionTypes.SUB_COMMAND,
+      type: ApplicationCommandOptionType.Subcommand,
       name: 'search',
       description: 'See what pets a player has',
       options: [
         {
           name: 'rsn',
           description: 'In-game name of player',
-          type: ApplicationCommandOptionTypes.STRING,
+          type: ApplicationCommandOptionType.String,
           required: true
         }
       ]
     }
   ],
-  run: async (client: Client, interaction: BaseCommandInteraction) => {
+  run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
 
     await interaction.deferReply({ ephemeral: true });
@@ -55,7 +60,7 @@ export const petsCommand: Command = {
         }
 
         const channel = client.channels.cache.get(config.guild.channels.leaderboard);
-        if (!channel?.isText()) return;
+        if (channel?.type !== ChannelType.GuildText) return;
 
         try {
           const messages = db.database.getData('/pets');

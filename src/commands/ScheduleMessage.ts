@@ -1,5 +1,12 @@
-import { BaseCommandInteraction, Client, InteractionReplyOptions, MessageEmbed } from 'discord.js';
-import { ApplicationCommandOptionTypes, ChannelTypes } from 'discord.js/typings/enums';
+import {
+  ChatInputCommandInteraction,
+  Client,
+  InteractionReplyOptions,
+  EmbedBuilder,
+  ApplicationCommandType,
+  ApplicationCommandOptionType,
+  ChannelType
+} from 'discord.js';
 import { Command, ScheduledMessage } from '../types';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -14,68 +21,68 @@ dayjs.extend(utc);
 export const scheduleCommand: Command = {
   name: 'schedule',
   description: 'Schedules a message in UTC time',
-  type: 'CHAT_INPUT',
+  type: ApplicationCommandType.ChatInput,
   options: [
     {
-      type: ApplicationCommandOptionTypes.SUB_COMMAND,
+      type: ApplicationCommandOptionType.Subcommand,
       name: 'view',
       description: 'View all the scheduled messages'
     },
     {
-      type: ApplicationCommandOptionTypes.SUB_COMMAND,
+      type: ApplicationCommandOptionType.Subcommand,
       name: 'embed',
       description: 'Schedule an embed',
       options: [
         {
           name: 'date',
           description: `What time to send the message at. Formatted ${DATE_FORMAT}.`,
-          type: ApplicationCommandOptionTypes.STRING,
+          type: ApplicationCommandOptionType.String,
           required: true
         },
         {
           name: 'channel',
           description: 'What channel to send the message in',
-          type: ApplicationCommandOptionTypes.CHANNEL,
+          type: ApplicationCommandOptionType.Channel,
           required: true,
-          channelTypes: [ChannelTypes.GUILD_TEXT]
+          channelTypes: [ChannelType.GuildText]
         },
         {
           name: 'message',
           description: `How to format the message: https://discordjs.guide/popular-topics/embeds.html#using-an-embed-object`,
-          type: ApplicationCommandOptionTypes.STRING,
+          type: ApplicationCommandOptionType.String,
           required: true
         }
       ]
     },
     {
-      type: ApplicationCommandOptionTypes.SUB_COMMAND,
+      type: ApplicationCommandOptionType.Subcommand,
       name: 'simple',
       description: 'Schedule an simple message',
       options: [
         {
           name: 'date',
           description: `What time to send the message at. Formatted ${DATE_FORMAT}.`,
-          type: ApplicationCommandOptionTypes.STRING,
+          type: ApplicationCommandOptionType.String,
           required: true
         },
         {
           name: 'channel',
           description: 'What channel to send the message in',
-          type: ApplicationCommandOptionTypes.CHANNEL,
+          type: ApplicationCommandOptionType.Channel,
           required: true,
-          channelTypes: [ChannelTypes.GUILD_TEXT]
+          channelTypes: [ChannelType.GuildText]
         },
         {
           name: 'message',
           description: `Message to send`,
-          type: ApplicationCommandOptionTypes.STRING,
+          type: ApplicationCommandOptionType.String,
           required: true
         }
       ]
     }
   ],
 
-  run: async (client: Client, interaction: BaseCommandInteraction) => {
+  run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
 
     if (!hasRole(interaction.member, config.guild.roles.staff)) {
@@ -139,11 +146,11 @@ export const scheduleCommand: Command = {
 
           if (!embedData) throw new Error();
 
-          const embed = new MessageEmbed(embedData);
+          const embed = new EmbedBuilder(embedData);
           const content = jsonMessage['content'] ? jsonMessage['content'] : '';
 
           messageToSchedule.type = 'embed';
-          messageToSchedule.embed = embed;
+          messageToSchedule.embed = embed.toJSON();
           messageToSchedule.content = content;
 
           options.embeds = [embed];
@@ -151,7 +158,7 @@ export const scheduleCommand: Command = {
         } catch {
           interaction.followUp({
             content:
-              'Something is wrong with the way you formatted the MessageEmbedOptions. Here is how to format them: https://discordjs.guide/popular-topics/embeds.html#using-an-embed-object'
+              'Something is wrong with the way you formatted the EmbedBuilderOptions. Here is how to format them: https://discordjs.guide/popular-topics/embeds.html#using-an-embed-object'
           });
           return;
         }

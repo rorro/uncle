@@ -1,6 +1,11 @@
 import dayjs from 'dayjs';
-import { BaseCommandInteraction, Client, MessageEmbed } from 'discord.js';
-import { ApplicationCommandOptionTypes } from 'discord.js/typings/enums';
+import {
+  ChatInputCommandInteraction,
+  Client,
+  EmbedBuilder,
+  ApplicationCommandType,
+  ApplicationCommandOptionType
+} from 'discord.js';
 import { Command } from 'src/types';
 import {
   changePermissions,
@@ -18,23 +23,23 @@ import db from '../db';
 export const acceptApplicationCommand: Command = {
   name: 'accept_application',
   description: 'Accept an applicant into the clan',
-  type: 'CHAT_INPUT',
+  type: ApplicationCommandType.ChatInput,
   options: [
     {
       name: 'rsn',
       description: 'In-game name of the applicant',
-      type: ApplicationCommandOptionTypes.STRING,
+      type: ApplicationCommandOptionType.String,
       required: true
     },
     {
       name: 'discord_user',
       description: 'Tag the user, example: @Rro',
-      type: ApplicationCommandOptionTypes.USER,
+      type: ApplicationCommandOptionType.User,
       required: true
     }
   ],
 
-  run: async (client: Client, interaction: BaseCommandInteraction) => {
+  run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
     if (!hasRole(interaction.member, config.guild.roles.applicationManager)) {
       await interaction.reply({
@@ -46,7 +51,11 @@ export const acceptApplicationCommand: Command = {
 
     await interaction.deferReply();
     const rsn = interaction.options.getString('rsn', true);
-    const discordUser = interaction.options.getMember('discord_user', true);
+    const discordUser = interaction.options.getMember('discord_user');
+
+    if (!discordUser) {
+      throw Error('User not found');
+    }
 
     try {
       // Copy the diary sheet and give the user the correct roles
@@ -133,12 +142,14 @@ export const acceptApplicationCommand: Command = {
       await discordUser.setNickname(rsn);
       await discordUser.roles.add(applicantRoles);
 
-      const reply = new MessageEmbed()
+      const reply = new EmbedBuilder()
         .setTitle(`Successfully accepted ${rsn}`)
         .setThumbnail(db.database.getData('/config/clanIcon'))
-        .addField('Diary Tasks Completed', tasksCompleted)
-        .addField('Roles Given', applicantRoles.map(roleId => `<@&${roleId}>`).join(' '))
-        .addField('Diary Sheet Link', webViewLink ? webViewLink : 'No link could be created.');
+        .addFields([
+          { name: 'Diary Tasks Completed', value: tasksCompleted },
+          { name: 'Roles Given', value: applicantRoles.map(roleId => `<@&${roleId}>`).join(' ') },
+          { name: 'Diary Sheet Link', value: webViewLink ? webViewLink : 'No link could be created.' }
+        ]);
 
       const DM = `Hi! I'm the official bot of Legacy, Uncle. I'm giving you a copy of our Legacy Diary. Completing tasks and submitting this sheet is required for most of our rank ups. I have already filled in your main account and some tasks have automatically been completed but others will require screenshot evidence of personal bests. Talk to any of our staff if you have any questions!\n\nYour sheet can be found here: ${webViewLink}`;
       let introMessage = `Welcome <@${discordUser.id}>!\nFeel free to introduce yourself a little in this channel. Please check out <#${config.guild.channels.assignRoles}> and read <#${config.guild.channels.rules}>.\nA staff member can meet you in-game to invite you to the clan. Until then you should join the in-game clan "Legacy" as a guest. If you see a staff member <:staff:995767143159304252> online, ask them to meet you.\n`;

@@ -1,13 +1,14 @@
-import * as discordTranscripts from 'discord-html-transcripts';
+import { createTranscript, ExportReturnType } from 'discord-html-transcripts';
 import {
   ButtonInteraction,
   Client,
   GuildTextBasedChannel,
-  MessageActionRow,
-  MessageAttachment,
-  MessageButton,
-  MessageEmbed,
-  Permissions
+  ActionRowBuilder,
+  AttachmentBuilder,
+  ButtonBuilder,
+  EmbedBuilder,
+  ButtonStyle,
+  PermissionFlagsBits
 } from 'discord.js';
 import * as fs from 'fs';
 import path from 'path';
@@ -31,14 +32,16 @@ export async function startApplication(interaction: ButtonInteraction) {
   }
 
   const applicantChannel = await createChannel(interaction.guild, parent, interaction.user);
+  if (!applicantChannel.isTextBased()) return;
+
   await interaction.editReply({
     content: `Head over to ${applicantChannel} to continue with the application.`
   });
 
   db.database.push(`/openApplications/${applicantChannel.id}`, interaction.user.id);
 
-  const embed = new MessageEmbed()
-    .setColor('DARK_PURPLE')
+  const embed = new EmbedBuilder()
+    .setColor('DarkPurple')
     .setThumbnail(db.database.getData('/config/clanIcon'))
     .setImage(db.database.getData('/config/requirements'))
     .setDescription(
@@ -49,13 +52,14 @@ If a current Legacy member referred you to us, please mention their RSN.
 When done, or if you have any questions, please ping @Staff and we'll be with you shortly.`
     );
 
-  const row = new MessageActionRow().addComponents(
-    new MessageButton()
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
       .setCustomId('application_close')
       .setLabel('Close')
       .setEmoji('🔒')
-      .setStyle('SECONDARY')
+      .setStyle(ButtonStyle.Secondary)
   );
+
   await applicantChannel.send({
     content: `${interaction.user} Welcome to your application channel.`,
     embeds: [embed],
@@ -65,9 +69,9 @@ When done, or if you have any questions, please ping @Staff and we'll be with yo
 
 export async function closeApplication(client: Client, interaction: ButtonInteraction) {
   await interaction.deferReply();
-  const row = new MessageActionRow().addComponents(
-    new MessageButton().setCustomId('close_close').setLabel('Close').setStyle('DANGER'),
-    new MessageButton().setCustomId('close_cancel').setLabel('Cancel').setStyle('SECONDARY')
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder().setCustomId('close_close').setLabel('Close').setStyle(ButtonStyle.Danger),
+    new ButtonBuilder().setCustomId('close_cancel').setLabel('Cancel').setStyle(ButtonStyle.Secondary)
   );
   await interaction.followUp({
     content: 'Are you sure you want to close this application?',
@@ -84,11 +88,11 @@ export async function cancelClose(interaction: ButtonInteraction) {
 export async function comfirmClose(client: Client, interaction: ButtonInteraction) {
   if (!interaction.inCachedGuild()) return;
 
-  const row = new MessageActionRow().addComponents(
-    new MessageButton()
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
       .setCustomId('delete_application')
       .setLabel('Delete')
-      .setStyle('DANGER')
+      .setStyle(ButtonStyle.Danger)
       .setEmoji('⛔')
   );
 
@@ -102,8 +106,8 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
   if (applicantId !== undefined) {
     await channel.edit({
       permissionOverwrites: [
-        { id: config.guild.roles.staff, allow: [Permissions.FLAGS.VIEW_CHANNEL] },
-        { id: interaction.guild.roles.everyone, deny: [Permissions.FLAGS.VIEW_CHANNEL] }
+        { id: config.guild.roles.staff, allow: [PermissionFlagsBits.ViewChannel] },
+        { id: interaction.guild.roles.everyone, deny: [PermissionFlagsBits.ViewChannel] }
       ]
     });
   }
@@ -129,7 +133,7 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
     description += ` Transcript saved to ${transcriptsChannel}.`;
   }
 
-  const embed = new MessageEmbed().setDescription(description);
+  const embed = new EmbedBuilder().setDescription(description);
   await channel.send({ embeds: [embed], components: [row] });
   return;
 }
@@ -148,11 +152,10 @@ async function saveTranscript(
   const applicant = client.users.cache.get(applicantId);
   if (!applicant) return false;
 
-  const transcript = await discordTranscripts.createTranscript(channel, {
-    returnType: 'buffer',
-    minify: true,
-    useCDN: true,
-    saveImages: true
+  const transcript = await createTranscript(channel, {
+    returnType: ExportReturnType.Buffer,
+    saveImages: true,
+    poweredBy: false
   });
 
   const transcriptName = `transcript-${channel.name}.html`;
@@ -162,7 +165,7 @@ async function saveTranscript(
   const PORT = config.API.port;
   const transcriptUrl = `http://${URL}:${PORT}/transcripts/${transcriptName}`;
 
-  const embed = new MessageEmbed()
+  const embed = new EmbedBuilder()
     .setAuthor({
       name: `${applicant?.username}#${applicant?.discriminator}`,
       iconURL: applicant.displayAvatarURL()
@@ -175,7 +178,7 @@ async function saveTranscript(
 
   await transcriptsChannel.send({
     embeds: [embed],
-    files: [new MessageAttachment(transcript, transcriptName)]
+    files: [new AttachmentBuilder(transcript, { name: transcriptName })]
   });
   return true;
 }

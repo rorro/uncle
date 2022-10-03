@@ -1,6 +1,12 @@
 import dayjs from 'dayjs';
-import { BaseCommandInteraction, Client, MessageEmbed } from 'discord.js';
-import { ApplicationCommandOptionTypes } from 'discord.js/typings/enums';
+import {
+  ChatInputCommandInteraction,
+  Client,
+  EmbedBuilder,
+  ApplicationCommandType,
+  ApplicationCommandOptionType,
+  ChannelType
+} from 'discord.js';
 import { getSheetData } from '../api/googleHandler';
 import config from '../config';
 import db from '../db';
@@ -10,15 +16,15 @@ import { getRank, hasRole } from '../utils';
 export const diaryCommand: Command = {
   name: 'diary',
   description: 'Show various information about splits',
-  type: 'CHAT_INPUT',
+  type: ApplicationCommandType.ChatInput,
   options: [
     {
-      type: ApplicationCommandOptionTypes.SUB_COMMAND,
+      type: ApplicationCommandOptionType.Subcommand,
       name: 'setmessage',
       description: 'Sets the message in which the top 10 Legacy diary completions will be shown',
       options: [
         {
-          type: ApplicationCommandOptionTypes.STRING,
+          type: ApplicationCommandOptionType.String,
           name: 'message_id',
           description: 'Id of the message',
           required: true
@@ -26,12 +32,12 @@ export const diaryCommand: Command = {
       ]
     },
     {
-      type: ApplicationCommandOptionTypes.SUB_COMMAND,
+      type: ApplicationCommandOptionType.Subcommand,
       name: 'updatetop10',
       description: 'Update the diary task completion top 10 list'
     }
   ],
-  run: async (client: Client, interaction: BaseCommandInteraction) => {
+  run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
 
     if (!hasRole(interaction.member, config.guild.roles.staff)) {
@@ -57,10 +63,21 @@ export const diaryCommand: Command = {
         return;
       case 'updatetop10':
         const channel = client.channels.cache.get(config.guild.channels.legacyDiary);
-        if (!channel?.isText()) return;
+        if (channel?.type !== ChannelType.GuildText) return;
 
         try {
           const messageId = db.database.getData('/diarytop10');
+
+          const message = await channel.messages.fetch(messageId);
+
+          if (message.author.id !== client.user?.id) {
+            await interaction.followUp({
+              content:
+                'The diary message was not sent by me. You can send a new message with `/message send`'
+            });
+            return;
+          }
+
           const summaryData = await getSheetData(
             config.googleDrive.splitsSheet,
             'Summary!A2:AA',
@@ -75,7 +92,7 @@ export const diaryCommand: Command = {
           let uniqueScoresFound = 0;
           let lastScore = 0;
           let description = '';
-          const embed = new MessageEmbed()
+          const embed = new EmbedBuilder()
             .setTitle('Diary top 10 completion list')
             .setThumbnail(db.database.getData('/config/clanIcon'))
             .setFooter({ text: `Last updated: ${dayjs().format('MMMM DD, YYYY')}` });
@@ -105,7 +122,9 @@ export const diaryCommand: Command = {
             content: 'Top 10 diary completions updated.'
           });
         } catch (e) {
-          console.error(e);
+          await interaction.followUp({
+            content: `Something went wrong. A diary message has probably not been set in the correct channel. Set one in <#${config.guild.channels.legacyDiary}> with \`/diary setmessage\``
+          });
         }
     }
   }

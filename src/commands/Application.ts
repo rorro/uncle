@@ -1,11 +1,14 @@
 import {
-  BaseCommandInteraction,
+  ChatInputCommandInteraction,
   Client,
-  MessageActionRow,
-  MessageButton,
-  MessageEmbed
+  ActionRowBuilder,
+  ButtonBuilder,
+  EmbedBuilder,
+  ButtonStyle,
+  ApplicationCommandType,
+  ApplicationCommandOptionType,
+  ChannelType
 } from 'discord.js';
-import { ApplicationCommandOptionTypes, ChannelTypes } from 'discord.js/typings/enums';
 import config from '../config';
 import db from '../db';
 import { Command } from '../types';
@@ -14,38 +17,38 @@ import { hasRole } from '../utils';
 export const applicationCommand: Command = {
   name: 'application',
   description: 'All new application commands',
-  type: 'CHAT_INPUT',
+  type: ApplicationCommandType.ChatInput,
   options: [
     {
-      type: ApplicationCommandOptionTypes.SUB_COMMAND,
+      type: ApplicationCommandOptionType.Subcommand,
       name: 'send_application_message',
       description: 'Send the application message used to start application status',
       options: [
         {
           name: 'application_channel',
           description: 'The channel where application process is started from',
-          type: ApplicationCommandOptionTypes.CHANNEL,
-          channelTypes: [ChannelTypes.GUILD_TEXT],
+          type: ApplicationCommandOptionType.Channel,
+          channelTypes: [ChannelType.GuildText],
           required: true
         }
       ]
     },
     {
-      type: ApplicationCommandOptionTypes.SUB_COMMAND,
+      type: ApplicationCommandOptionType.Subcommand,
       name: 'set_transcript_channel',
       description: 'Where transcript messages will be sent',
       options: [
         {
           name: 'transcripts_channel',
           description: 'The channel channel where closed application transcript messages will be sent',
-          type: ApplicationCommandOptionTypes.CHANNEL,
-          channelTypes: [ChannelTypes.GUILD_TEXT],
+          type: ApplicationCommandOptionType.Channel,
+          channelTypes: [ChannelType.GuildText],
           required: true
         }
       ]
     }
   ],
-  run: async (client: Client, interaction: BaseCommandInteraction) => {
+  run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
 
     if (!hasRole(interaction.member, config.guild.roles.staff)) {
@@ -64,20 +67,20 @@ export const applicationCommand: Command = {
     switch (subCommand) {
       case 'send_application_message':
         const selectedChannel = interaction.options.getChannel('application_channel', true);
-        if (!selectedChannel.isText()) return;
+        if (selectedChannel.type !== ChannelType.GuildText) return;
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
           .setTitle('Legacy Application')
-          .setColor('DARK_PURPLE')
+          .setColor('DarkPurple')
           .setDescription('If you wish to apply, click the "Start Application" button below.')
           .setThumbnail(db.database.getData('/config/clanIcon'));
 
-        const row = new MessageActionRow().addComponents(
-          new MessageButton()
+        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+          new ButtonBuilder()
             .setCustomId('start_application')
             .setLabel('Start Application')
             .setEmoji('📝')
-            .setStyle('PRIMARY')
+            .setStyle(ButtonStyle.Primary)
         );
 
         await selectedChannel.send({ embeds: [embed], components: [row] });

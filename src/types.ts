@@ -1,14 +1,15 @@
 import {
-  BaseCommandInteraction,
+  ChatInputCommandInteraction,
   ChatInputApplicationCommandData,
   Client,
-  MessageActionRow,
-  MessageAttachment,
-  MessageEmbed
+  ActionRowBuilder,
+  AttachmentBuilder,
+  EmbedBuilder,
+  ButtonBuilder
 } from 'discord.js';
 
 export interface Command extends ChatInputApplicationCommandData {
-  run: (client: Client, interaction: BaseCommandInteraction) => void;
+  run: (client: Client, interaction: ChatInputCommandInteraction) => void;
 }
 
 export interface LeaderboardRecord {
@@ -32,9 +33,9 @@ export interface ScheduledMessage {
 
 export interface MessageOptions {
   message?: string;
-  embeds?: MessageEmbed[];
-  components?: MessageActionRow[];
-  files?: MessageAttachment[];
+  embeds?: EmbedBuilder[];
+  components?: ActionRowBuilder<ButtonBuilder>[];
+  files?: AttachmentBuilder[];
 }
 
 export enum LeaderboardType {

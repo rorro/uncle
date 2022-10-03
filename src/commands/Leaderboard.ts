@@ -1,5 +1,11 @@
-import { BaseCommandInteraction, Client, MessageEmbed } from 'discord.js';
-import { ApplicationCommandOptionTypes } from 'discord.js/typings/enums';
+import {
+  ChatInputCommandInteraction,
+  Client,
+  EmbedBuilder,
+  ApplicationCommandType,
+  ApplicationCommandOptionType,
+  ChannelType
+} from 'discord.js';
 import { Command, LeaderboardRecord, LeaderboardType } from '../types';
 import { getSheetData } from '../api/googleHandler';
 import config from '../config';
@@ -10,17 +16,17 @@ import { hasRole, PeriodsInMillseconds } from '../utils';
 export const leaderboardCommand: Command = {
   name: 'leaderboard',
   description: 'Leaderboard commands',
-  type: 'CHAT_INPUT',
+  type: ApplicationCommandType.ChatInput,
   options: [
     {
-      type: ApplicationCommandOptionTypes.SUB_COMMAND,
+      type: ApplicationCommandOptionType.Subcommand,
       name: 'update',
       description: 'Update the Legacy speed leaderboards',
       options: [
         {
           name: 'leaderboard_metric',
           description: 'What leaderboard to update',
-          type: ApplicationCommandOptionTypes.STRING,
+          type: ApplicationCommandOptionType.String,
           required: true,
           autocomplete: true
         }
@@ -28,7 +34,7 @@ export const leaderboardCommand: Command = {
     }
   ],
 
-  run: async (client: Client, interaction: BaseCommandInteraction) => {
+  run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
 
     await interaction.deferReply({ ephemeral: true });
@@ -134,7 +140,7 @@ export const leaderboardCommand: Command = {
           messageId = db.database.getData(`/speeds/${metricName}`);
           // Discord message exists and should be edited instead
           const channel = client.channels.cache.get(config.guild.channels.leaderboard);
-          if (!channel?.isText()) return;
+          if (channel?.type !== ChannelType.GuildText) return;
 
           await channel.messages.edit(messageId, { content: message });
         } catch {
@@ -154,7 +160,7 @@ export const leaderboardCommand: Command = {
 
         await interaction.followUp({
           embeds: [
-            new MessageEmbed().setDescription(
+            new EmbedBuilder().setDescription(
               `Leaderboard for ${metricEmoji} **${metricName}** ${metricEmoji} has been updated.\n[Quick hop to the leaderboard](https://discord.com/channels/${interaction.guildId}/${config.guild.channels.leaderboard}/${messageId})`
             )
           ]

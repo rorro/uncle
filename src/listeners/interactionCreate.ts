@@ -1,4 +1,4 @@
-import { BaseCommandInteraction, Client, Interaction } from 'discord.js';
+import { ChatInputCommandInteraction, Client, Interaction } from 'discord.js';
 import { commands } from '../commands';
 import {
   cancelClose,
@@ -45,7 +45,7 @@ export default (client: Client): void => {
       }
     }
 
-    if (!interaction.isCommand()) return;
+    if (!interaction.isChatInputCommand()) return;
 
     await handleSlashCommand(client, interaction);
   });
@@ -53,7 +53,7 @@ export default (client: Client): void => {
 
 const handleSlashCommand = async (
   client: Client,
-  interaction: BaseCommandInteraction
+  interaction: ChatInputCommandInteraction
 ): Promise<void> => {
   const slashCommand = commands.find(c => c.name === interaction.commandName);
 

@@ -1,5 +1,10 @@
-import { BaseCommandInteraction, Client, MessageEmbed } from 'discord.js';
-import { ApplicationCommandOptionTypes } from 'discord.js/typings/enums';
+import {
+  ChatInputCommandInteraction,
+  Client,
+  EmbedBuilder,
+  ApplicationCommandType,
+  ApplicationCommandOptionType
+} from 'discord.js';
 import { getSheetData } from '../api/googleHandler';
 import config from '../config';
 import { Command, PlayerSummary } from '../types';
@@ -9,28 +14,28 @@ import db from '../db';
 export const splitsCommand: Command = {
   name: 'splits',
   description: 'Show various information about splits',
-  type: 'CHAT_INPUT',
+  type: ApplicationCommandType.ChatInput,
   options: [
     {
-      type: ApplicationCommandOptionTypes.SUB_COMMAND,
+      type: ApplicationCommandOptionType.Subcommand,
       name: 'summary',
       description: 'View summary of clan splits'
     },
     {
-      type: ApplicationCommandOptionTypes.SUB_COMMAND,
+      type: ApplicationCommandOptionType.Subcommand,
       name: 'search',
       description: 'See split information of a player',
       options: [
         {
           name: 'rsn',
           description: 'In-game name of player',
-          type: ApplicationCommandOptionTypes.STRING,
+          type: ApplicationCommandOptionType.String,
           required: true
         }
       ]
     }
   ],
-  run: async (client: Client, interaction: BaseCommandInteraction) => {
+  run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
 
     await interaction.deferReply({ ephemeral: true });
@@ -71,7 +76,7 @@ export const splitsCommand: Command = {
               topThreeDiary += `${getRank(p.rank)} ${p.name}: ${p.diaryTasks}\n`;
             });
 
-          const embed = new MessageEmbed()
+          const embed = new EmbedBuilder()
             .setTitle('Legacy Splits Summary')
             .setFooter({ text: `Current month: ${currentMonth}` })
             .setThumbnail(db.database.getData('/config/clanIcon'))
@@ -122,7 +127,7 @@ export const splitsCommand: Command = {
               value.slice(18, 21)
             ];
 
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
               .setTitle(`Showing player data for ${value.at(0)}`)
               .setThumbnail(db.database.getData('/config/clanIcon'))
               .setFooter({ text: `Joined Legacy at ${joinDate}` })

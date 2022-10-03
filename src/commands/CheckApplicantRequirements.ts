@@ -1,5 +1,10 @@
-import { BaseCommandInteraction, Client, MessageEmbed } from 'discord.js';
-import { ApplicationCommandOptionTypes } from 'discord.js/typings/enums';
+import {
+  ChatInputCommandInteraction,
+  Client,
+  EmbedBuilder,
+  ApplicationCommandType,
+  ApplicationCommandOptionType
+} from 'discord.js';
 import { Command } from 'src/types';
 import { RWAPI, WOMAPI } from '../api/handler';
 import { SnapshotSkill } from '../api/types';
@@ -10,17 +15,17 @@ import db from '../db';
 export const checkApplicantRequirementsCommand: Command = {
   name: 'check_requirements',
   description: 'Check if a new applicant meets the requirements to join the clan',
-  type: 'CHAT_INPUT',
+  type: ApplicationCommandType.ChatInput,
   options: [
     {
       name: 'rsn',
       description: 'RSN of the applicant',
-      type: ApplicationCommandOptionTypes.STRING,
+      type: ApplicationCommandOptionType.String,
       required: true
     }
   ],
 
-  run: async (client: Client, interaction: BaseCommandInteraction) => {
+  run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
 
     if (!hasRole(interaction.member, config.guild.roles.applicationManager)) {
@@ -36,7 +41,7 @@ export const checkApplicantRequirementsCommand: Command = {
     const trackUrl = `${config.wiseoldmanAPI}/players/track`;
     const getUrl = `${config.wiseoldmanAPI}/players/username/${rsn}`;
 
-    const reply = new MessageEmbed()
+    const reply = new EmbedBuilder()
       .setTitle(`Requirements check for ${rsn}`)
       .setURL(`https://wiseoldman.net/players/${rsn.replace(' ', '%20')}`)
       .setThumbnail(db.database.getData('/config/clanIcon'));

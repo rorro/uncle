@@ -20,13 +20,14 @@
     "@types/node": "^17.0.31",
     "nodemon": "^2.0.16",
     "ts-node": "^10.7.0",
+    "ts-node-dev": "^2.0.0",
     "typescript": "^4.6.4"
   },
   "scripts": {
     "build": "tsc",
     "start": "NODE_ENV=production pm2 start dist/bot.js --watch",
     "deploy": "npm run build && bash deploy.sh",
-    "dev": "NODE_ENV=development nodemon src/bot.ts",
+    "dev": "ts-node-dev --poll --respawn --transpile-only --ignore-watch node_modules src/bot.ts",
     "dev-win": "set NODE_ENV=development&&nodemon src/bot.ts"
   }
 }

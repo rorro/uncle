@@ -8,12 +8,14 @@
   "dependencies": {
     "@wise-old-man/utils": "^2.0.10",
     "axios": "^0.27.2",
+    "better-sqlite3": "^7.6.2",
     "dayjs": "^1.11.3",
     "discord-html-transcripts": "^3.1.0",
     "discord.js": "^14.5.0",
     "dotenv": "^16.0.0",
     "express": "^4.18.1",
     "googleapis": "^100.0.0",
+    "knex": "^2.3.0",
     "node-json-db": "^1.5.0"
   },
   "devDependencies": {
@@ -29,6 +31,7 @@
     "start": "NODE_ENV=production pm2 start dist/bot.js --watch",
     "deploy": "npm run build && bash deploy.sh",
     "dev": "ts-node-dev --poll --respawn --transpile-only --ignore-watch node_modules src/bot.ts",
-    "dev-win": "set NODE_ENV=development&&nodemon src/bot.ts"
+    "dev-win": "set NODE_ENV=development&&nodemon src/bot.ts",
+    "knex": "./node_modules/.bin/knex --knexfile src/database/config.ts"
   }
 }

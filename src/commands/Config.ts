@@ -9,6 +9,7 @@ import { hasRole } from '../utils';
 import config from '../config';
 import db from '../db';
 import { URL } from 'url';
+import { insertIntoConfig } from '../database/handler';
 
 export const configCommand: Command = {
   name: 'config',
@@ -22,7 +23,7 @@ export const configCommand: Command = {
       required: true,
       choices: [
         { name: 'Clan Icon', value: 'clanIcon' },
-        { name: 'Requirements', value: 'requirements' }
+        { name: 'Requirements', value: 'requirementsImage' }
       ]
     },
     {
@@ -53,7 +54,7 @@ export const configCommand: Command = {
       return;
     }
 
-    db.database.push(`/config/${toConfigure}`, link);
+    await insertIntoConfig(toConfigure, link);
 
     await interaction.followUp({
       content: `${toConfigure} has been configured to ${link}.`

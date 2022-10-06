@@ -10,6 +10,7 @@ import config from '../config';
 import { Command, PlayerSummary } from '../types';
 import { getRank } from '../utils';
 import db from '../db';
+import { getConfigValue } from '../database/handler';
 
 export const splitsCommand: Command = {
   name: 'splits',
@@ -79,7 +80,6 @@ export const splitsCommand: Command = {
           const embed = new EmbedBuilder()
             .setTitle('Legacy Splits Summary')
             .setFooter({ text: `Current month: ${currentMonth}` })
-            .setThumbnail(db.database.getData('/config/clanIcon'))
             .setURL(
               'https://docs.google.com/spreadsheets/d/1Cuc6_MB9E1-6nFXbv6pDxKlwCjS9mXDG5kaPV4B_Wq8/edit?usp=sharing'
             )
@@ -90,6 +90,9 @@ export const splitsCommand: Command = {
               { name: 'Top 3 Legacy points', value: topThreePoints, inline: true },
               { name: 'Top 3 Legacy diary tasks completed', value: topThreeDiary, inline: true }
             ]);
+
+          const clanIcon = await getConfigValue('clanIcon');
+          if (clanIcon) embed.setThumbnail(clanIcon);
 
           await interaction.followUp({
             embeds: [embed]
@@ -132,7 +135,6 @@ export const splitsCommand: Command = {
 
             const embed = new EmbedBuilder()
               .setTitle(`Showing player data for ${value.at(0)}`)
-              .setThumbnail(db.database.getData('/config/clanIcon'))
               .setFooter({ text: `Joined Legacy at ${joinDate}` })
               .setURL(
                 'https://docs.google.com/spreadsheets/d/1Cuc6_MB9E1-6nFXbv6pDxKlwCjS9mXDG5kaPV4B_Wq8/edit?usp=sharing'
@@ -161,6 +163,9 @@ export const splitsCommand: Command = {
                 },
                 { name: 'Rank', value: `${getRank(rank)} ${rank}`, inline: true }
               ]);
+
+            const clanIcon = await getConfigValue('clanIcon');
+            if (clanIcon) embed.setThumbnail(clanIcon);
 
             await interaction.followUp({
               embeds: [embed]

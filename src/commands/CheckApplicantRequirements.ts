@@ -10,6 +10,7 @@ import { RWAPI, womClient } from '../api/handler';
 import config from '../config';
 import { hasRole } from '../utils';
 import db from '../db';
+import { getConfigValue } from '../database/handler';
 
 export const checkApplicantRequirementsCommand: Command = {
   name: 'check_requirements',
@@ -40,8 +41,10 @@ export const checkApplicantRequirementsCommand: Command = {
 
     const reply = new EmbedBuilder()
       .setTitle(`Requirements check for ${rsn}`)
-      .setURL(`https://wiseoldman.net/players/${rsn.replaceAll(' ', '%20')}`)
-      .setThumbnail(db.database.getData('/config/clanIcon'));
+      .setURL(`https://wiseoldman.net/players/${rsn.replaceAll(' ', '%20')}`);
+
+    const clanIcon = await getConfigValue('clanIcon');
+    if (clanIcon) reply.setThumbnail(clanIcon);
 
     try {
       await womClient.players.updatePlayer(rsn);

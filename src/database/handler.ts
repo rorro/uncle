@@ -1,18 +1,28 @@
-import { Message } from 'discord.js';
-import knex from 'knex';
 import knexDB from './knex';
-import { ChannelResponse, MessagesResponse, MessageType, MessageOptions } from './types';
+import {
+  ChannelResponse,
+  MessagesResponse,
+  MessageType,
+  MessageOptions,
+  OpenApplicationsResponse
+} from './types';
 
-export async function getChannelId(channel: string): Promise<ChannelResponse | undefined> {
-  const result = await knexDB('channels').select('channel_id').where('channel', channel);
+export async function getChannelId(channel: string): Promise<string | undefined> {
+  const result = await knexDB('channels').where('channel', channel).select('channel_id');
 
   if (result.length > 0) {
-    return result[0];
+    return result[0].channel_id;
   }
   return;
 }
 
-export async function insertIntoChannels(channel: string, channel_id: string, type: MessageType) {
+export async function getAllChannels(): Promise<ChannelResponse[] | undefined> {
+  const result = await knexDB('channels');
+
+  return result ? result : undefined;
+}
+
+export async function insertIntoChannels(channel: string, channel_id: string) {
   await knexDB('channels').insert({ channel, channel_id }).onConflict('channel').merge();
 }
 
@@ -20,20 +30,21 @@ export async function deleteFromChannels(channel: string) {
   await knexDB('channels').where('channel', channel).delete();
 }
 
-export async function getMessageByName(name: string): Promise<MessagesResponse | undefined> {
-  const result = await knexDB('messages').where('name', name).select('name', 'message_id', 'type');
+export async function getMessageIdByName(name: string): Promise<string | undefined> {
+  const result = await knexDB('messages').where('name', name).select('message_id');
 
-  return result ? result[0] : undefined;
+  if (result.length > 0) {
+    return result[0].message_id;
+  }
+  return;
 }
 
-export async function getMessagesByType(type: MessageType): Promise<MessagesResponse[] | undefined> {
-  const result = await knexDB('messages').where('type', type).select('name', 'message_id', 'type');
-
-  return result ? result : undefined;
+export async function getMessagesByType(type: MessageType): Promise<MessagesResponse[]> {
+  return await knexDB('messages').where('type', type);
 }
 
 export async function getAllMessages(): Promise<MessagesResponse[] | undefined> {
-  const result = await knexDB('messages').select('name', 'message_id', 'type');
+  const result = await knexDB('messages');
 
   return result ? result : undefined;
 }
@@ -51,15 +62,52 @@ export async function deleteFromMessages(options: MessageOptions) {
   }
 }
 
-export async function insertIntoOpenApplications(user_id: string, channel_id: string) {
-  await knexDB('messages').insert({ user_id, channel_id }).onConflict('name').merge();
+export async function getOpenChannel(user_id: string, table: string): Promise<string | undefined> {
+  const result = await knexDB(table).where('user_id', user_id).select('channel_id');
+
+  if (result.length > 0) {
+    return result[0].channel_id;
+  }
+  return;
 }
 
-// export async function getChannelId(channel: string): Promise<ChannelResponse | undefined> {
-//   const result = await knexDB('channels').select('channel_id').where('channel', channel);
+export async function getOpenChannelUser(
+  channel_id: string,
+  table: string
+): Promise<string | undefined> {
+  const result = await knexDB(table).where('channel_id', channel_id).select('user_id');
 
-//   if (result.length > 0) {
-//     return result[0];
-//   }
-//   return;
-// }
+  if (result.length > 0) {
+    return result[0].user_id;
+  }
+  return;
+}
+
+export async function getAllOpenChannels(
+  table: string
+): Promise<OpenApplicationsResponse[] | undefined> {
+  const result = await knexDB(table);
+
+  return result ? result : undefined;
+}
+
+export async function insertIntoOpenChannels(user_id: string, channel_id: string, table: string) {
+  return await knexDB(table).insert({ user_id, channel_id }, 'id').onConflict('user_id').merge();
+}
+
+export async function deleteFromOpenChannels(user_id: string, table: string) {
+  await knexDB(table).where('user_id', user_id).delete();
+}
+
+export async function getConfigValue(config_key: string): Promise<string | undefined> {
+  const result = await knexDB('config').where('config_key', config_key).select('config_value');
+
+  if (result.length > 0) {
+    return result[0].config_value;
+  }
+  return;
+}
+
+export async function insertIntoConfig(config_key: string, config_value: string) {
+  await knexDB('config').insert({ config_key, config_value }).onConflict('config_key').merge();
+}

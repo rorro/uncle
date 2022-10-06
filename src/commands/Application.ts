@@ -9,6 +9,7 @@ import {
   ApplicationCommandOptionType,
   ChannelType
 } from 'discord.js';
+import { getConfigValue, insertIntoChannels } from '../database/handler';
 import config from '../config';
 import db from '../db';
 import { Command } from '../types';
@@ -72,8 +73,10 @@ export const applicationCommand: Command = {
         const embed = new EmbedBuilder()
           .setTitle('Legacy Application')
           .setColor('DarkPurple')
-          .setDescription('If you wish to apply, click the "Start Application" button below.')
-          .setThumbnail(db.database.getData('/config/clanIcon'));
+          .setDescription('If you wish to apply, click the "Start Application" button below.');
+
+        const clanIcon = await getConfigValue('clanIcon');
+        if (clanIcon) embed.setThumbnail(clanIcon);
 
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
           new ButtonBuilder()
@@ -91,7 +94,7 @@ export const applicationCommand: Command = {
       case 'set_transcript_channel':
         const transcriptsChannel = interaction.options.getChannel('transcripts_channel', true);
 
-        db.database.push('/transcriptsChannel', transcriptsChannel.id);
+        await insertIntoChannels('transcriptsChannel', transcriptsChannel.id);
 
         await interaction.followUp({
           content: `Transcripts channel has been set to ${transcriptsChannel}`

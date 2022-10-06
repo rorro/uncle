@@ -12,6 +12,8 @@ import config from '../config';
 import db from '../db';
 import { sendMessageInChannel } from '../discord';
 import { hasRole, PeriodsInMillseconds } from '../utils';
+import { getMessageIdByName, insertIntoMessages } from '../database/handler';
+import { MessageType } from '../database/types';
 
 export const leaderboardCommand: Command = {
   name: 'leaderboard',
@@ -135,9 +137,10 @@ export const leaderboardCommand: Command = {
           message += `\`\`\``;
         }
 
-        let messageId = '';
+        let messageId = await getMessageIdByName(metricName);
         try {
-          messageId = db.database.getData(`/speeds/${metricName}`);
+          if (messageId === undefined) throw new Error('Message id not found');
+
           // Discord message exists and should be edited instead
           const channel = client.channels.cache.get(config.guild.channels.leaderboard);
           if (channel?.type !== ChannelType.GuildText) return;
@@ -155,7 +158,7 @@ export const leaderboardCommand: Command = {
             return;
           }
           messageId = mId;
-          db.database.push(`/speeds/${metricName}`, messageId);
+          await insertIntoMessages(metricName, messageId, MessageType.Leaderboard);
         }
 
         await interaction.followUp({

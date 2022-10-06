@@ -7,6 +7,8 @@ import {
   ApplicationCommandOptionType,
   ChannelType
 } from 'discord.js';
+import { getConfigValue, getMessageIdByName, insertIntoMessages } from '../database/handler';
+import { MessageType } from '../database/types';
 import { getSheetData } from '../api/googleHandler';
 import config from '../config';
 import db from '../db';
@@ -55,7 +57,7 @@ export const diaryCommand: Command = {
     switch (subCommand) {
       case 'setmessage':
         const editMessageId = interaction.options.getString('message_id', true);
-        db.database.push('/diarytop10', editMessageId);
+        await insertIntoMessages('diarytop10', editMessageId, MessageType.Other);
 
         await interaction.followUp({
           content: `Top 10 diary message has been set to ${editMessageId}. Make sure this message is in <#${config.guild.channels.legacyDiary}>. If it's not, re-do this command.`
@@ -66,7 +68,14 @@ export const diaryCommand: Command = {
         if (channel?.type !== ChannelType.GuildText) return;
 
         try {
-          const messageId = db.database.getData('/diarytop10');
+          const messageId = await getMessageIdByName('diarytop10');
+
+          if (messageId === undefined) {
+            await interaction.followUp({
+              content: 'No diary message has been configured. Configure one with `/diary setmessage`'
+            });
+            return;
+          }
 
           const message = await channel.messages.fetch(messageId);
 
@@ -94,8 +103,10 @@ export const diaryCommand: Command = {
           let description = '';
           const embed = new EmbedBuilder()
             .setTitle('Diary top 10 completion list')
-            .setThumbnail(db.database.getData('/config/clanIcon'))
             .setFooter({ text: `Last updated: ${dayjs().format('MMMM DD, YYYY')}` });
+
+          const clanIcon = await getConfigValue('clanIcon');
+          if (clanIcon) embed.setThumbnail(clanIcon);
 
           for (let i in players) {
             const player = players[i];

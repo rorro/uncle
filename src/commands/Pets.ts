@@ -5,6 +5,8 @@ import {
   ApplicationCommandOptionType,
   ChannelType
 } from 'discord.js';
+import { deleteFromMessages, getMessagesByType, insertIntoMessages } from '../database/handler';
+import { MessagesResponse, MessageType } from '../database/types';
 import { getSheetData } from '../api/googleHandler';
 import config from '../config';
 import db from '../db';
@@ -63,34 +65,40 @@ export const petsCommand: Command = {
         if (channel?.type !== ChannelType.GuildText) return;
 
         try {
-          const messages = db.database.getData('/pets');
-          for (const index in messages) {
+          const messages = await getMessagesByType(MessageType.Pets);
+          messages.forEach(async message => {
             try {
               // Delete the old pet hiscore messages
-              const messageToDelete = await (await channel.messages.fetch(messages[index])).delete();
+              await (await channel.messages.fetch(message.message_id)).delete();
             } catch (error) {
               console.error('Old pet message not found.');
             }
-          }
+          });
+          await deleteFromMessages({ type: MessageType.Pets });
         } catch (e) {
           console.error('No message IDs found.');
         }
 
         const [petHiscores, scores] = getTopPetsIndex(petData);
 
-        let leaderboardMessages = [];
         for (let i in scores) {
           for (const j in petHiscores[+scores[i]]) {
             const index = petHiscores[+scores[i]][j];
-            const petMessage = buildMessage(emojis, petData?.at(index), +i + 1);
+            const data = petData?.at(index);
+            const petMessage = buildMessage(emojis, data, +i + 1);
             const messageId = await sendMessageInChannel(client, config.guild.channels.leaderboard, {
               message: petMessage
             });
-            leaderboardMessages.push(messageId);
+            if (messageId === undefined) {
+              await interaction.followUp({ content: 'Something went wrong when sending message' });
+              return;
+            }
+
+            await insertIntoMessages(`#${+i + 1} pets: ${data?.at(0)}`, messageId, MessageType.Pets);
             content = 'Pets hiscores updated.';
           }
         }
-        db.database.push('/pets', leaderboardMessages);
+
         break;
       case 'search':
         const username = interaction.options.getString('rsn', true).toLowerCase();

@@ -5,11 +5,9 @@ import dayjs from 'dayjs';
 import { DATE_FORMAT } from './utils';
 
 class DB {
-  database: JsonDB;
   scheduledMessages: JsonDB;
 
   constructor() {
-    this.database = new JsonDB(new Config('.db', true, true, '/'));
     this.scheduledMessages = new JsonDB(new Config('.scheduledMessages', true, true, '/'));
   }
 

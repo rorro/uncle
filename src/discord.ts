@@ -2,10 +2,10 @@ import {
   Client,
   Guild,
   EmbedBuilder,
-  Permissions,
   User,
   ChannelType,
-  PermissionFlagsBits
+  PermissionFlagsBits,
+  GuildTextBasedChannel
 } from 'discord.js';
 import db from './db';
 import config from './config';
@@ -26,11 +26,18 @@ export async function sendMessageInChannel(client: Client, channelId: string, op
   return sent.id;
 }
 
-export async function createChannel(guild: Guild, categoryId: string, user: User, channelType: string) {
-  const applicationId = !db.database.exists('/channelId') ? 1 : db.database.getData('/channelId') + 1;
-
+export async function createChannel(
+  guild: Guild,
+  categoryId: string,
+  user: User,
+  channelType: string
+): Promise<GuildTextBasedChannel> {
   const channel = await guild.channels.create({
-    name: `${user.username}${user.discriminator}-${channelType}-${applicationId}`,
+    name: `${user.username}${user.discriminator}-${channelType}-${(
+      Math.floor(Math.random() * 10000) + 10000
+    )
+      .toString()
+      .substring(1)}`,
     type: ChannelType.GuildText,
     parent: categoryId,
     permissionOverwrites: [
@@ -54,7 +61,6 @@ export async function createChannel(guild: Guild, categoryId: string, user: User
       }
     ]
   });
-  db.database.push('/channelId', applicationId);
   return channel;
 }
 

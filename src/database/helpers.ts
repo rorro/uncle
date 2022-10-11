@@ -4,7 +4,8 @@ import {
   MessagesResponse,
   MessageType,
   MessageOptions,
-  OpenApplicationsResponse
+  OpenApplicationsResponse,
+  OauthData
 } from './types';
 
 export async function getChannelId(channel: string): Promise<string | undefined> {
@@ -110,4 +111,16 @@ export async function getConfigValue(config_key: string): Promise<string | undef
 
 export async function insertIntoConfig(config_key: string, config_value: string) {
   await knexDB('config').insert({ config_key, config_value }).onConflict('config_key').merge();
+}
+
+export async function getAccessTokens(): Promise<{ access_token: string }[]> {
+  return await knexDB('auth_data').select('access_token');
+}
+
+export async function insertOauthData(data: OauthData) {
+  await knexDB('auth_data').insert(data).onConflict('access_token').merge();
+}
+
+export async function deleteFromOuathData(access_token: string) {
+  await knexDB('auth_data').where('access_token', access_token).delete();
 }

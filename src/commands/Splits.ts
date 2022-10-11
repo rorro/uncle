@@ -103,7 +103,10 @@ export const splitsCommand: Command = {
         const data = await getSheetData(config.googleDrive.splitsSheet, 'Data!1:900', 'FORMATTED_VALUE');
         const players = data?.slice(3);
 
-        for (const { index, value } of (players as any[][]).map((value, index) => ({ index, value }))) {
+        for (const { index, value } of (players as any[][]).map((value, index) => ({
+          index,
+          value
+        }))) {
           if (value.at(0).toLowerCase() === username) {
             const [
               rank,
@@ -117,8 +120,8 @@ export const splitsCommand: Command = {
               botw
             ] = [
               value.at(3),
-              value.at(14),
-              value.at(15),
+              value.at(14).length > 0 ? value.at(14) : '--',
+              value.at(15).length > 0 ? value.at(15) : '--',
               value.at(6),
               value.at(7),
               value.at(4),

@@ -27,3 +27,12 @@ export interface OpenApplicationsResponse {
   user_id: string;
   channel_id: string;
 }
+
+export interface OauthData {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  refresh_token: string;
+  scope: string;
+  discord_user_id: string;
+}

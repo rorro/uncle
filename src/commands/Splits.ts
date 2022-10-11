@@ -10,7 +10,7 @@ import config from '../config';
 import { Command, PlayerSummary } from '../types';
 import { getRank } from '../utils';
 import db from '../db';
-import { getConfigValue } from '../database/handler';
+import { getConfigValue } from '../database/helpers';
 
 export const splitsCommand: Command = {
   name: 'splits',

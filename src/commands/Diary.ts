@@ -7,7 +7,7 @@ import {
   ApplicationCommandOptionType,
   ChannelType
 } from 'discord.js';
-import { getConfigValue, getMessageIdByName, insertIntoMessages } from '../database/handler';
+import { getConfigValue, getMessageIdByName, insertIntoMessages } from '../database/helpers';
 import { MessageType } from '../database/types';
 import { getSheetData } from '../api/googleHandler';
 import config from '../config';

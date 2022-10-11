@@ -5,7 +5,7 @@ import {
   ApplicationCommandOptionType,
   ChannelType
 } from 'discord.js';
-import { deleteFromMessages, getMessagesByType, insertIntoMessages } from '../database/handler';
+import { deleteFromMessages, getMessagesByType, insertIntoMessages } from '../database/helpers';
 import { MessagesResponse, MessageType } from '../database/types';
 import { getSheetData } from '../api/googleHandler';
 import config from '../config';

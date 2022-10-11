@@ -10,7 +10,7 @@ import { RWAPI, womClient } from '../api/handler';
 import config from '../config';
 import { hasRole } from '../utils';
 import db from '../db';
-import { getConfigValue } from '../database/handler';
+import { getConfigValue } from '../database/helpers';
 
 export const checkApplicantRequirementsCommand: Command = {
   name: 'check_requirements',

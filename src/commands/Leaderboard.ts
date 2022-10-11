@@ -12,7 +12,7 @@ import config from '../config';
 import db from '../db';
 import { sendMessageInChannel } from '../discord';
 import { hasRole, PeriodsInMillseconds } from '../utils';
-import { getMessageIdByName, insertIntoMessages } from '../database/handler';
+import { getMessageIdByName, insertIntoMessages } from '../database/helpers';
 import { MessageType } from '../database/types';
 
 export const leaderboardCommand: Command = {

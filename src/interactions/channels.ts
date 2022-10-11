@@ -17,9 +17,9 @@ import {
   getOpenChannelUser,
   getChannelId,
   getConfigValue,
-  getOpenChannel,
-  insertIntoOpenChannels
-} from '../database/handler';
+  getOpenApplication,
+  insertIntoOpenApplications
+} from '../database/helpers';
 import config from '../config';
 import db from '../db';
 import { createChannel } from '../discord';

@@ -9,7 +9,7 @@ import {
   ApplicationCommandOptionType,
   ChannelType
 } from 'discord.js';
-import { getConfigValue, insertIntoChannels } from '../database/handler';
+import { getConfigValue, insertIntoChannels } from '../database/helpers';
 import config from '../config';
 import db from '../db';
 import { Command } from '../types';

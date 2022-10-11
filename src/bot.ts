@@ -21,3 +21,5 @@ interactionCreate(client);
 
 client.login(config.token);
 api.init();
+
+export default client;

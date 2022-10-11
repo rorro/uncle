@@ -5,7 +5,7 @@ import {
   getMessageIdByName,
   getMessagesByType,
   insertIntoMessages
-} from '../database/handler';
+} from '../database/helpers';
 import { MessageType } from '../database/types';
 import { Command } from 'src/types';
 

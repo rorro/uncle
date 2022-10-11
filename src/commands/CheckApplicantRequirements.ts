@@ -43,7 +43,7 @@ export const checkApplicantRequirementsCommand: Command = {
 
     const reply = new EmbedBuilder()
       .setTitle(`Requirements check for ${rsn}`)
-      .setURL(`https://wiseoldman.net/players/${rsn.replace(' ', '%20')}`)
+      .setURL(`https://wiseoldman.net/players/${rsn.replaceAll(' ', '%20')}`)
       .setThumbnail(db.database.getData('/config/clanIcon'));
 
     try {
@@ -122,12 +122,12 @@ export const checkApplicantRequirementsCommand: Command = {
       });
     } catch (e: any) {
       if (e.response?.data?.message) {
-        reply.setDescription(e.response?.data?.message);
+        reply.setDescription(e.response.data.message);
       } else {
         reply.setDescription(`${e.name}\n${e.message}`);
       }
       reply.setColor('#FF0000');
-      await interaction.editReply({ embeds: [reply] });
+      await interaction.followUp({ embeds: [reply] });
     }
   }
 };

@@ -44,10 +44,8 @@ export async function getMessagesByType(type: MessageType): Promise<MessagesResp
   return await knexDB('messages').where('type', type);
 }
 
-export async function getAllMessages(): Promise<MessagesResponse[] | undefined> {
-  const result = await knexDB('messages');
-
-  return result ? result : undefined;
+export async function getAllMessages(): Promise<MessagesResponse[]> {
+  return await knexDB('messages');
 }
 
 export async function insertIntoMessages(name: string, message_id: string, type: MessageType) {

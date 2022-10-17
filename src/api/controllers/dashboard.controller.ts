@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import {
   deleteFromOuathData,
   getAccessTokens,
+  getAllMessages,
   getAllOpenApplications,
   insertOauthData
 } from '../../database/helpers';
@@ -49,48 +50,58 @@ const authenticate = async (req: Request, res: Response) => {
           };
 
           await insertOauthData(data);
-          res.cookie('access_token', encrypt(oauthData.access_token, PUBLIC_KEY), {
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-          });
+          const publicEncrypted = encrypt(oauthData.access_token, PUBLIC_KEY);
+          const encoded = encodeURIComponent(publicEncrypted);
+
+          res.redirect(`http://localhost:3000/login/${encoded}`);
         } else {
           await revokeAccess(oauthData.access_token);
+          res.redirect('http://localhost:3000');
         }
-        res.redirect('/dashboard');
       } catch (e) {
+        console.log(e);
         console.log('user not in guild');
-        res.sendStatus(400);
+        res.redirect('http://localhost:3000');
       }
     } catch (e) {
       console.log(e);
-      res.sendStatus(400);
+      res.redirect('http://localhost:3000');
     }
   } else {
-    res.redirect('/dashboard');
+    res.redirect('http://localhost:3000');
   }
 };
 
 const getData = async (req: Request, res: Response) => {
-  const isLoggedIn = await hasAccess(req.cookies.access_token);
+  const access_token = req.query.access_token as string;
+  console.log(access_token);
+  if (!access_token) {
+    res.send({ message: 'Invalid access token' });
+    return;
+  }
+
+  const isLoggedIn = await hasAccess(access_token);
   if (isLoggedIn) {
-    const openApplications = await getAllOpenApplications();
-    res.json(openApplications ? openApplications : []);
+    // const openApplications = await getAllOpenApplications();
+    // res.json(openApplications ? openApplications : []);
+    res.send({ message: 'You are logged IN!' });
   } else {
-    res.send({ message: 'You are logged out!' });
+    res.send({ message: 'You are logged OUT!' });
   }
 };
 
 const logout = async (req: Request, res: Response) => {
-  const cookie = req.cookies.access_token;
-  const decrypted = decrypt(cookie, PUBLIC_KEY);
+  const access_token = req.body.access_token;
+  const decrypted = decrypt(access_token, PUBLIC_KEY);
+
   const tokens = await getAccessTokens();
   const toDelete = tokens.find(t => decrypt(t.access_token, PRIVATE_KEY) === decrypted);
+
   if (toDelete) {
     await deleteFromOuathData(toDelete?.access_token);
     await revokeAccess(decrypted);
+    console.log(`logged out ${decrypted}`);
   }
-
-  res.clearCookie('access_token');
-  res.redirect('/dashboard');
 };
 
 function encrypt(token: string, key: string): string {
@@ -115,8 +126,35 @@ async function revokeAccess(token: string) {
   await oauth2.revokeToken(token, Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString('base64'));
 }
 
+async function isLoggedIn(access_token: string) {
+  if (!access_token) {
+    return false;
+  }
+
+  return await hasAccess(access_token);
+}
+
+async function verifyLogin(req: Request, res: Response) {
+  const loggedIn = await isLoggedIn(req.query.access_token as string);
+  console.log(`loggedIn: ${loggedIn}`);
+  res.send(loggedIn);
+}
+
+async function getMessages(req: Request, res: Response) {
+  const loggedIn = await isLoggedIn(req.query.access_token as string);
+  console.log(loggedIn);
+  if (!loggedIn) {
+    res.sendStatus(401);
+  } else {
+    const messages = await getAllMessages();
+    res.send(messages);
+  }
+}
+
 export default {
   authenticate,
   getData,
-  logout
+  logout,
+  getMessages,
+  verifyLogin
 };

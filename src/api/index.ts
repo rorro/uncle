@@ -1,6 +1,7 @@
 import express, { Express } from 'express';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import path from 'path';
 import config from '../config';
 import dashboardRoutes from './routes/dashboard.routes';
@@ -10,6 +11,7 @@ export function init(): Express {
 
   api.use(bodyParser.json());
   api.use(cookieParser());
+  api.use(cors());
   api.use(bodyParser.urlencoded({ extended: true }));
 
   api.use('/dashboard', dashboardRoutes);

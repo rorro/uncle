@@ -16,7 +16,7 @@ import config from '../config';
 import db from '../db';
 import { createChannel } from '../discord';
 
-export async function startApplication(interaction: ButtonInteraction) {
+export async function startChannel(interaction: ButtonInteraction, channelType: string) {
   if (!interaction.inCachedGuild()) return;
 
   await interaction.deferReply({ ephemeral: true });
@@ -31,50 +31,68 @@ export async function startApplication(interaction: ButtonInteraction) {
     return;
   }
 
-  const applicantChannel = await createChannel(interaction.guild, parent, interaction.user);
+  const channelConfig =
+    channelType === 'application'
+      ? {
+          databaseCategory: 'openApplications',
+          description: `Post screenshots of **ONLY** the required items and prayers. Every screenshot **must** show your username.
+
+    If a current Legacy member referred you to us, please mention their RSN.
+              
+    When done, or if you have any questions, please ping @Staff and we'll be with you shortly.`
+        }
+      : {
+          databaseCategory: 'openSupportTickets',
+          description: `Hi there, how can we help you?`
+        };
+
+  const applicantChannel = await createChannel(interaction.guild, parent, interaction.user, channelType);
   if (!applicantChannel.isTextBased()) return;
 
   await interaction.editReply({
-    content: `Head over to ${applicantChannel} to continue with the application.`
+    content: `Head over to ${applicantChannel} to continue.`
   });
 
-  db.database.push(`/openApplications/${applicantChannel.id}`, interaction.user.id);
+  db.database.push(`/${channelConfig.databaseCategory}/${applicantChannel.id}`, interaction.user.id);
 
   const embed = new EmbedBuilder()
     .setColor('DarkPurple')
     .setThumbnail(db.database.getData('/config/clanIcon'))
-    .setImage(db.database.getData('/config/requirements'))
-    .setDescription(
-      `Post screenshots of **ONLY** the required items and prayers. Every screenshot **must** show your username.
+    .setDescription(channelConfig.description);
 
-If a current Legacy member referred you to us, please mention their RSN.
-          
-When done, or if you have any questions, please ping @Staff and we'll be with you shortly.`
-    );
+  if (channelType === 'application') {
+    embed.setImage(db.database.getData('/config/requirements'));
+  }
 
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
-      .setCustomId('application_close')
+      .setCustomId(`close_channel:${channelType}`)
       .setLabel('Close')
       .setEmoji('🔒')
       .setStyle(ButtonStyle.Secondary)
   );
 
   await applicantChannel.send({
-    content: `${interaction.user} Welcome to your application channel.`,
+    content: `${interaction.user} Welcome to your ${channelType} channel.`,
     embeds: [embed],
     components: [row]
   });
 }
 
-export async function closeApplication(client: Client, interaction: ButtonInteraction) {
+export async function closeChannel(client: Client, interaction: ButtonInteraction, channelType: string) {
   await interaction.deferReply();
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-    new ButtonBuilder().setCustomId('close_close').setLabel('Close').setStyle(ButtonStyle.Danger),
+    new ButtonBuilder()
+      .setCustomId(`close_close:${channelType}`)
+      .setLabel('Close')
+      .setStyle(ButtonStyle.Danger),
     new ButtonBuilder().setCustomId('close_cancel').setLabel('Cancel').setStyle(ButtonStyle.Secondary)
   );
+
   await interaction.followUp({
-    content: 'Are you sure you want to close this application?',
+    content: `Are you sure you want to close this ${
+      channelType === 'support' ? 'support ticket' : channelType
+    }?`,
     components: [row]
   });
 }
@@ -85,12 +103,12 @@ export async function cancelClose(interaction: ButtonInteraction) {
   interaction.message.delete();
 }
 
-export async function comfirmClose(client: Client, interaction: ButtonInteraction) {
+export async function comfirmClose(client: Client, interaction: ButtonInteraction, channelType: string) {
   if (!interaction.inCachedGuild()) return;
 
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
-      .setCustomId('delete_application')
+      .setCustomId('delete_channel')
       .setLabel('Delete')
       .setStyle(ButtonStyle.Danger)
       .setEmoji('⛔')
@@ -99,9 +117,12 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
   const channel = interaction.channel;
   if (!channel) return;
 
-  const openApplication = db.database.exists(`/openApplications/${interaction.channelId}`);
+  const databaseCategory = channelType === 'application' ? 'openApplications' : 'openSupportTickets';
+  const descriptionName = channelType === 'application' ? 'Application' : 'Support ticket';
+
+  const openApplication = db.database.exists(`/${databaseCategory}/${interaction.channelId}`);
   const applicantId = openApplication
-    ? db.database.getData(`/openApplications/${interaction.channelId}`)
+    ? db.database.getData(`/${databaseCategory}/${interaction.channelId}`)
     : undefined;
   if (applicantId !== undefined) {
     await channel.edit({
@@ -112,25 +133,28 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
     });
   }
 
-  db.database.delete(`/openApplications/${interaction.channelId}`);
+  db.database.delete(`/${databaseCategory}/${interaction.channelId}`);
   await interaction.message.delete();
 
-  const transcriptsChannel = db.database.exists('/transcriptsChannel')
-    ? (client.channels.cache.get(db.database.getData('/transcriptsChannel')) as GuildTextBasedChannel)
-    : undefined;
+  let description = `${descriptionName} closed by ${interaction.user}.`;
 
-  let description = `Application closed by ${interaction.user}.`;
-  if (transcriptsChannel) {
-    const transcriptSaved = await saveTranscript(client, channel, transcriptsChannel, applicantId);
-    if (!transcriptSaved) {
-      await channel.send({
-        content:
-          'Transcript was not saved because the applicant left the server before application was closed.',
-        components: [row]
-      });
-      return;
+  if (channelType === 'application') {
+    const transcriptsChannel = db.database.exists('/transcriptsChannel')
+      ? (client.channels.cache.get(db.database.getData('/transcriptsChannel')) as GuildTextBasedChannel)
+      : undefined;
+
+    if (transcriptsChannel) {
+      const transcriptSaved = await saveTranscript(client, channel, transcriptsChannel, applicantId);
+      if (!transcriptSaved) {
+        await channel.send({
+          content:
+            'Transcript was not saved because the applicant left the server before application was closed.',
+          components: [row]
+        });
+        return;
+      }
+      description += ` Transcript saved to ${transcriptsChannel}.`;
     }
-    description += ` Transcript saved to ${transcriptsChannel}.`;
   }
 
   const embed = new EmbedBuilder().setDescription(description);
@@ -138,7 +162,7 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
   return;
 }
 
-export async function deleteApplication(interaction: ButtonInteraction) {
+export async function deleteChannel(interaction: ButtonInteraction) {
   interaction.channel?.delete();
   return;
 }

@@ -14,33 +14,19 @@ import db from '../db';
 import { Command } from '../types';
 import { hasRole } from '../utils';
 
-export const applicationCommand: Command = {
-  name: 'application',
-  description: 'All new application commands',
+export const supportCommand: Command = {
+  name: 'support',
+  description: 'All support commands',
   type: ApplicationCommandType.ChatInput,
   options: [
     {
       type: ApplicationCommandOptionType.Subcommand,
-      name: 'send_application_message',
-      description: 'Send the application message used to start application status',
+      name: 'send_support_message',
+      description: 'Send the support message used to open a support ticket',
       options: [
         {
-          name: 'application_channel',
-          description: 'The channel where application process is started from',
-          type: ApplicationCommandOptionType.Channel,
-          channelTypes: [ChannelType.GuildText],
-          required: true
-        }
-      ]
-    },
-    {
-      type: ApplicationCommandOptionType.Subcommand,
-      name: 'set_transcript_channel',
-      description: 'Where transcript messages will be sent',
-      options: [
-        {
-          name: 'transcripts_channel',
-          description: 'The channel channel where closed application transcript messages will be sent',
+          name: 'support_channel',
+          description: 'The channel where support process is started from',
           type: ApplicationCommandOptionType.Channel,
           channelTypes: [ChannelType.GuildText],
           required: true
@@ -65,36 +51,27 @@ export const applicationCommand: Command = {
     let content = '';
 
     switch (subCommand) {
-      case 'send_application_message':
-        const selectedChannel = interaction.options.getChannel('application_channel', true);
+      case 'send_support_message':
+        const selectedChannel = interaction.options.getChannel('support_channel', true);
         if (selectedChannel.type !== ChannelType.GuildText) return;
 
         const embed = new EmbedBuilder()
-          .setTitle('Legacy Application')
+          .setTitle('Legacy Support')
           .setColor('DarkPurple')
-          .setDescription('If you wish to apply, click the "Start Application" button below.')
+          .setDescription('If you wish to open a support ticket, click the "Open Ticket" button below.')
           .setThumbnail(db.database.getData('/config/clanIcon'));
 
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
           new ButtonBuilder()
-            .setCustomId('start_channel:application')
-            .setLabel('Start Application')
-            .setEmoji('📝')
+            .setCustomId('start_channel:support')
+            .setLabel('Open Ticket')
+            .setEmoji('🎟️')
             .setStyle(ButtonStyle.Primary)
         );
 
         await selectedChannel.send({ embeds: [embed], components: [row] });
         await interaction.followUp({
-          content: `A new application message has been sent in ${selectedChannel}.`
-        });
-        return;
-      case 'set_transcript_channel':
-        const transcriptsChannel = interaction.options.getChannel('transcripts_channel', true);
-
-        db.database.push('/transcriptsChannel', transcriptsChannel.id);
-
-        await interaction.followUp({
-          content: `Transcripts channel has been set to ${transcriptsChannel}`
+          content: `A new support ticket message has been sent in ${selectedChannel}.`
         });
         return;
     }

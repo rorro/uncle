@@ -2,11 +2,11 @@ import { ChatInputCommandInteraction, Client, Interaction } from 'discord.js';
 import { commands } from '../commands';
 import {
   cancelClose,
-  closeApplication,
+  closeChannel,
   comfirmClose,
-  deleteApplication,
-  startApplication
-} from '../interactions/application';
+  deleteChannel,
+  startChannel
+} from '../interactions/channels';
 import { SPEED_CATEGORIES } from '../utils';
 
 export default (client: Client): void => {
@@ -26,21 +26,23 @@ export default (client: Client): void => {
         interaction.respond(options.slice(0, 25));
       }
     } else if (interaction.isButton()) {
-      switch (interaction.customId) {
-        case 'start_application':
-          await startApplication(interaction);
+      const [command, channel] = interaction.customId.split(':');
+
+      switch (command) {
+        case 'start_channel':
+          await startChannel(interaction, channel);
           break;
-        case 'application_close':
-          await closeApplication(client, interaction);
+        case 'close_channel':
+          await closeChannel(client, interaction, channel);
           break;
         case 'close_close':
-          await comfirmClose(client, interaction);
+          await comfirmClose(client, interaction, channel);
           break;
         case 'close_cancel':
           await cancelClose(interaction);
           break;
-        case 'delete_application':
-          await deleteApplication(interaction);
+        case 'delete_channel':
+          await deleteChannel(interaction);
           break;
       }
     }

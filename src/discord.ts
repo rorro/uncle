@@ -26,13 +26,11 @@ export async function sendMessageInChannel(client: Client, channelId: string, op
   return sent.id;
 }
 
-export async function createChannel(guild: Guild, categoryId: string, user: User) {
-  const applicationId = !db.database.exists('/applicationId')
-    ? 1
-    : db.database.getData('/applicationId') + 1;
+export async function createChannel(guild: Guild, categoryId: string, user: User, channelType: string) {
+  const applicationId = !db.database.exists('/channelId') ? 1 : db.database.getData('/channelId') + 1;
 
   const channel = await guild.channels.create({
-    name: `${user.username}${user.discriminator}-app-${applicationId}`,
+    name: `${user.username}${user.discriminator}-${channelType}-${applicationId}`,
     type: ChannelType.GuildText,
     parent: categoryId,
     permissionOverwrites: [
@@ -56,7 +54,7 @@ export async function createChannel(guild: Guild, categoryId: string, user: User
       }
     ]
   });
-  db.database.push('/applicationId', applicationId);
+  db.database.push('/channelId', applicationId);
   return channel;
 }
 

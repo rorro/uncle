@@ -9,6 +9,7 @@ import { messageCommand } from './commands/Message';
 import { petsCommand } from './commands/Pets';
 import { scheduleCommand } from './commands/ScheduleMessage';
 import { splitsCommand } from './commands/Splits';
+import { supportCommand } from './commands/Suport';
 import { Command } from './types';
 
 export const commands: Command[] = [
@@ -21,6 +22,7 @@ export const commands: Command[] = [
   diaryCommand,
   leaderboardCommand,
   applicationCommand,
+  supportCommand,
   scheduleCommand,
   configCommand
 ];

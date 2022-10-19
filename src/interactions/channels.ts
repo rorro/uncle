@@ -21,7 +21,7 @@ export async function startChannel(interaction: ButtonInteraction, channelType: 
 
   await interaction.deferReply({ ephemeral: true });
 
-  await interaction.editReply({ content: 'Starting application process...' });
+  await interaction.editReply({ content: `Starting ${channelType} process...` });
 
   const parent = interaction.channel?.parentId;
   if (!parent) {
@@ -163,7 +163,7 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
 }
 
 export async function deleteChannel(interaction: ButtonInteraction) {
-  interaction.channel?.delete();
+  await interaction.channel?.delete();
   return;
 }
 

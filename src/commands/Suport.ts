@@ -9,6 +9,7 @@ import {
   ApplicationCommandOptionType,
   ChannelType
 } from 'discord.js';
+import { getConfigValue } from '../database/handler';
 import config from '../config';
 import db from '../db';
 import { Command } from '../types';
@@ -58,8 +59,10 @@ export const supportCommand: Command = {
         const embed = new EmbedBuilder()
           .setTitle('Legacy Support')
           .setColor('DarkPurple')
-          .setDescription('If you wish to open a support ticket, click the "Open Ticket" button below.')
-          .setThumbnail(db.database.getData('/config/clanIcon'));
+          .setDescription('If you wish to open a support ticket, click the "Open Ticket" button below.');
+
+        const clanIcon = await getConfigValue('clanIcon');
+        if (clanIcon) embed.setThumbnail(clanIcon);
 
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
           new ButtonBuilder()

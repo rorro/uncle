@@ -176,8 +176,10 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
     }
   }
   description +=
-    transcriptsChannelId !== undefined
+    channelType === 'application' && transcriptsChannelId !== undefined
       ? ` Transcript saved to ${transcriptsChannel}.`
+      : channelType === 'support'
+      ? ''
       : ` Transcript was not saved because no transcript channel is set.`;
 
   const embed = new EmbedBuilder().setDescription(description);

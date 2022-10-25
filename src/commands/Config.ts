@@ -7,7 +7,6 @@ import {
 import { Command } from '../types';
 import { hasRole } from '../utils';
 import config from '../config';
-import db from '../db';
 import { URL } from 'url';
 import { insertIntoConfig } from '../database/helpers';
 

@@ -9,7 +9,6 @@ import {
 import { Command, LeaderboardRecord, LeaderboardType } from '../types';
 import { getSheetData } from '../api/googleHandler';
 import config from '../config';
-import db from '../db';
 import { sendMessageInChannel } from '../discord';
 import { hasRole, PeriodsInMillseconds } from '../utils';
 import { getMessageIdByName, insertIntoMessages } from '../database/helpers';

@@ -4,7 +4,6 @@ import {
   deleteFromOuathData,
   getAccessTokens,
   getAllMessages,
-  getAllOpenApplications,
   insertOauthData
 } from '../../database/helpers';
 import CryptoJS from 'crypto-js';

@@ -6,10 +6,9 @@ import {
   ChannelType
 } from 'discord.js';
 import { deleteFromMessages, getMessagesByType, insertIntoMessages } from '../database/helpers';
-import { MessagesResponse, MessageType } from '../database/types';
+import { MessageType } from '../database/types';
 import { getSheetData } from '../api/googleHandler';
 import config from '../config';
-import db from '../db';
 import { sendMessageInChannel } from '../discord';
 import { Command, LeaderboardRecord } from '../types';
 import { hasRole } from '../utils';

@@ -1,12 +1,4 @@
 import { ChatInputCommandInteraction, Client, ApplicationCommandType } from 'discord.js';
-import {
-  deleteFromMessages,
-  getAllMessages,
-  getMessageIdByName,
-  getMessagesByType,
-  insertIntoMessages
-} from '../database/helpers';
-import { MessageType } from '../database/types';
 import { Command } from 'src/types';
 
 export const helpCommand: Command = {

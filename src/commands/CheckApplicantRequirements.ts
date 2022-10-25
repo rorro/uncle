@@ -8,8 +8,12 @@ import {
 import { Command } from 'src/types';
 import { RWAPI, womClient } from '../api/handler';
 import config from '../config';
+<<<<<<< HEAD
 import { hasRole } from '../utils';
 import db from '../db';
+=======
+import { getLevel, hasRole, SKILLS } from '../utils';
+>>>>>>> b91bc10 (Remove unused variables)
 import { getConfigValue } from '../database/helpers';
 
 export const checkApplicantRequirementsCommand: Command = {

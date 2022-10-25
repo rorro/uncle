@@ -18,7 +18,6 @@ import {
 import config from '../config';
 import { sendMessageInChannel } from '../discord';
 import { getApplicantRoles, getRoleName, hasRole } from '../utils';
-import db from '../db';
 import { getConfigValue } from '../database/helpers';
 
 export const acceptApplicationCommand: Command = {

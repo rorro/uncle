@@ -21,7 +21,6 @@ import {
   insertIntoOpenChannels
 } from '../database/helpers';
 import config from '../config';
-import db from '../db';
 import { createChannel } from '../discord';
 
 export async function startChannel(interaction: ButtonInteraction, channelType: string) {

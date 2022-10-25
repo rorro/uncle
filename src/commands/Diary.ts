@@ -11,7 +11,6 @@ import { getConfigValue, getMessageIdByName, insertIntoMessages } from '../datab
 import { MessageType } from '../database/types';
 import { getSheetData } from '../api/googleHandler';
 import config from '../config';
-import db from '../db';
 import { Command, PlayerSummary } from '../types';
 import { getRank, hasRole } from '../utils';
 

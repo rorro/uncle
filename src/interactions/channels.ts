@@ -17,8 +17,8 @@ import {
   getOpenChannelUser,
   getChannelId,
   getConfigValue,
-  getOpenApplication,
-  insertIntoOpenApplications
+  getOpenChannel,
+  insertIntoOpenChannels
 } from '../database/helpers';
 import config from '../config';
 import db from '../db';

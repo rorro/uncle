@@ -41,11 +41,7 @@ export const checkApplicantRequirementsCommand: Command = {
 
     const reply = new EmbedBuilder()
       .setTitle(`Requirements check for ${rsn}`)
-<<<<<<< HEAD
       .setURL(`https://wiseoldman.net/players/${rsn.replaceAll(' ', '%20')}`);
-=======
-      .setURL(`https://wiseoldman.net/players/${rsn.replace(' ', '%20')}`);
->>>>>>> 2663bd7 (Migrate everything but not scheduled messages)
 
     const clanIcon = await getConfigValue('clanIcon');
     if (clanIcon) reply.setThumbnail(clanIcon);

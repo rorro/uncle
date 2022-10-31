@@ -5,7 +5,8 @@ import {
   MessageType,
   MessageOptions,
   OpenApplicationsResponse,
-  OauthData
+  OauthData,
+  ConfigEntry
 } from './types';
 
 export async function getChannelId(channel: string): Promise<string | undefined> {
@@ -96,6 +97,12 @@ export async function insertIntoOpenChannels(user_id: string, channel_id: string
 
 export async function deleteFromOpenChannels(user_id: string, table: string) {
   await knexDB(table).where('user_id', user_id).delete();
+}
+
+export async function getAllConfigValues(): Promise<ConfigEntry[]> {
+  const result = await knexDB('config');
+
+  return result ? result : [];
 }
 
 export async function getConfigValue(config_key: string): Promise<string | undefined> {

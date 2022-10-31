@@ -22,6 +22,12 @@ export interface MessageOptions {
   type?: MessageType;
 }
 
+export interface ConfigEntry {
+  id: number;
+  config_key: string;
+  config_value: string;
+}
+
 export interface OpenApplicationsResponse {
   id: number;
   user_id: string;

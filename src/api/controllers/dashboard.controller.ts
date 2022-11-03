@@ -39,27 +39,27 @@ const authenticate = async (req: Request, res: Response) => {
         grantType: 'authorization_code'
       });
 
-      const { id } = await oauth2.getUser(oauthData.access_token);
+      const oauth2User = await oauth2.getUser(oauthData.access_token);
       const guild = await client.guilds.fetch(config.guild.id);
 
       console.log(
-        `Authenticating... user_id: ${id}...guild_id: ${guild}...token: ${oauthData.access_token}`
+        `Authenticating... user_id: ${oauth2User}...guild_id: ${guild}...token: ${oauthData.access_token}`
       );
       try {
-        const user = await guild.members.fetch(id);
+        const user = await guild.members.fetch(oauth2User.id);
         const isStaff = hasRole(user, config.guild.roles.staff);
 
         console.log(`Authenticating... is_staff: ${isStaff}`);
 
         if (isStaff) {
-          const encryptedAccessToken = encrypt(oauthData.access_token, PRIVATE_KEY);
           const data = {
-            access_token: encryptedAccessToken,
+            access_token: encrypt(oauthData.access_token, PRIVATE_KEY),
             token_type: oauthData.token_type,
-            expires_in: oauthData.expires_in,
+            expires_in: oauthData.expires_in * 1000,
             refresh_token: encrypt(oauthData.refresh_token, PRIVATE_KEY),
             scope: oauthData.scope,
-            discord_user_id: id
+            user: JSON.stringify(user),
+            date: Date.now()
           };
 
           console.log(`Authenticating... inserting into database`);
@@ -105,11 +105,8 @@ interface ResponseType {
 }
 
 const getData = async (req: Request, res: Response) => {
-  // U2FsdGVkX18wXSFyCMwaaqffOJYv/2a+01jTD4K80EE3HM6oy4iIGL/atcAV+ZiM
-  // U2FsdGVkX18wXSFyCMwaaqffOJYv%2F2a%2B01jTD4K80EE3HM6oy4iIGL%2FatcAV%2BZiM
   const accessToken = req.query.accessToken as string;
 
-  console.log(`Getting data_accessToken: ${accessToken}`);
   if (!accessToken) {
     res.send({ message: 'Invalid access token' });
     return;
@@ -117,6 +114,7 @@ const getData = async (req: Request, res: Response) => {
 
   const isLoggedIn = await hasAccess(accessToken);
   if (isLoggedIn) {
+    console.log(`Getting data_accessToken: ${accessToken}`);
     const guild = client.guilds.cache.get(config.guild.id);
     if (!guild) return;
 

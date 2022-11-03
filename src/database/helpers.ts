@@ -1,3 +1,4 @@
+import { TextChannel, User } from 'discord.js';
 import knexDB from './knex';
 import {
   ChannelResponse,
@@ -62,11 +63,18 @@ export async function deleteFromMessages(options: MessageOptions) {
   }
 }
 
-export async function getOpenChannel(user_id: string, table: string): Promise<string | undefined> {
-  const result = await knexDB(table).where('user_id', user_id).select('channel_id');
+export async function getOpenChannel(
+  user_id: string,
+  table: string
+): Promise<{ user: User; channel: TextChannel } | undefined> {
+  const result = await knexDB(table).where('user_id', user_id).select('user', 'channel');
+  console.log(`args: ${user_id}, ${table}`);
 
   if (result.length > 0) {
-    return result[0].channel_id;
+    const user: User = JSON.parse(result[0].user);
+    const channel: TextChannel = JSON.parse(result[0].channel);
+
+    return { user, channel };
   }
   return;
 }
@@ -74,13 +82,18 @@ export async function getOpenChannel(user_id: string, table: string): Promise<st
 export async function getOpenChannelUser(
   channel_id: string,
   table: string
-): Promise<string | undefined> {
-  const result = await knexDB(table).where('channel_id', channel_id).select('user_id');
+): Promise<{ user: User; channel: TextChannel } | undefined> {
+  const result = await knexDB(table).select('user', 'channel');
 
-  if (result.length > 0) {
-    return result[0].user_id;
-  }
-  return;
+  if (result.length < 1) return;
+
+  return result
+    .map(r => {
+      return { user: JSON.parse(r.user), channel: JSON.parse(r.channel) };
+    })
+    .filter(a => {
+      return a.channel.id === channel_id;
+    })[0];
 }
 
 export async function getAllOpenChannels(
@@ -88,11 +101,20 @@ export async function getAllOpenChannels(
 ): Promise<OpenApplicationsResponse[] | undefined> {
   const result = await knexDB(table);
 
-  return result ? result : undefined;
+  if (!result) return undefined;
+
+  return result.map(r => {
+    return { user: JSON.parse(r.user), channel: JSON.parse(r.channel) };
+  });
 }
 
-export async function insertIntoOpenChannels(user_id: string, channel_id: string, table: string) {
-  return await knexDB(table).insert({ user_id, channel_id }, 'id').onConflict('user_id').merge();
+export async function insertIntoOpenChannels(
+  user_id: string,
+  user: string,
+  channel: string,
+  table: string
+) {
+  return await knexDB(table).insert({ user_id, user, channel }, 'id').onConflict('user_id').merge();
 }
 
 export async function deleteFromOpenChannels(user_id: string, table: string) {

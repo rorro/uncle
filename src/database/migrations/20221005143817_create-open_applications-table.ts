@@ -4,7 +4,8 @@ export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTable('open_applications', (table: Knex.TableBuilder) => {
     table.increments('id').primary();
     table.string('user_id').notNullable().unique();
-    table.string('channel_id').notNullable().unique();
+    table.string('user').notNullable();
+    table.string('channel').notNullable();
   });
 }
 

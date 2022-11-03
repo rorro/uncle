@@ -8,7 +8,8 @@ import {
   ButtonBuilder,
   EmbedBuilder,
   ButtonStyle,
-  PermissionFlagsBits
+  PermissionFlagsBits,
+  ChannelType
 } from 'discord.js';
 import * as fs from 'fs';
 import path from 'path';
@@ -55,21 +56,27 @@ export async function startChannel(interaction: ButtonInteraction, channelType: 
         };
 
   const openApplication = await getOpenChannel(interaction.user.id, channelConfig.databaseCategory);
-  if (openApplication && interaction.client.channels.cache.has(openApplication)) {
+
+  if (openApplication && interaction.client.channels.cache.has(openApplication.channel.id)) {
     interaction.editReply(
-      `You already have an open application. Head over to <#${openApplication}> to continue.`
+      `You already have an open application. Head over to <#${openApplication.channel.id}> to continue.`
     );
     return;
   }
 
   const applicantChannel = await createChannel(interaction.guild, parent, interaction.user, channelType);
-  if (!applicantChannel.isTextBased()) return;
+  if (applicantChannel.type !== ChannelType.GuildText) return;
 
   await interaction.editReply({
     content: `Head over to ${applicantChannel} to continue.`
   });
 
-  await insertIntoOpenChannels(interaction.user.id, applicantChannel.id, channelConfig.databaseCategory);
+  await insertIntoOpenChannels(
+    interaction.user.id,
+    JSON.stringify(interaction.user),
+    JSON.stringify(applicantChannel),
+    channelConfig.databaseCategory
+  );
 
   const embed = new EmbedBuilder().setColor('DarkPurple').setDescription(channelConfig.description);
 
@@ -137,8 +144,8 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
   const databaseCategory = channelType === 'application' ? 'open_applications' : 'open_support_tickets';
   const descriptionName = channelType === 'application' ? 'Application' : 'Support ticket';
 
-  const applicantId = await getOpenChannelUser(interaction.channelId, databaseCategory);
-  if (!applicantId) {
+  const applicant = await getOpenChannelUser(interaction.channelId, databaseCategory);
+  if (!applicant) {
     await channel.send({
       content:
         'Applicant was not found for this application. You are free to remove the channel manually.'
@@ -153,7 +160,7 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
     ]
   });
 
-  await deleteFromOpenChannels(applicantId, databaseCategory);
+  await deleteFromOpenChannels(applicant.user.id, databaseCategory);
   await interaction.message.delete();
 
   const transcriptsChannelId = await getChannelId('transcriptsChannel');
@@ -164,7 +171,7 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
 
   let description = `${descriptionName} closed by ${interaction.user}.`;
   if (channelType === 'application' && transcriptsChannel) {
-    const transcriptSaved = await saveTranscript(client, channel, transcriptsChannel, applicantId);
+    const transcriptSaved = await saveTranscript(client, channel, transcriptsChannel, applicant.user.id);
     if (!transcriptSaved) {
       await channel.send({
         content:

@@ -1,3 +1,5 @@
+import { GuildMember, TextChannel, User } from 'discord.js';
+
 export interface ChannelResponse {
   id: number;
   channel: string;
@@ -29,9 +31,8 @@ export interface ConfigEntry {
 }
 
 export interface OpenApplicationsResponse {
-  id: number;
-  user_id: string;
-  channel_id: string;
+  user: User;
+  channel: TextChannel;
 }
 
 export interface OauthData {
@@ -40,5 +41,6 @@ export interface OauthData {
   expires_in: number;
   refresh_token: string;
   scope: string;
-  discord_user_id: string;
+  user: string;
+  date: number;
 }

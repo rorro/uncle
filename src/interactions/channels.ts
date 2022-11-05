@@ -43,7 +43,8 @@ export async function startChannel(interaction: ButtonInteraction, channelType: 
         }
       : {
           databaseCategory: 'openSupportTickets',
-          description: `Hi there, how can we help you?`
+          description: `Hi there, how can we help you?`,
+          footer: `This channel is visible only to you and staff members.`
         };
 
   const applicantChannel = await createChannel(interaction.guild, parent, interaction.user, channelType);
@@ -62,6 +63,8 @@ export async function startChannel(interaction: ButtonInteraction, channelType: 
 
   if (channelType === 'application') {
     embed.setImage(db.database.getData('/config/requirements'));
+  } else {
+    embed.setFooter({ text: channelConfig.footer ? channelConfig.footer : '' });
   }
 
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(

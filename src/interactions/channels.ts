@@ -13,16 +13,9 @@ import {
 } from 'discord.js';
 import * as fs from 'fs';
 import path from 'path';
-import {
-  deleteFromOpenChannels,
-  getOpenChannelUser,
-  getChannelId,
-  getConfigValue,
-  getOpenChannel,
-  insertIntoOpenChannels
-} from '../database/helpers';
 import config from '../config';
 import { createChannel } from '../discord';
+import KnexDB from '../database/knex';
 
 export async function startChannel(interaction: ButtonInteraction, channelType: string) {
   if (!interaction.inCachedGuild()) return;
@@ -50,12 +43,15 @@ export async function startChannel(interaction: ButtonInteraction, channelType: 
     When done, or if you have any questions, please ping @Staff and we'll be with you shortly.`
         }
       : {
-          databaseCategory: 'openSupportTickets',
+          databaseCategory: 'open_support_tickets',
           description: `Hi there, how can we help you?`,
           footer: `This channel is visible only to you and staff members.`
         };
 
-  const openApplication = await getOpenChannel(interaction.user.id, channelConfig.databaseCategory);
+  const openApplication = await KnexDB.getOpenChannel(
+    interaction.user.id,
+    channelConfig.databaseCategory
+  );
 
   if (openApplication && interaction.client.channels.cache.has(openApplication.channel.id)) {
     interaction.editReply(
@@ -71,7 +67,7 @@ export async function startChannel(interaction: ButtonInteraction, channelType: 
     content: `Head over to ${applicantChannel} to continue.`
   });
 
-  await insertIntoOpenChannels(
+  await KnexDB.insertIntoOpenChannels(
     interaction.user.id,
     JSON.stringify(interaction.user),
     JSON.stringify(applicantChannel),
@@ -80,10 +76,10 @@ export async function startChannel(interaction: ButtonInteraction, channelType: 
 
   const embed = new EmbedBuilder().setColor('DarkPurple').setDescription(channelConfig.description);
 
-  const clanIcon = await getConfigValue('clanIcon');
+  const clanIcon = (await KnexDB.getConfigItem('clan_icon')) as string;
   if (clanIcon) embed.setThumbnail(clanIcon);
 
-  const requirementsImage = await getConfigValue('requirementsImage');
+  const requirementsImage = (await KnexDB.getConfigItem('requirements_image')) as string;
   if (requirementsImage && channelType === 'application') embed.setImage(requirementsImage);
 
   if (channelType === 'support' && channelConfig.footer) embed.setFooter({ text: channelConfig.footer });
@@ -144,7 +140,7 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
   const databaseCategory = channelType === 'application' ? 'open_applications' : 'open_support_tickets';
   const descriptionName = channelType === 'application' ? 'Application' : 'Support ticket';
 
-  const applicant = await getOpenChannelUser(interaction.channelId, databaseCategory);
+  const applicant = await KnexDB.getOpenChannelUser(interaction.channelId, databaseCategory);
   if (!applicant) {
     await channel.send({
       content:
@@ -160,12 +156,14 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
     ]
   });
 
-  await deleteFromOpenChannels(applicant.user.id, databaseCategory);
+  await KnexDB.deleteFromOpenChannels(applicant.user.id, databaseCategory);
   await interaction.message.delete();
 
-  const transcriptsChannelId = await getChannelId('transcriptsChannel');
+  const transcriptsChannelId = (await KnexDB.getConfigItem('transcripts_channel')) as string;
+  console.log(transcriptsChannelId);
+
   const transcriptsChannel =
-    transcriptsChannelId !== undefined
+    transcriptsChannelId !== null
       ? (client.channels.cache.get(transcriptsChannelId) as GuildTextBasedChannel)
       : undefined;
 
@@ -182,7 +180,7 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
     }
   }
   description +=
-    channelType === 'application' && transcriptsChannelId !== undefined
+    channelType === 'application' && transcriptsChannel
       ? ` Transcript saved to ${transcriptsChannel}.`
       : channelType === 'support'
       ? ''

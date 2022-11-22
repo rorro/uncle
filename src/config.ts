@@ -10,7 +10,7 @@ switch (process.env.NODE_ENV) {
     path = `${__dirname}/../.env.production`;
     break;
   default:
-    throw `Unhandled environment variable: ${process.env.NODE_ENV}`;
+    throw `Unhandled environment variable (process.env.NODE_ENV): ${process.env.NODE_ENV}`;
 }
 dotenv.config({ path: path });
 

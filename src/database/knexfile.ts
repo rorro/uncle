@@ -1,9 +1,10 @@
-const config = {
+export default {
   client: 'better-sqlite3',
   connection: {
     filename: `${__dirname}/../../database.sqlite3`
   },
-  useNullAsDefault: true
+  useNullAsDefault: true,
+  seeds: {
+    directory: './seeds'
+  }
 };
-
-export default config;

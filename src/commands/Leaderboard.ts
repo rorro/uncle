@@ -11,8 +11,8 @@ import { getSheetData } from '../api/googleHandler';
 import config from '../config';
 import { sendMessageInChannel } from '../discord';
 import { hasRole, PeriodsInMillseconds } from '../utils';
-import { getMessageIdByName, insertIntoMessages } from '../database/helpers';
-import { MessageType } from '../database/types';
+import { MessageType } from '../types';
+import KnexDB from '../database/knex';
 
 export const leaderboardCommand: Command = {
   name: 'leaderboard',
@@ -52,6 +52,20 @@ export const leaderboardCommand: Command = {
         }
 
         const metric = interaction.options.getString('leaderboard_metric', true);
+
+        const leaderboardChannelId = (await KnexDB.getConfigItem('leaderboard_channel')) as string;
+        if (!leaderboardChannelId) {
+          await interaction.followUp({ content: `Leaderboard channel has not been configured.` });
+          return;
+        }
+
+        const channel = client.channels.cache.get(leaderboardChannelId);
+        if (!channel || channel.type !== ChannelType.GuildText) {
+          await interaction.followUp({
+            content: `The configured leaderboard channel either doesn't exist or is not a text channel.`
+          });
+          return;
+        }
 
         const leaderboardData = await getSheetData(
           config.googleDrive.leaderboardSheet,
@@ -136,18 +150,16 @@ export const leaderboardCommand: Command = {
           message += `\`\`\``;
         }
 
-        let messageId = await getMessageIdByName(metricName);
+        let messageId = await KnexDB.getMessageIdByName(metricName);
         try {
-          if (messageId === undefined) throw new Error('Message id not found');
+          if (!messageId) throw new Error('Message id not found');
 
           // Discord message exists and should be edited instead
-          const channel = client.channels.cache.get(config.guild.channels.leaderboard);
-          if (channel?.type !== ChannelType.GuildText) return;
 
           await channel.messages.edit(messageId, { content: message });
         } catch {
           // message not found, send it and store message id
-          const mId = await sendMessageInChannel(client, config.guild.channels.leaderboard, {
+          const mId = await sendMessageInChannel(client, leaderboardChannelId, {
             message: message
           });
           if (!mId) {
@@ -157,13 +169,18 @@ export const leaderboardCommand: Command = {
             return;
           }
           messageId = mId;
-          await insertIntoMessages(metricName, messageId, MessageType.Leaderboard);
+          await KnexDB.insertIntoMessages(
+            metricName,
+            messageId,
+            `#${channel.name}`,
+            MessageType.Leaderboard
+          );
         }
 
         await interaction.followUp({
           embeds: [
             new EmbedBuilder().setDescription(
-              `Leaderboard for ${metricEmoji} **${metricName}** ${metricEmoji} has been updated.\n[Quick hop to the leaderboard](https://discord.com/channels/${interaction.guildId}/${config.guild.channels.leaderboard}/${messageId})`
+              `Leaderboard for ${metricEmoji} **${metricName}** ${metricEmoji} has been updated.\n[Quick hop to the leaderboard](https://discord.com/channels/${interaction.guildId}/${leaderboardChannelId}/${messageId})`
             )
           ]
         });

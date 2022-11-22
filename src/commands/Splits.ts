@@ -9,7 +9,7 @@ import { getSheetData } from '../api/googleHandler';
 import config from '../config';
 import { Command, PlayerSummary } from '../types';
 import { getRank } from '../utils';
-import { getConfigValue } from '../database/helpers';
+import KnexDB from '../database/knex';
 
 export const splitsCommand: Command = {
   name: 'splits',
@@ -42,6 +42,8 @@ export const splitsCommand: Command = {
 
     const subCommand = interaction.options.getSubcommand();
     let content = '';
+
+    const clanIcon = (await KnexDB.getConfigItem('clan_icon')) as string;
 
     switch (subCommand) {
       case 'summary':
@@ -90,7 +92,6 @@ export const splitsCommand: Command = {
               { name: 'Top 3 Legacy diary tasks completed', value: topThreeDiary, inline: true }
             ]);
 
-          const clanIcon = await getConfigValue('clanIcon');
           if (clanIcon) embed.setThumbnail(clanIcon);
 
           await interaction.followUp({
@@ -163,7 +164,6 @@ export const splitsCommand: Command = {
                 { name: 'Rank', value: `${getRank(rank)} ${rank}`, inline: true }
               ]);
 
-            const clanIcon = await getConfigValue('clanIcon');
             if (clanIcon) embed.setThumbnail(clanIcon);
 
             await interaction.followUp({

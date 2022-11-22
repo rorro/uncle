@@ -1,20 +1,11 @@
 import DiscordOauth2 from 'discord-oauth2';
-import { Request, response, Response } from 'express';
-import {
-  deleteFromOuathData,
-  getAccessTokens,
-  getAllChannels,
-  getAllConfigValues,
-  getAllMessages,
-  getAllOpenChannels,
-  insertOauthData
-} from '../../database/helpers';
+import { Request, Response } from 'express';
 import CryptoJS from 'crypto-js';
 import config from '../../config';
 import client from '../../bot';
 import { hasRole } from '../../utils';
-import { Channel, Guild, GuildBasedChannel } from 'discord.js';
-import { ChannelResponse, ConfigEntry, MessagesResponse } from '../../database/types';
+import { ResponseType } from '../../types';
+import KnexDB from '../../database/knex';
 
 const oauth2 = new DiscordOauth2();
 
@@ -63,7 +54,7 @@ const authenticate = async (req: Request, res: Response) => {
           };
 
           console.log(`Authenticating... inserting into database`);
-          await insertOauthData(data);
+          KnexDB.insertOauthData(data);
           const publicEncrypted = encrypt(oauthData.access_token, PUBLIC_KEY);
           const encoded = encodeURIComponent(publicEncrypted);
 
@@ -92,18 +83,6 @@ const authenticate = async (req: Request, res: Response) => {
   }
 };
 
-interface CustomChannel {
-  configuredChannel: ChannelResponse;
-  channel?: GuildBasedChannel;
-}
-
-interface ResponseType {
-  guild?: Guild;
-  channels: CustomChannel[];
-  messages: MessagesResponse[];
-  configs: ConfigEntry[];
-}
-
 const getData = async (req: Request, res: Response) => {
   const accessToken = req.query.accessToken as string;
 
@@ -112,54 +91,61 @@ const getData = async (req: Request, res: Response) => {
     return;
   }
 
+  console.log(`accessToken: ${accessToken}`);
+
   const isLoggedIn = await hasAccess(accessToken);
   if (isLoggedIn) {
     console.log(`Getting data_accessToken: ${accessToken}`);
     const guild = client.guilds.cache.get(config.guild.id);
     if (!guild) return;
 
-    const allChannels = guild.channels ? JSON.parse(JSON.stringify(guild.channels)).guild.channels : [];
+    const allGuildChannels = await guild.channels.fetch();
+    // console.log(allGuildChannels);
 
-    const response: ResponseType = { guild: guild, channels: [], messages: [], configs: [] };
+    const response: ResponseType = {
+      guild: guild,
+      guildChannels: allGuildChannels,
+      configs: await KnexDB.getAllConfigs(),
+      messages: await KnexDB.getAllMessages(),
+      scheduledMessages: await KnexDB.getAllScheduledMessages()
+    };
 
-    // CONFIGURED CHANNELS
-    const configuredChannels = await getAllChannels();
-    if (!configuredChannels) {
-      res.json(response);
-      return;
-    }
-
-    for (const ch of configuredChannels) {
-      if (!allChannels.includes(ch.channel_id)) continue;
-      const channel = guild.channels.cache.get(ch.channel_id);
-
-      response.channels.push({
-        configuredChannel: ch,
-        channel: channel
-      });
-    }
-
-    // CONFIGURED MESSAGES
-    const configuredMessages = await getAllMessages();
-
-    for (const msg of configuredMessages) {
-      response.messages.push(msg);
-    }
-
-    // GENERAL CONFIGS
-    const generalConfigs = await getAllConfigValues();
-    for (const conf of generalConfigs) {
-      response.configs.push(conf);
-    }
+    // console.log(response);
 
     // OPEN CHANNELS
-    const openApplications = await getAllOpenChannels('open_applications');
-    const openSupportTickets = await getAllOpenChannels('open_support_tickets');
+    // const openApplications = await getAllOpenChannels('open_applications');
+    // const openSupportTickets = await getAllOpenChannels('open_support_tickets');
 
     res.json(response);
   } else {
-    res.send({ message: 'You are logged OUT!' });
+    res.send();
   }
+};
+
+const saveData = async (req: Request, res: Response) => {
+  const accessToken = req.query.accessToken as string;
+  const category = req.query.category as string;
+
+  if (!accessToken) {
+    res.send({ message: 'Invalid access token' });
+    return;
+  }
+
+  if (!category) {
+    res.send({ message: 'Invalid category' });
+    return;
+  }
+
+  const isLoggedIn = await hasAccess(accessToken);
+  if (!isLoggedIn) {
+    res.send({ message: 'You are not logged in!' });
+    return;
+  }
+
+  res.send({ message: 'Data saved' });
+
+  await KnexDB.updateConfig('', '', req.body);
+  console.log(accessToken, category);
 };
 
 const logout = async (req: Request, res: Response) => {
@@ -168,15 +154,15 @@ const logout = async (req: Request, res: Response) => {
   const access_token = req.body.access_token;
   if (!access_token) return;
 
-  const decrypted = decrypt(access_token, PUBLIC_KEY);
-  console.log(`Logging out...access_token: ${decrypted}`);
+  const decrypted = decrypt(decodeURIComponent(access_token), PUBLIC_KEY);
+  console.log(`Logging out...decrypted: ${decrypted}`);
 
-  const tokens = await getAccessTokens();
+  const tokens = await KnexDB.getAccessTokens();
   const toDelete = tokens.find(t => decrypt(t.access_token, PRIVATE_KEY) === decrypted);
 
   if (toDelete) {
     console.log(`Logging out...to_delete: ${toDelete?.access_token}`);
-    await deleteFromOuathData(toDelete?.access_token);
+    await KnexDB.deleteFromOuathData(toDelete?.access_token);
     console.log(`Logging out...deleted from database`);
     await revokeAccess(decrypted);
     console.log(`Logging out...revoked access`);
@@ -193,13 +179,27 @@ function decrypt(token: string, key: string): string {
 }
 
 async function hasAccess(cookie: string): Promise<boolean> {
+  console.log(`Verifying access...`);
+
   if (!cookie) return false;
 
   const decrypted = decrypt(cookie, PUBLIC_KEY);
 
-  const tokens = await getAccessTokens();
+  const tokens = await KnexDB.getAccessTokens();
   const hasAccess = tokens.find(t => decrypt(t.access_token, PRIVATE_KEY) === decrypted);
-  return hasAccess ? true : false;
+
+  if (!hasAccess) return false;
+  console.log(`Verifying access... hasAccess: ${hasAccess}`);
+
+  // Check if access token has expired
+  const oauthData = (await KnexDB.getOauthData(hasAccess.access_token))[0];
+  if (oauthData.date + oauthData.expires_in < Date.now()) {
+    console.log(`Verifying access... token has expired!`);
+    await KnexDB.deleteFromOuathData(hasAccess.access_token);
+    return false;
+  }
+
+  return true;
 }
 
 async function revokeAccess(token: string) {
@@ -212,35 +212,16 @@ async function revokeAccess(token: string) {
   }
 }
 
-async function isLoggedIn(access_token: string) {
-  if (!access_token) {
-    return false;
-  }
-
-  return await hasAccess(access_token);
-}
-
 async function verifyLogin(req: Request, res: Response) {
-  const loggedIn = await isLoggedIn(req.query.access_token as string);
-  console.log(`loggedIn: ${loggedIn}`);
+  const loggedIn = await hasAccess(req.query.access_token as string);
+  console.log(`verifyLogin-is logged in?: ${loggedIn}`);
   res.send(loggedIn);
-}
-
-async function getMessages(req: Request, res: Response) {
-  const loggedIn = await isLoggedIn(req.query.access_token as string);
-  console.log(`Getting messages_loggedIn: ${loggedIn}`);
-  if (!loggedIn) {
-    res.sendStatus(401);
-  } else {
-    const messages = await getAllMessages();
-    res.send(messages);
-  }
 }
 
 export default {
   authenticate,
   getData,
   logout,
-  getMessages,
-  verifyLogin
+  verifyLogin,
+  saveData
 };

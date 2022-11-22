@@ -7,9 +7,11 @@ import {
   PermissionFlagsBits,
   GuildTextBasedChannel
 } from 'discord.js';
-import db from './db';
 import config from './config';
-import { ScheduledMessage, MessageOptions } from './types';
+import { MessageOptions } from './types';
+import KnexDB from './database/knex';
+import dayjs from 'dayjs';
+import { DATE_FORMAT } from './utils';
 
 // Send a message in a specific channel
 export async function sendMessageInChannel(client: Client, channelId: string, options?: MessageOptions) {
@@ -64,19 +66,21 @@ export async function createChannel(
   return channel;
 }
 
-export function sendScheduledMessages(client: Client) {
-  const messages = db.getPassedMessages();
-  messages.forEach((m: ScheduledMessage) => {
-    let options: MessageOptions = {};
-    switch (m.type) {
-      case 'embed':
-        options.message = m.content ? m.content : '';
-        options.embeds = m.embed ? [new EmbedBuilder(m.embed)] : [];
-        break;
-      case 'simple':
-        options.message = m.content;
-        break;
-    }
-    sendMessageInChannel(client, m.channel, options);
-  });
+export async function sendScheduledMessages(client: Client) {
+  const newMessages = await KnexDB.getAllScheduledMessages();
+  let newOptions: MessageOptions = {};
+  for (const scheduled of newMessages) {
+    const scheduledDate = dayjs(scheduled.date);
+    const currentTimeInUTC = dayjs().utc().format(DATE_FORMAT);
+    const datePassed = scheduledDate.diff(currentTimeInUTC, 'minute') <= 0;
+
+    if (!datePassed) continue;
+
+    const message = JSON.parse(scheduled.message);
+    newOptions.message = message.content ? message.content : '';
+    newOptions.embeds = message.embed ? [new EmbedBuilder(message.embed)] : [];
+
+    await sendMessageInChannel(client, scheduled.channel, newOptions);
+    await KnexDB.deleteScheduledMessage(scheduled.id);
+  }
 }

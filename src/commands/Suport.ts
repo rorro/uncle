@@ -9,10 +9,10 @@ import {
   ApplicationCommandOptionType,
   ChannelType
 } from 'discord.js';
-import { getConfigValue } from '../database/helpers';
 import config from '../config';
 import { Command } from '../types';
 import { hasRole } from '../utils';
+import KnexDB from '../database/knex';
 
 export const supportCommand: Command = {
   name: 'support',
@@ -60,7 +60,8 @@ export const supportCommand: Command = {
           .setColor('DarkPurple')
           .setDescription('If you wish to open a support ticket, click the "Open Ticket" button below.');
 
-        const clanIcon = await getConfigValue('clanIcon');
+        // const clanIcon = await getConfigValue('clanIcon');
+        const clanIcon = (await KnexDB.getConfigItem('clan_icon')) as string;
         if (clanIcon) embed.setThumbnail(clanIcon);
 
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(

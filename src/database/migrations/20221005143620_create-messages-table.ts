@@ -5,6 +5,7 @@ export async function up(knex: Knex): Promise<void> {
     table.increments('id').primary();
     table.string('name').notNullable().unique();
     table.string('message_id').notNullable().unique();
+    table.string('channel').notNullable();
     table.integer('type').notNullable();
   });
 }

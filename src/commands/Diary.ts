@@ -7,12 +7,11 @@ import {
   ApplicationCommandOptionType,
   ChannelType
 } from 'discord.js';
-import { getConfigValue, getMessageIdByName, insertIntoMessages } from '../database/helpers';
-import { MessageType } from '../database/types';
 import { getSheetData } from '../api/googleHandler';
 import config from '../config';
 import { Command, PlayerSummary } from '../types';
 import { getRank, hasRole } from '../utils';
+import KnexDB from '../database/knex';
 
 export const diaryCommand: Command = {
   name: 'diary',
@@ -53,32 +52,65 @@ export const diaryCommand: Command = {
 
     const subCommand = interaction.options.getSubcommand();
 
+    const diaryChannelId = (await KnexDB.getConfigItem('diary_channel')) as string;
+    console.log(diaryChannelId);
+
+    if (!diaryChannelId) {
+      await interaction.followUp({
+        content: `A diary channel has not been configured.`
+      });
+      return;
+    }
+
+    const diaryChannel = client.channels.cache.get(diaryChannelId);
+    if (!diaryChannel || diaryChannel.type !== ChannelType.GuildText) {
+      await interaction.followUp({
+        content: `The diary channel either doesn't exist or is not a text channel. Please re-configure it.`
+      });
+      return;
+    }
+
     switch (subCommand) {
       case 'setmessage':
         const editMessageId = interaction.options.getString('message_id', true);
-        await insertIntoMessages('diarytop10', editMessageId, MessageType.Other);
+
+        try {
+          const configuredMessage = await diaryChannel.messages.fetch(editMessageId);
+
+          if (configuredMessage.author !== client.user) throw Error('not me');
+        } catch (e: any) {
+          if (e.message.includes('not me')) {
+            await interaction.followUp({
+              content: `This message was not sent by me, I will not be able to use it.`
+            });
+          } else {
+            await interaction.followUp({
+              content: `The selected message must be in ${diaryChannel}.`
+            });
+          }
+          return;
+        }
+
+        await KnexDB.updateConfig('diary_top10_message', editMessageId);
 
         await interaction.followUp({
-          content: `Top 10 diary message has been set to ${editMessageId}. Make sure this message is in <#${config.guild.channels.legacyDiary}>. If it's not, re-do this command.`
+          content: `Top 10 diary message has been set to [this message](<https://discord.com/channels/${interaction.guildId}/${diaryChannelId}/${editMessageId}>).`
         });
         return;
       case 'updatetop10':
-        const channel = client.channels.cache.get(config.guild.channels.legacyDiary);
-        if (channel?.type !== ChannelType.GuildText) return;
-
         try {
-          const messageId = await getMessageIdByName('diarytop10');
+          const messageId = (await KnexDB.getConfigItem('diary_top10_message')) as string;
 
-          if (messageId === undefined) {
+          if (!messageId) {
             await interaction.followUp({
               content: 'No diary message has been configured. Configure one with `/diary setmessage`'
             });
             return;
           }
 
-          const message = await channel.messages.fetch(messageId);
+          const message = await diaryChannel.messages.fetch(messageId);
 
-          if (message.author.id !== client.user?.id) {
+          if (message.author !== client.user) {
             await interaction.followUp({
               content:
                 'The diary message was not sent by me. You can send a new message with `/message send`'
@@ -104,7 +136,7 @@ export const diaryCommand: Command = {
             .setTitle('Diary top 10 completion list')
             .setFooter({ text: `Last updated: ${dayjs().format('MMMM DD, YYYY')}` });
 
-          const clanIcon = await getConfigValue('clanIcon');
+          const clanIcon = (await KnexDB.getConfigItem('clan_icon')) as string;
           if (clanIcon) embed.setThumbnail(clanIcon);
 
           for (let i in players) {
@@ -126,14 +158,14 @@ export const diaryCommand: Command = {
           }
 
           embed.setDescription(description);
-          await channel.messages.edit(messageId, { content: '\u200b', embeds: [embed] });
+          await diaryChannel.messages.edit(messageId, { content: '\u200b', embeds: [embed] });
 
           await interaction.followUp({
-            content: 'Top 10 diary completions updated.'
+            content: `Top 10 diary completions updated. [Quick hop to message.](<https://discord.com/channels/${interaction.guildId}/${diaryChannelId}/${messageId}>)`
           });
         } catch (e) {
           await interaction.followUp({
-            content: `Something went wrong. A diary message has probably not been set in the correct channel. Set one in <#${config.guild.channels.legacyDiary}> with \`/diary setmessage\``
+            content: `Something went wrong. A diary message has probably not been set in the correct channel. Set one in <#${diaryChannel}> with \`/diary setmessage\``
           });
         }
     }

@@ -1,5 +1,6 @@
 import { ChatInputCommandInteraction, Client, ApplicationCommandType } from 'discord.js';
-import { Command } from 'src/types';
+import { Command } from '../types';
+import KnexDB from '../database/knex';
 
 export const helpCommand: Command = {
   name: 'help',
@@ -8,6 +9,7 @@ export const helpCommand: Command = {
   run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     const content = 'So far I only do stuff for the staff members.';
 
+    await KnexDB.getAllScheduledMessages();
     await interaction.reply({
       ephemeral: true,
       content: content

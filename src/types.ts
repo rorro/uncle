@@ -104,9 +104,9 @@ export enum ScheduledMessageType {
 }
 
 export interface ScheduledMessageEntry {
-  id: number;
+  id?: number;
   message: string;
-  date: number;
+  date: String;
   channel: string;
   type: ScheduledMessageType;
 }

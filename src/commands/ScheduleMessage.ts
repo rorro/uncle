@@ -182,10 +182,10 @@ async function scheduleMessage(messageToSchedule: ScheduledMessage) {
     content: messageToSchedule.content,
     embed: messageToSchedule.embed
   };
-  KnexDB.insertScheduledMessage(
-    JSON.stringify(newMessage),
-    messageToSchedule.date,
-    messageToSchedule.channel,
-    messageType
-  );
+  KnexDB.insertScheduledMessage({
+    message: JSON.stringify(newMessage),
+    date: messageToSchedule.date,
+    channel: messageToSchedule.channel,
+    type: messageType
+  });
 }

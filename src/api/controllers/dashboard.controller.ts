@@ -142,10 +142,21 @@ const saveData = async (req: Request, res: Response) => {
     return;
   }
 
-  res.send({ message: 'Data saved' });
+  switch (category) {
+    case 'configs':
+      console.log(`saving configs:`);
+      await KnexDB.updateConfig('', '', req.body);
+      break;
+    case 'scheduled_messages':
+      console.log(`saving scheduled message:`);
+      await KnexDB.insertScheduledMessage(req.body);
+      break;
 
-  await KnexDB.updateConfig('', '', req.body);
-  console.log(accessToken, category);
+    default:
+      break;
+  }
+  console.log(req.body);
+  res.send({ message: 'Data saved' });
 };
 
 const logout = async (req: Request, res: Response) => {

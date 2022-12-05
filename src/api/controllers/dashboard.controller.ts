@@ -149,14 +149,37 @@ const saveData = async (req: Request, res: Response) => {
       break;
     case 'scheduled_messages':
       console.log(`saving scheduled message:`);
-      await KnexDB.insertScheduledMessage(req.body);
-      break;
-
-    default:
-      break;
+      const newMessageId = await KnexDB.insertScheduledMessage(req.body);
+      res.send({
+        newId: newMessageId.newId,
+        message:
+          newMessageId.newId !== -1 ? 'Successfully scheduled new message.' : 'Some error happened.'
+      });
+      return;
   }
-  console.log(req.body);
-  res.send({ message: 'Data saved' });
+  // console.log(req.body);
+  res.send({ message: 'saved some data' });
+};
+
+const deleteScheduledMessage = async (req: Request, res: Response) => {
+  const accessToken = req.query.accessToken as string;
+  const messageId = parseInt(req.query.messageId as string);
+
+  if (!accessToken) {
+    res.send({ message: 'Invalid access token' });
+    return;
+  }
+
+  const isLoggedIn = await hasAccess(accessToken);
+  if (!isLoggedIn) {
+    res.send({ message: 'You are not logged in!' });
+    return;
+  }
+
+  KnexDB.deleteScheduledMessage(messageId);
+  console.log(`message deleted: ${messageId}`);
+
+  res.send({ message: 'Scheduled message deleted' });
 };
 
 const logout = async (req: Request, res: Response) => {
@@ -234,5 +257,6 @@ export default {
   getData,
   logout,
   verifyLogin,
-  saveData
+  saveData,
+  deleteScheduledMessage
 };

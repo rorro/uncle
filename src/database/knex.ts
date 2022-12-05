@@ -149,18 +149,31 @@ class KnexDB {
   }
 
   // Scheduled Messages
-  async insertScheduledMessage(entry: ScheduledMessageEntry) {
+  async insertScheduledMessage(entry: ScheduledMessageEntry): Promise<{ newId: number }> {
     const { id, message, date, channel, type } = entry;
-    if (id) {
+
+    if (id && id >= 1) {
       // Editing an existing scheduled message
       console.log(`Editing existing scheduled message: ${id}`);
 
-      await this.db('scheduled_messages').update({ message, date, channel, type }).where('id', id);
+      try {
+        const messageId: { id: number }[] = await this.db('scheduled_messages')
+          .update({ message, date, channel, type })
+          .where('id', id)
+          .returning('id');
+
+        return messageId ? { newId: messageId[0].id } : { newId: -1 };
+      } catch (e) {
+        return { newId: -1 };
+      }
     } else {
       console.log(`Inserting new scheduled message`);
-      console.log(entry);
 
-      await this.db('scheduled_messages').insert({ message, date, channel, type });
+      const messageId: { id: number }[] = await this.db('scheduled_messages')
+        .insert({ message, date, channel, type })
+        .returning('id');
+
+      return messageId ? { newId: messageId[0].id } : { newId: -1 };
     }
   }
 

@@ -6,6 +6,7 @@
   "author": "Rorro",
   "license": "ISC",
   "dependencies": {
+    "@wise-old-man/utils": "^2.0.10",
     "axios": "^0.27.2",
     "dayjs": "^1.11.3",
     "discord-html-transcripts": "^3.1.0",

@@ -36,13 +36,13 @@ export default {
       justiciar: process.env.JUSTICIAR_ROLE as string
     }
   },
-  // All valid metrics can be found here https://wiseoldman.net/docs/records
+  // All valid metrics can be found here https://docs.wiseoldman.net/global-type-definitions
   requirements: [
     // requirements to join the clan
     { metric: 'combatLevel', type: 'other', name: '+ Combat', threshold: 120 },
-    { metric: 'totalLevel', type: 'other', name: '+ Total', threshold: 1750 },
 
     // Skills
+    { metric: 'overall', type: 'skill', name: '+ Total', threshold: 1750 },
     { metric: 'ranged', type: 'skill', name: 'Ranged', threshold: 94 },
     { metric: 'magic', type: 'skill', name: 'Magic', threshold: 94 },
     { metric: 'agility', type: 'skill', name: 'Agility', threshold: 70 },

@@ -6,10 +6,9 @@ import {
   ApplicationCommandOptionType
 } from 'discord.js';
 import { Command } from 'src/types';
-import { RWAPI, WOMAPI } from '../api/handler';
-import { SnapshotSkill } from '../api/types';
+import { RWAPI, womClient } from '../api/handler';
 import config from '../config';
-import { getLevel, hasRole, SKILLS } from '../utils';
+import { hasRole } from '../utils';
 import db from '../db';
 
 export const checkApplicantRequirementsCommand: Command = {
@@ -38,8 +37,6 @@ export const checkApplicantRequirementsCommand: Command = {
 
     await interaction.deferReply();
     const rsn = interaction.options.getString('rsn', true);
-    const trackUrl = `${config.wiseoldmanAPI}/players/track`;
-    const getUrl = `${config.wiseoldmanAPI}/players/username/${rsn}`;
 
     const reply = new EmbedBuilder()
       .setTitle(`Requirements check for ${rsn}`)
@@ -47,7 +44,7 @@ export const checkApplicantRequirementsCommand: Command = {
       .setThumbnail(db.database.getData('/config/clanIcon'));
 
     try {
-      await WOMAPI.post(trackUrl, { username: rsn });
+      await womClient.players.updatePlayer(rsn);
     } catch (e: any) {
       if (e.response?.data?.message) {
         reply.setDescription(e.response?.data?.message);
@@ -70,43 +67,47 @@ export const checkApplicantRequirementsCommand: Command = {
     }
 
     try {
-      const response = await WOMAPI.get(getUrl);
+      const response = await womClient.players.getPlayerDetails(rsn);
+      if (response === null) return;
 
-      let totalLevel = 0;
-      Object.entries(response.data.latestSnapshot).forEach(([key, value]) => {
-        if (SKILLS.includes(key)) {
-          const val = value as SnapshotSkill;
-          totalLevel += getLevel(val.experience);
-        }
-      });
-
-      let data = response.data;
-      const snapshot = data.latestSnapshot;
-      data['totalLevel'] = totalLevel; // Add it here to make the loop below with less edge cases
+      const skills = Object.entries(response.latestSnapshot.data.skills);
+      const bosses = Object.entries(response.latestSnapshot.data.bosses);
 
       let description = '**Skills and Kill Counts**\n';
 
       config.requirements.forEach(requirement => {
         switch (requirement.type) {
-          case 'other':
-            description += `${data[requirement.metric] >= requirement.threshold ? '✅' : '❌'} ${
+          case 'other': // right now only combat level is others
+            description += `${response.combatLevel >= requirement.threshold ? '✅' : '❌'} ${
               requirement.threshold
-            }${requirement.name} (${data[requirement.metric]})\n`;
+            }${requirement.name} (${response.combatLevel})\n`;
             break;
           case 'skill':
-            const level = getLevel(snapshot[requirement.metric].experience);
-            description += `${level >= requirement.threshold ? '✅' : '❌'} ${requirement.threshold} ${
-              requirement.name
-            } (${level})\n`;
+            const skill = skills.find(([name]) => name === requirement.metric);
+            if (!skill) break;
+            const [, skillValue] = skill;
+            description += `${skillValue.level >= requirement.threshold ? '✅' : '❌'} ${
+              requirement.threshold
+            } ${requirement.name} (${skillValue.level})\n`;
             break;
           case 'boss':
-            const bossKc = Math.max(snapshot[requirement.metric].kills, 0);
-            const alternativeKc = requirement.alternative
-              ? Math.max(snapshot[requirement.alternative].kills, 0)
-              : 0;
-            description += `${bossKc + alternativeKc >= requirement.threshold ? '✅' : '❌'} ${
+            const boss = bosses.find(([name]) => name === requirement.metric);
+            if (!boss) break;
+            const [, bossValue] = boss;
+            const bossKc = Math.max(bossValue.kills, 0);
+
+            let altBossKc = 0;
+            if (requirement.alternative) {
+              const altBoss = bosses.find(([name]) => name === requirement.alternative);
+              if (altBoss) {
+                const [, altBossValue] = altBoss;
+                altBossKc = Math.max(altBossValue.kills, 0);
+              }
+            }
+
+            description += `${bossKc + altBossKc >= requirement.threshold ? '✅' : '❌'} ${
               requirement.threshold
-            }kc ${requirement.name} (${bossKc}, ${alternativeKc})\n`;
+            }kc ${requirement.name} (${bossKc}, ${altBossKc})\n`;
             break;
         }
       });

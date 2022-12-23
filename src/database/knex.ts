@@ -22,13 +22,8 @@ class KnexDB {
   async updateConfig(configKey: string, configValue: string, configEntry?: ConfigEntry) {
     if (configEntry) {
       await this.db('configs').update(configEntry).where('guild_id', config.guild.id);
-      // Object.entries(configEntry).map(([key, value]) => {});
     } else {
-      // await this.db('configs').where('guild_id', config.guild.id).update(configKey: configValue);
-
       const query = `UPDATE configs SET ${configKey} = '${configValue}' WHERE guild_id=${config.guild.id}`;
-      console.log(query);
-
       await this.db.raw(query);
     }
   }
@@ -112,7 +107,6 @@ class KnexDB {
     table: string
   ): Promise<{ user: User; channel: TextChannel } | undefined> {
     const result = await this.db(table).where('user_id', user_id).select('user', 'channel');
-    console.log(`args: ${user_id}, ${table}`);
 
     if (result.length > 0) {
       const user: User = JSON.parse(result[0].user);
@@ -149,13 +143,15 @@ class KnexDB {
   }
 
   // Scheduled Messages
-  async insertScheduledMessage(entry: ScheduledMessageEntry): Promise<{ newId: number }> {
+  async insertScheduledMessage(
+    entry: ScheduledMessageEntry | undefined
+  ): Promise<{ newId: number } | undefined> {
+    if (!entry) return;
+
     const { id, message, date, channel, type } = entry;
 
     if (id && id >= 1) {
       // Editing an existing scheduled message
-      console.log(`Editing existing scheduled message: ${id}`);
-
       try {
         const messageId: { id: number }[] = await this.db('scheduled_messages')
           .update({ message, date, channel, type })
@@ -167,8 +163,6 @@ class KnexDB {
         return { newId: -1 };
       }
     } else {
-      console.log(`Inserting new scheduled message`);
-
       const messageId: { id: number }[] = await this.db('scheduled_messages')
         .insert({ message, date, channel, type })
         .returning('id');
@@ -177,7 +171,9 @@ class KnexDB {
     }
   }
 
-  async deleteScheduledMessage(id: number) {
+  async deleteScheduledMessage(id: number | undefined) {
+    if (!id) return;
+
     await this.db('scheduled_messages').where('id', id).delete();
   }
 

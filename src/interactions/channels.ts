@@ -160,7 +160,6 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
   await interaction.message.delete();
 
   const transcriptsChannelId = (await KnexDB.getConfigItem('transcripts_channel')) as string;
-  console.log(transcriptsChannelId);
 
   const transcriptsChannel =
     transcriptsChannelId !== null

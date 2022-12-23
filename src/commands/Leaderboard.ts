@@ -160,7 +160,7 @@ export const leaderboardCommand: Command = {
         } catch {
           // message not found, send it and store message id
           const mId = await sendMessageInChannel(client, leaderboardChannelId, {
-            message: message
+            content: message
           });
           if (!mId) {
             await interaction.followUp({

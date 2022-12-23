@@ -30,7 +30,7 @@ export interface PlayerSummary {
 }
 
 export interface MessageOptions {
-  message?: string;
+  content?: string;
   embeds?: EmbedBuilder[];
   components?: ActionRowBuilder<ButtonBuilder>[];
   files?: AttachmentBuilder[];
@@ -106,7 +106,7 @@ export enum ScheduledMessageType {
 export interface ScheduledMessageEntry {
   id?: number;
   message: string;
-  date: String;
+  date: string;
   channel: string;
   type: ScheduledMessageType;
 }

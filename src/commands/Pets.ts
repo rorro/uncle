@@ -99,7 +99,7 @@ export const petsCommand: Command = {
             const data = petData?.at(index);
             const petMessage = buildMessage(emojis, data, +i + 1);
             const messageId = await sendMessageInChannel(client, leaderboardChannelId, {
-              message: petMessage
+              content: petMessage
             });
             if (messageId === undefined) {
               await interaction.followUp({ content: 'Something went wrong when sending message' });

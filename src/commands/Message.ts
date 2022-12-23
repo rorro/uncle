@@ -125,7 +125,7 @@ export const messageCommand: Command = {
           const sendMessage = interaction.options.getString('message', true);
           const parsedSend = parseMessage(sendMessage);
 
-          await sendMessageInChannel(client, channel.id, { message: parsedSend });
+          await sendMessageInChannel(client, channel.id, { content: parsedSend });
           response += 'sent message.';
           break;
         case 'edit':

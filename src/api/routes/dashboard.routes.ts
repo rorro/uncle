@@ -3,7 +3,6 @@ import controller from '../controllers/dashboard.controller';
 
 const router = express.Router();
 
-// /
 router.get('/', controller.getData);
 router.get('/auth', controller.authenticate);
 router.post('/logout', controller.logout);

@@ -118,7 +118,6 @@ export const scheduleCommand: Command = {
     }
 
     const scheduledDate = dayjs.utc(date);
-    console.log(`scheduled the following time: ${scheduledDate}`);
 
     if (scheduledDate.diff(dayjs().utc().format(DATE_FORMAT), 'minute') <= 0) {
       await interaction.followUp(`Given date has already passed.`);

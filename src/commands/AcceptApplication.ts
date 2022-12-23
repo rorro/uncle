@@ -180,7 +180,7 @@ export const acceptApplicationCommand: Command = {
         })
         .then(async () => {
           await sendMessageInChannel(client, newMembersChannelId, {
-            message: introMessage
+            content: introMessage
           });
         });
 

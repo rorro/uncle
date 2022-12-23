@@ -53,7 +53,6 @@ export const diaryCommand: Command = {
     const subCommand = interaction.options.getSubcommand();
 
     const diaryChannelId = (await KnexDB.getConfigItem('diary_channel')) as string;
-    console.log(diaryChannelId);
 
     if (!diaryChannelId) {
       await interaction.followUp({

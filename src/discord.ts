@@ -19,12 +19,13 @@ export async function sendMessageInChannel(client: Client, channelId: string, op
   const channel = client.channels.cache.get(channelId);
   if (channel?.type !== ChannelType.GuildText) return;
 
-  const sent = await channel.send({
-    content: options?.message ? options?.message : '\u200b',
-    embeds: options?.embeds ? options?.embeds : [],
-    components: options?.components ? options?.components : [],
-    files: options?.files ? options.files : []
-  });
+  const messageData: MessageOptions = {};
+  if (options?.content) messageData.content = options.content;
+  if (options?.embeds) messageData.embeds = options.embeds;
+  if (options?.components) messageData.components = options.components;
+  if (options?.files) messageData.files = options.files;
+
+  const sent = await channel.send(messageData);
   return sent.id;
 }
 
@@ -76,9 +77,14 @@ export async function sendScheduledMessages(client: Client) {
 
     if (!datePassed) continue;
 
-    const message = JSON.parse(scheduled.message);
-    newOptions.message = message.content ? message.content : '';
-    newOptions.embeds = message.embed ? [new EmbedBuilder(message.embed)] : [];
+    // Replace because I'm too lazy to do it any other proper way.
+    const message = JSON.parse(scheduled.message.replaceAll('\\\\u200B', '​'));
+
+    newOptions.content = message.content ? message.content : undefined;
+    newOptions.embeds =
+      message.embed && Object.keys(message.embed).length !== 0
+        ? [new EmbedBuilder(message.embed)]
+        : undefined;
 
     await sendMessageInChannel(client, scheduled.channel, newOptions);
     await KnexDB.deleteScheduledMessage(scheduled.id);

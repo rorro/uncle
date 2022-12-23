@@ -19,8 +19,6 @@ const authenticate = async (req: Request, res: Response) => {
   const { code } = req.query;
   if (code) {
     try {
-      console.log(`Authenticating...`);
-
       const oauthData = await oauth2.tokenRequest({
         clientId: CLIENT_ID,
         clientSecret: CLIENT_SECRET,
@@ -33,14 +31,9 @@ const authenticate = async (req: Request, res: Response) => {
       const oauth2User = await oauth2.getUser(oauthData.access_token);
       const guild = await client.guilds.fetch(config.guild.id);
 
-      console.log(
-        `Authenticating... user_id: ${oauth2User}...guild_id: ${guild}...token: ${oauthData.access_token}`
-      );
       try {
         const user = await guild.members.fetch(oauth2User.id);
         const isStaff = hasRole(user, config.guild.roles.staff);
-
-        console.log(`Authenticating... is_staff: ${isStaff}`);
 
         if (isStaff) {
           const data = {
@@ -53,29 +46,22 @@ const authenticate = async (req: Request, res: Response) => {
             date: Date.now()
           };
 
-          console.log(`Authenticating... inserting into database`);
           KnexDB.insertOauthData(data);
           const publicEncrypted = encrypt(oauthData.access_token, PUBLIC_KEY);
           const encoded = encodeURIComponent(publicEncrypted);
 
           // Everything went fine, send client to login url to save cookie
-
-          console.log(`Authenticating... redirecting to /login/:access_token ${publicEncrypted}`);
           res.redirect(`http://localhost:3000/login/${encoded}`);
         } else {
           // User that logged in is not a staff member of the guild, redirect back to front page
-          console.log(`Authenticating... user not staff revoke access`);
           await revokeAccess(oauthData.access_token);
           res.redirect('http://localhost:3000');
         }
       } catch (e) {
         // The user that logged in is not in the guild, redirect to front page
-        console.log(e);
-        console.log(`Authenticating... user not in guild`);
         res.redirect('http://localhost:3000');
       }
     } catch (e) {
-      console.log(e);
       res.redirect('http://localhost:3000');
     }
   } else {
@@ -91,16 +77,12 @@ const getData = async (req: Request, res: Response) => {
     return;
   }
 
-  console.log(`accessToken: ${accessToken}`);
-
   const isLoggedIn = await hasAccess(accessToken);
   if (isLoggedIn) {
-    console.log(`Getting data_accessToken: ${accessToken}`);
     const guild = client.guilds.cache.get(config.guild.id);
     if (!guild) return;
 
     const allGuildChannels = await guild.channels.fetch();
-    // console.log(allGuildChannels);
 
     const response: ResponseType = {
       guild: guild,
@@ -109,12 +91,6 @@ const getData = async (req: Request, res: Response) => {
       messages: await KnexDB.getAllMessages(),
       scheduledMessages: await KnexDB.getAllScheduledMessages()
     };
-
-    // console.log(response);
-
-    // OPEN CHANNELS
-    // const openApplications = await getAllOpenChannels('open_applications');
-    // const openSupportTickets = await getAllOpenChannels('open_support_tickets');
 
     res.json(response);
   } else {
@@ -144,12 +120,12 @@ const saveData = async (req: Request, res: Response) => {
 
   switch (category) {
     case 'configs':
-      console.log(`saving configs:`);
       await KnexDB.updateConfig('', '', req.body);
       break;
     case 'scheduled_messages':
-      console.log(`saving scheduled message:`);
       const newMessageId = await KnexDB.insertScheduledMessage(req.body);
+      if (!newMessageId) return;
+
       res.send({
         newId: newMessageId.newId,
         message:
@@ -157,7 +133,6 @@ const saveData = async (req: Request, res: Response) => {
       });
       return;
   }
-  // console.log(req.body);
   res.send({ message: 'saved some data' });
 };
 
@@ -177,30 +152,20 @@ const deleteScheduledMessage = async (req: Request, res: Response) => {
   }
 
   KnexDB.deleteScheduledMessage(messageId);
-  console.log(`message deleted: ${messageId}`);
-
   res.send({ message: 'Scheduled message deleted' });
 };
 
 const logout = async (req: Request, res: Response) => {
-  console.log(`Logging out...`);
-
   const access_token = req.body.access_token;
   if (!access_token) return;
 
   const decrypted = decrypt(decodeURIComponent(access_token), PUBLIC_KEY);
-  console.log(`Logging out...decrypted: ${decrypted}`);
-
   const tokens = await KnexDB.getAccessTokens();
   const toDelete = tokens.find(t => decrypt(t.access_token, PRIVATE_KEY) === decrypted);
 
   if (toDelete) {
-    console.log(`Logging out...to_delete: ${toDelete?.access_token}`);
     await KnexDB.deleteFromOuathData(toDelete?.access_token);
-    console.log(`Logging out...deleted from database`);
     await revokeAccess(decrypted);
-    console.log(`Logging out...revoked access`);
-    console.log(`logged out ${decrypted}`);
   }
 };
 
@@ -213,8 +178,6 @@ function decrypt(token: string, key: string): string {
 }
 
 async function hasAccess(cookie: string): Promise<boolean> {
-  console.log(`Verifying access...`);
-
   if (!cookie) return false;
 
   const decrypted = decrypt(cookie, PUBLIC_KEY);
@@ -223,12 +186,9 @@ async function hasAccess(cookie: string): Promise<boolean> {
   const hasAccess = tokens.find(t => decrypt(t.access_token, PRIVATE_KEY) === decrypted);
 
   if (!hasAccess) return false;
-  console.log(`Verifying access... hasAccess: ${hasAccess}`);
-
   // Check if access token has expired
   const oauthData = (await KnexDB.getOauthData(hasAccess.access_token))[0];
   if (oauthData.date + oauthData.expires_in < Date.now()) {
-    console.log(`Verifying access... token has expired!`);
     await KnexDB.deleteFromOuathData(hasAccess.access_token);
     return false;
   }
@@ -237,7 +197,6 @@ async function hasAccess(cookie: string): Promise<boolean> {
 }
 
 async function revokeAccess(token: string) {
-  console.log(`logging out... token: ${token}`);
   try {
     const credentials = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString('base64');
     await oauth2.revokeToken(token, credentials);
@@ -248,7 +207,6 @@ async function revokeAccess(token: string) {
 
 async function verifyLogin(req: Request, res: Response) {
   const loggedIn = await hasAccess(req.query.access_token as string);
-  console.log(`verifyLogin-is logged in?: ${loggedIn}`);
   res.send(loggedIn);
 }
 

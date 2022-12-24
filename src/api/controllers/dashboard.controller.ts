@@ -11,18 +11,15 @@ const oauth2 = new DiscordOauth2();
 
 const PUBLIC_KEY = process.env.PUBLIC_KEY as string;
 const PRIVATE_KEY = process.env.PRIVATE_KEY as string;
-const CLIENT_ID = process.env.CLIENT_ID as string;
-const CLIENT_SECRET = process.env.CLIENT_SECRET as string;
 
-// https://discord.com/api/oauth2/authorize?client_id=969344573514088508&redirect_uri=http%3A%2F%2Flocalhost%3A7373%2Fdashboard%2Fauth&response_type=code&scope=identify
 const authenticate = async (req: Request, res: Response) => {
   const { code } = req.query;
   if (code) {
     try {
       const oauthData = await oauth2.tokenRequest({
-        clientId: CLIENT_ID,
-        clientSecret: CLIENT_SECRET,
-        redirectUri: process.env.REDIRECT_URI || 'http://localhost:7373/dashboard/auth',
+        clientId: config.client.id,
+        clientSecret: config.client.secret,
+        redirectUri: `http://${config.API.url}:${config.API.port}/dashboard/auth`,
         code: code.toString(),
         scope: 'identify',
         grantType: 'authorization_code'
@@ -51,21 +48,22 @@ const authenticate = async (req: Request, res: Response) => {
           const encoded = encodeURIComponent(publicEncrypted);
 
           // Everything went fine, send client to login url to save cookie
-          res.redirect(`http://localhost:3000/login/${encoded}`);
+          res.redirect(`http://${config.site.url}:${config.site.port}/login/${encoded}`);
         } else {
           // User that logged in is not a staff member of the guild, redirect back to front page
           await revokeAccess(oauthData.access_token);
-          res.redirect('http://localhost:3000');
+          res.redirect(`http://${config.site.url}:${config.site.port}`);
         }
       } catch (e) {
         // The user that logged in is not in the guild, redirect to front page
-        res.redirect('http://localhost:3000');
+        res.redirect(`http://${config.site.url}:${config.site.port}`);
       }
     } catch (e) {
-      res.redirect('http://localhost:3000');
+      // Something went wrong with getting the token
+      res.redirect(`http://${config.site.url}:${config.site.port}`);
     }
   } else {
-    res.redirect('http://localhost:3000');
+    res.redirect(`http://${config.site.url}:${config.site.port}`);
   }
 };
 
@@ -198,7 +196,7 @@ async function hasAccess(cookie: string): Promise<boolean> {
 
 async function revokeAccess(token: string) {
   try {
-    const credentials = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString('base64');
+    const credentials = Buffer.from(`${config.client.id}:${config.client.secret}`).toString('base64');
     await oauth2.revokeToken(token, credentials);
   } catch (e) {
     console.log(e);

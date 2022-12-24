@@ -7,12 +7,10 @@ export async function up(knex: Knex): Promise<void> {
     table.string('new_members_channel').defaultTo(null);
     table.string('assign_roles_channel').defaultTo(null);
     table.string('rules_channel').defaultTo(null);
-    table.string('diary_channel').defaultTo(null);
     table.string('leaderboard_channel').defaultTo(null);
     table.string('transcripts_channel').defaultTo(null);
     table.string('clan_icon').defaultTo(null);
     table.string('requirements_image').defaultTo(null);
-    table.string('diary_top10_message').defaultTo(null);
     table.integer('channels_count').notNullable().defaultTo(0);
   });
 }

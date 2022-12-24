@@ -1,14 +1,7 @@
 import knex, { Knex } from 'knex';
 import knexfile from './knexfile';
 import config from '../config';
-import {
-  ConfigEntry,
-  MessageEntry,
-  MessageType,
-  OauthData,
-  ScheduledMessageEntry,
-  ScheduledMessageType
-} from '../types';
+import { ConfigEntry, MessageEntry, MessageType, OauthData, ScheduledMessageEntry } from '../types';
 import { TextChannel, User } from 'discord.js';
 
 class KnexDB {
@@ -39,12 +32,10 @@ class KnexDB {
         'new_members_channel',
         'assign_roles_channel',
         'rules_channel',
-        'diary_channel',
         'leaderboard_channel',
         'transcripts_channel',
         'clan_icon',
-        'requirements_image',
-        'diary_top10_message'
+        'requirements_image'
       )
     )[0];
   }

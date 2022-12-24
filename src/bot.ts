@@ -19,7 +19,7 @@ const client = new Client({
 ready(client);
 interactionCreate(client);
 
-client.login(config.token);
+client.login(config.client.token);
 api.init();
 
 export default client;

@@ -15,9 +15,13 @@ switch (process.env.NODE_ENV) {
 dotenv.config({ path: path });
 
 export default {
-  token: process.env.DISCORD_TOKEN as string,
   wiseoldmanAPI: 'https://api.wiseoldman.net',
   runewatchAPI: 'https://runewatch.com/api/v2/rsn/',
+  client: {
+    token: process.env.DISCORD_TOKEN as string,
+    id: process.env.CLIENT_ID as string,
+    secret: process.env.CLIENT_SECRET as string
+  },
   guild: {
     id: process.env.GUILD_ID as string,
     channels: {
@@ -78,7 +82,11 @@ export default {
     petPlusAmount: 7
   },
   API: {
-    url: process.env.URL as string,
-    port: process.env.PORT as string
+    url: process.env.API_URL as string,
+    port: process.env.API_PORT as string
+  },
+  site: {
+    url: process.env.SITE_URL as string,
+    port: process.env.SITE_PORT as string
   }
 };

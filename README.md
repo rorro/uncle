@@ -28,6 +28,8 @@ This project does some very clan specific things that you will need to heavily m
 
 ```
 DISCORD_TOKEN={discord_bot_token}
+CLIENT_ID={discord_bot_id}
+CLIENT_SECRET={discord_bot_secret}
 
 GUILD_ID={guild_id}
 
@@ -53,6 +55,9 @@ SPLITS_SHEET={google_sheets_sheet_id}
 
 URL=localhost
 PORT=7373
+
+SITE_URL=localhost
+SITE_PORT=3000
 ```
 
 2. For some commands to work, you will need to create access credentials for Google Workspace APIs. Follow [this link](https://developers.google.com/workspace/guides/create-credentials) and create a service account. After creating a servie account, download the credentials as a JSON file, rename the file to `unclebot-credentials.json` and add it to the root folder of the project.

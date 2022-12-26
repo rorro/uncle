@@ -13,6 +13,7 @@ export default (client: Client): void => {
 
     // Send scheduled messages once a minute
     setInterval(sendScheduledMessages, 1 * 60 * 1000, client);
+    // setInterval(sendScheduledMessages, 10 * 1000, client);
 
     console.log(`${client.user.username} is online`);
   });

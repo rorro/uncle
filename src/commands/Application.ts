@@ -10,9 +10,9 @@ import {
   ChannelType
 } from 'discord.js';
 import config from '../config';
-import db from '../db';
 import { Command } from '../types';
 import { hasRole } from '../utils';
+import KnexDB from '../database/knex';
 
 export const applicationCommand: Command = {
   name: 'application',
@@ -72,8 +72,10 @@ export const applicationCommand: Command = {
         const embed = new EmbedBuilder()
           .setTitle('Legacy Application')
           .setColor('DarkPurple')
-          .setDescription('If you wish to apply, click the "Start Application" button below.')
-          .setThumbnail(db.database.getData('/config/clanIcon'));
+          .setDescription('If you wish to apply, click the "Start Application" button below.');
+
+        const clanIcon = (await KnexDB.getConfigItem('clan_icon')) as string;
+        if (clanIcon) embed.setThumbnail(clanIcon);
 
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
           new ButtonBuilder()
@@ -91,7 +93,7 @@ export const applicationCommand: Command = {
       case 'set_transcript_channel':
         const transcriptsChannel = interaction.options.getChannel('transcripts_channel', true);
 
-        db.database.push('/transcriptsChannel', transcriptsChannel.id);
+        await KnexDB.updateConfig('transcripts_channel', transcriptsChannel.id);
 
         await interaction.followUp({
           content: `Transcripts channel has been set to ${transcriptsChannel}`

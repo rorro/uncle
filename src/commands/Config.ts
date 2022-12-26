@@ -7,8 +7,8 @@ import {
 import { Command } from '../types';
 import { hasRole } from '../utils';
 import config from '../config';
-import db from '../db';
 import { URL } from 'url';
+import KnexDB from '../database/knex';
 
 export const configCommand: Command = {
   name: 'config',
@@ -21,8 +21,8 @@ export const configCommand: Command = {
       type: ApplicationCommandOptionType.String,
       required: true,
       choices: [
-        { name: 'Clan Icon', value: 'clanIcon' },
-        { name: 'Requirements', value: 'requirements' }
+        { name: 'Clan Icon', value: 'clan_icon' },
+        { name: 'Requirements', value: 'requirements_image' }
       ]
     },
     {
@@ -53,7 +53,7 @@ export const configCommand: Command = {
       return;
     }
 
-    db.database.push(`/config/${toConfigure}`, link);
+    await KnexDB.updateConfig(toConfigure, link);
 
     await interaction.followUp({
       content: `${toConfigure} has been configured to ${link}.`

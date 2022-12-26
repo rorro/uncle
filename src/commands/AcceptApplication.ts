@@ -18,7 +18,7 @@ import {
 import config from '../config';
 import { sendMessageInChannel } from '../discord';
 import { getApplicantRoles, getRoleName, hasRole } from '../utils';
-import db from '../db';
+import KnexDB from '../database/knex';
 
 export const acceptApplicationCommand: Command = {
   name: 'accept_application',
@@ -55,6 +55,15 @@ export const acceptApplicationCommand: Command = {
 
     if (!discordUser) {
       throw Error('User not found');
+    }
+
+    const newMembersChannelId = (await KnexDB.getConfigItem('new_members_channel')) as string;
+    if (!newMembersChannelId) {
+      await interaction.followUp({
+        ephemeral: true,
+        content: 'New members channel where welcome messages are sent has not been configured.'
+      });
+      return;
     }
 
     try {
@@ -142,29 +151,36 @@ export const acceptApplicationCommand: Command = {
       await discordUser.setNickname(rsn);
       await discordUser.roles.add(applicantRoles);
 
-      const reply = new EmbedBuilder()
-        .setTitle(`Successfully accepted ${rsn}`)
-        .setThumbnail(db.database.getData('/config/clanIcon'))
-        .addFields([
-          { name: 'Diary Tasks Completed', value: tasksCompleted },
-          { name: 'Roles Given', value: applicantRoles.map(roleId => `<@&${roleId}>`).join(' ') },
-          { name: 'Diary Sheet Link', value: webViewLink ? webViewLink : 'No link could be created.' }
-        ]);
+      const reply = new EmbedBuilder().setTitle(`Successfully accepted ${rsn}`).addFields([
+        { name: 'Diary Tasks Completed', value: tasksCompleted },
+        { name: 'Roles Given', value: applicantRoles.map(roleId => `<@&${roleId}>`).join(' ') },
+        { name: 'Diary Sheet Link', value: webViewLink ? webViewLink : 'No link could be created.' }
+      ]);
+
+      const clanIcon = (await KnexDB.getConfigItem('clan_icon')) as string;
+      if (clanIcon) reply.setThumbnail(clanIcon);
 
       const DM = `Hi! I'm the official bot of Legacy, Uncle. I'm giving you a copy of our Legacy Diary. Completing tasks and submitting this sheet is required for most of our rank ups. I have already filled in your main account and some tasks have automatically been completed but others will require screenshot evidence of personal bests. Talk to any of our staff if you have any questions!\n\nYour sheet can be found here: ${webViewLink}`;
-      let introMessage = `Welcome <@${discordUser.id}>!\nFeel free to introduce yourself a little in this channel. Please check out <#${config.guild.channels.assignRoles}> and read <#${config.guild.channels.rules}>.\nA staff member can meet you in-game to invite you to the clan. Until then you should join the in-game clan "Legacy" as a guest. If you see a staff member <:staff:995767143159304252> online, ask them to meet you.\n`;
+      let introMessage = `Welcome <@${
+        discordUser.id
+      }>!\nFeel free to introduce yourself a little in this channel. Please check out <#${await KnexDB.getConfigItem(
+        'assign_roles_channel'
+      )}> and read <#${await KnexDB.getConfigItem(
+        'rules_channel'
+      )}>.\nA staff member can meet you in-game to invite you to the clan. Until then you should join the in-game clan "Legacy" as a guest. If you see a staff member <:staff:995767143159304252> online, ask them to meet you.\n`;
 
+      const diaryChannelId = await KnexDB.getConfigItem('diary_channel');
       await discordUser
         .send({ content: DM })
         .then(() => {
-          introMessage += `I sent you a Legacy Diary sheet in a PM. You can read more about that at <#${config.guild.channels.legacyDiary}>.`;
+          introMessage += `I sent you a Legacy Diary sheet in a PM. You can read more about that at <#${diaryChannelId}>.`;
         })
         .catch(e => {
           introMessage += `\nI wasn't able to send you a PM with the diary sheet link. Under privacy settings for the server, enable direct messages and a staff member will PM you the link.`;
         })
         .then(async () => {
-          await sendMessageInChannel(client, config.guild.channels.newMembers, {
-            message: introMessage
+          await sendMessageInChannel(client, newMembersChannelId, {
+            content: introMessage
           });
         });
 

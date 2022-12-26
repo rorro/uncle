@@ -5,12 +5,13 @@ import {
   ApplicationCommandOptionType,
   ChannelType
 } from 'discord.js';
+import { MessageType } from '../types';
 import { getSheetData } from '../api/googleHandler';
 import config from '../config';
-import db from '../db';
 import { sendMessageInChannel } from '../discord';
 import { Command, LeaderboardRecord } from '../types';
 import { hasRole } from '../utils';
+import KnexDB from '../database/knex';
 
 export const petsCommand: Command = {
   name: 'pets',
@@ -59,38 +60,62 @@ export const petsCommand: Command = {
           return;
         }
 
-        const channel = client.channels.cache.get(config.guild.channels.leaderboard);
-        if (channel?.type !== ChannelType.GuildText) return;
+        const leaderboardChannelId = (await KnexDB.getConfigItem('leaderboard_channel')) as string;
+        if (!leaderboardChannelId) {
+          await interaction.followUp({
+            content: 'Leaderboard channel has not been configured.'
+          });
+          return;
+        }
+
+        const channel = client.channels.cache.get(leaderboardChannelId);
+        if (channel?.type !== ChannelType.GuildText) {
+          await interaction.followUp({
+            content: `The configured leaderboard channel either doesn't exist or is not a text channel!`
+          });
+          return;
+        }
 
         try {
-          const messages = db.database.getData('/pets');
-          for (const index in messages) {
+          const messages = await KnexDB.getMessagesByType(MessageType.Pets);
+          messages.forEach(async message => {
             try {
               // Delete the old pet hiscore messages
-              const messageToDelete = await (await channel.messages.fetch(messages[index])).delete();
+              await (await channel.messages.fetch(message.message_id)).delete();
             } catch (error) {
               console.error('Old pet message not found.');
             }
-          }
+          });
+          await KnexDB.deleteFromMessages({ type: MessageType.Pets });
         } catch (e) {
           console.error('No message IDs found.');
         }
 
         const [petHiscores, scores] = getTopPetsIndex(petData);
 
-        let leaderboardMessages = [];
         for (let i in scores) {
           for (const j in petHiscores[+scores[i]]) {
             const index = petHiscores[+scores[i]][j];
-            const petMessage = buildMessage(emojis, petData?.at(index), +i + 1);
-            const messageId = await sendMessageInChannel(client, config.guild.channels.leaderboard, {
-              message: petMessage
+            const data = petData?.at(index);
+            const petMessage = buildMessage(emojis, data, +i + 1);
+            const messageId = await sendMessageInChannel(client, leaderboardChannelId, {
+              content: petMessage
             });
-            leaderboardMessages.push(messageId);
+            if (messageId === undefined) {
+              await interaction.followUp({ content: 'Something went wrong when sending message' });
+              return;
+            }
+
+            await KnexDB.insertIntoMessages(
+              `#${+i + 1} pets: ${data?.at(0)}`,
+              messageId,
+              `#${channel.name}`,
+              MessageType.Pets
+            );
             content = 'Pets hiscores updated.';
           }
         }
-        db.database.push('/pets', leaderboardMessages);
+
         break;
       case 'search':
         const username = interaction.options.getString('rsn', true).toLowerCase();

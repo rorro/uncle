@@ -5,13 +5,15 @@ import {
   EmbedBuilder,
   ApplicationCommandType,
   ApplicationCommandOptionType,
-  ChannelType
+  ChannelType,
+  TextChannel
 } from 'discord.js';
 import { getSheetData } from '../api/googleHandler';
 import config from '../config';
-import db from '../db';
-import { Command, PlayerSummary } from '../types';
+import { Command, MessageType, PlayerSummary } from '../types';
 import { getRank, hasRole } from '../utils';
+import KnexDB from '../database/knex';
+import { sendMessageInChannel } from '../discord';
 
 export const diaryCommand: Command = {
   name: 'diary',
@@ -52,32 +54,49 @@ export const diaryCommand: Command = {
 
     const subCommand = interaction.options.getSubcommand();
 
+    const leaderboardChannelId = (await KnexDB.getConfigItem('leaderboard_channel')) as string;
+    if (!leaderboardChannelId) {
+      await interaction.followUp({ content: `Leaderboard channel has not been configured.` });
+      return;
+    }
+
+    const leaderboardChannel = client.channels.cache.get(leaderboardChannelId);
+    if (!leaderboardChannel || leaderboardChannel.type !== ChannelType.GuildText) {
+      await interaction.followUp({
+        content: `The configured leaderboard channel either doesn't exist or is not a text channel.`
+      });
+      return;
+    }
+
     switch (subCommand) {
       case 'setmessage':
         const editMessageId = interaction.options.getString('message_id', true);
-        db.database.push('/diarytop10', editMessageId);
+
+        try {
+          const configuredMessage = await leaderboardChannel.messages.fetch(editMessageId);
+
+          if (configuredMessage.author !== client.user) throw Error('not me');
+        } catch (e: any) {
+          if (e.message.includes('not me')) {
+            await interaction.followUp({
+              content: `This message was not sent by me, I will not be able to use it.`
+            });
+          } else {
+            await interaction.followUp({
+              content: `The selected message must be in ${leaderboardChannel}.`
+            });
+          }
+          return;
+        }
+
+        await KnexDB.updateConfig('diary_top10_message', editMessageId);
 
         await interaction.followUp({
-          content: `Top 10 diary message has been set to ${editMessageId}. Make sure this message is in <#${config.guild.channels.legacyDiary}>. If it's not, re-do this command.`
+          content: `Top 10 diary message has been set to [this message](<https://discord.com/channels/${interaction.guildId}/${leaderboardChannelId}/${editMessageId}>).`
         });
         return;
       case 'updatetop10':
-        const channel = client.channels.cache.get(config.guild.channels.legacyDiary);
-        if (channel?.type !== ChannelType.GuildText) return;
-
         try {
-          const messageId = db.database.getData('/diarytop10');
-
-          const message = await channel.messages.fetch(messageId);
-
-          if (message.author.id !== client.user?.id) {
-            await interaction.followUp({
-              content:
-                'The diary message was not sent by me. You can send a new message with `/message send`'
-            });
-            return;
-          }
-
           const summaryData = await getSheetData(
             config.googleDrive.splitsSheet,
             'Summary!A2:AA',
@@ -89,43 +108,88 @@ export const diaryCommand: Command = {
             )
             .sort((a, b) => b.diaryTasks - a.diaryTasks);
 
-          let uniqueScoresFound = 0;
-          let lastScore = 0;
-          let description = '';
-          const embed = new EmbedBuilder()
-            .setTitle('Diary top 10 completion list')
-            .setThumbnail(db.database.getData('/config/clanIcon'))
-            .setFooter({ text: `Last updated: ${dayjs().format('MMMM DD, YYYY')}` });
+          const embed = await buildMessage(players);
 
-          for (let i in players) {
-            const player = players[i];
+          let messageId = await KnexDB.getMessageIdByName('diary_top10_message');
 
-            if (uniqueScoresFound === 10 && player.diaryTasks !== lastScore) {
-              break;
+          if (messageId) {
+            try {
+              await leaderboardChannel.messages.fetch(messageId);
+              await leaderboardChannel.messages.edit(messageId, { content: '\u200b', embeds: [embed] });
+            } catch {
+              await sendNewMessage(client, interaction, leaderboardChannel, embed);
             }
-
-            if (lastScore !== player.diaryTasks) {
-              description += `**${player.diaryTasks}**\n\u200b \u200b \u200b \u200b${getRank(
-                player.rank
-              )} ${player.name}\n`;
-              lastScore = player.diaryTasks;
-              uniqueScoresFound += 1;
-            } else {
-              description += `\u200b \u200b \u200b \u200b${getRank(player.rank)} ${player.name}\n`;
-            }
+          } else {
+            await sendNewMessage(client, interaction, leaderboardChannel, embed);
           }
 
-          embed.setDescription(description);
-          await channel.messages.edit(messageId, { content: '\u200b', embeds: [embed] });
-
           await interaction.followUp({
-            content: 'Top 10 diary completions updated.'
+            content: `Top 10 diary completions updated. [Quick hop to message.](<https://discord.com/channels/${interaction.guildId}/${leaderboardChannelId}/${messageId}>)`
           });
         } catch (e) {
           await interaction.followUp({
-            content: `Something went wrong. A diary message has probably not been set in the correct channel. Set one in <#${config.guild.channels.legacyDiary}> with \`/diary setmessage\``
+            content: `Something went wrong. A diary message has probably not been set in the correct channel. Set one in <#${leaderboardChannel}> with \`/diary setmessage\``
           });
         }
     }
   }
 };
+
+async function sendNewMessage(
+  client: Client,
+  interaction: ChatInputCommandInteraction,
+  leaderboardChannel: TextChannel,
+  embed: EmbedBuilder
+) {
+  const mId = await sendMessageInChannel(client, leaderboardChannel.id, {
+    embeds: [embed]
+  });
+
+  if (!mId) {
+    await interaction.followUp({
+      content: 'Something went wrong when sending the leaderboard message.'
+    });
+    return;
+  }
+  await KnexDB.insertIntoMessages(
+    'diary_top10_message',
+    mId,
+    `#${leaderboardChannel.name}`,
+    MessageType.Leaderboard
+  );
+}
+
+async function buildMessage(players: PlayerSummary[]): Promise<EmbedBuilder> {
+  const embed = new EmbedBuilder()
+    .setTitle('Diary top 10 completion list')
+    .setFooter({ text: `Last updated: ${dayjs().format('MMMM DD, YYYY')}` });
+
+  const clanIcon = (await KnexDB.getConfigItem('clan_icon')) as string;
+  if (clanIcon) embed.setThumbnail(clanIcon);
+
+  let uniqueScoresFound = 0;
+  let lastScore = 0;
+  let description = '';
+
+  for (let i in players) {
+    const player = players[i];
+
+    if (uniqueScoresFound === 10 && player.diaryTasks !== lastScore) {
+      break;
+    }
+
+    if (lastScore !== player.diaryTasks) {
+      description += `**${player.diaryTasks}**\n\u200b \u200b \u200b \u200b${getRank(player.rank)} ${
+        player.name
+      }\n`;
+      lastScore = player.diaryTasks;
+      uniqueScoresFound += 1;
+    } else {
+      description += `\u200b \u200b \u200b \u200b${getRank(player.rank)} ${player.name}\n`;
+    }
+  }
+
+  embed.setDescription(description);
+
+  return embed;
+}

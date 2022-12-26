@@ -8,13 +8,14 @@ import {
   ButtonBuilder,
   EmbedBuilder,
   ButtonStyle,
-  PermissionFlagsBits
+  PermissionFlagsBits,
+  ChannelType
 } from 'discord.js';
 import * as fs from 'fs';
 import path from 'path';
 import config from '../config';
-import db from '../db';
 import { createChannel } from '../discord';
+import KnexDB from '../database/knex';
 
 export async function startChannel(interaction: ButtonInteraction, channelType: string) {
   if (!interaction.inCachedGuild()) return;
@@ -34,7 +35,7 @@ export async function startChannel(interaction: ButtonInteraction, channelType: 
   const channelConfig =
     channelType === 'application'
       ? {
-          databaseCategory: 'openApplications',
+          databaseCategory: 'open_applications',
           description: `Post screenshots of **ONLY** the required items and prayers. Every screenshot **must** show your username.
 
     If a current Legacy member referred you to us, please mention their RSN.
@@ -42,30 +43,46 @@ export async function startChannel(interaction: ButtonInteraction, channelType: 
     When done, or if you have any questions, please ping @Staff and we'll be with you shortly.`
         }
       : {
-          databaseCategory: 'openSupportTickets',
+          databaseCategory: 'open_support_tickets',
           description: `Hi there, how can we help you?`,
           footer: `This channel is visible only to you and staff members.`
         };
 
+  const openApplication = await KnexDB.getOpenChannel(
+    interaction.user.id,
+    channelConfig.databaseCategory
+  );
+
+  if (openApplication && interaction.client.channels.cache.has(openApplication.channel.id)) {
+    interaction.editReply(
+      `You already have an open application. Head over to <#${openApplication.channel.id}> to continue.`
+    );
+    return;
+  }
+
   const applicantChannel = await createChannel(interaction.guild, parent, interaction.user, channelType);
-  if (!applicantChannel.isTextBased()) return;
+  if (applicantChannel.type !== ChannelType.GuildText) return;
 
   await interaction.editReply({
     content: `Head over to ${applicantChannel} to continue.`
   });
 
-  db.database.push(`/${channelConfig.databaseCategory}/${applicantChannel.id}`, interaction.user.id);
+  await KnexDB.insertIntoOpenChannels(
+    interaction.user.id,
+    JSON.stringify(interaction.user),
+    JSON.stringify(applicantChannel),
+    channelConfig.databaseCategory
+  );
 
-  const embed = new EmbedBuilder()
-    .setColor('DarkPurple')
-    .setThumbnail(db.database.getData('/config/clanIcon'))
-    .setDescription(channelConfig.description);
+  const embed = new EmbedBuilder().setColor('DarkPurple').setDescription(channelConfig.description);
 
-  if (channelType === 'application') {
-    embed.setImage(db.database.getData('/config/requirements'));
-  } else {
-    embed.setFooter({ text: channelConfig.footer ? channelConfig.footer : '' });
-  }
+  const clanIcon = (await KnexDB.getConfigItem('clan_icon')) as string;
+  if (clanIcon) embed.setThumbnail(clanIcon);
+
+  const requirementsImage = (await KnexDB.getConfigItem('requirements_image')) as string;
+  if (requirementsImage && channelType === 'application') embed.setImage(requirementsImage);
+
+  if (channelType === 'support' && channelConfig.footer) embed.setFooter({ text: channelConfig.footer });
 
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
@@ -120,45 +137,53 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
   const channel = interaction.channel;
   if (!channel) return;
 
-  const databaseCategory = channelType === 'application' ? 'openApplications' : 'openSupportTickets';
+  const databaseCategory = channelType === 'application' ? 'open_applications' : 'open_support_tickets';
   const descriptionName = channelType === 'application' ? 'Application' : 'Support ticket';
 
-  const openApplication = db.database.exists(`/${databaseCategory}/${interaction.channelId}`);
-  const applicantId = openApplication
-    ? db.database.getData(`/${databaseCategory}/${interaction.channelId}`)
-    : undefined;
-  if (applicantId !== undefined) {
-    await channel.edit({
-      permissionOverwrites: [
-        { id: config.guild.roles.staff, allow: [PermissionFlagsBits.ViewChannel] },
-        { id: interaction.guild.roles.everyone, deny: [PermissionFlagsBits.ViewChannel] }
-      ]
+  const applicant = await KnexDB.getOpenChannelUser(interaction.channelId, databaseCategory);
+  if (!applicant) {
+    await channel.send({
+      content:
+        'Applicant was not found for this application. You are free to remove the channel manually.'
     });
+    return;
   }
 
-  db.database.delete(`/${databaseCategory}/${interaction.channelId}`);
+  await channel.edit({
+    permissionOverwrites: [
+      { id: config.guild.roles.staff, allow: [PermissionFlagsBits.ViewChannel] },
+      { id: interaction.guild.roles.everyone, deny: [PermissionFlagsBits.ViewChannel] }
+    ]
+  });
+
+  await KnexDB.deleteFromOpenChannels(applicant.user.id, databaseCategory);
   await interaction.message.delete();
 
-  let description = `${descriptionName} closed by ${interaction.user}.`;
+  const transcriptsChannelId = (await KnexDB.getConfigItem('transcripts_channel')) as string;
 
-  if (channelType === 'application') {
-    const transcriptsChannel = db.database.exists('/transcriptsChannel')
-      ? (client.channels.cache.get(db.database.getData('/transcriptsChannel')) as GuildTextBasedChannel)
+  const transcriptsChannel =
+    transcriptsChannelId !== null
+      ? (client.channels.cache.get(transcriptsChannelId) as GuildTextBasedChannel)
       : undefined;
 
-    if (transcriptsChannel) {
-      const transcriptSaved = await saveTranscript(client, channel, transcriptsChannel, applicantId);
-      if (!transcriptSaved) {
-        await channel.send({
-          content:
-            'Transcript was not saved because the applicant left the server before application was closed.',
-          components: [row]
-        });
-        return;
-      }
-      description += ` Transcript saved to ${transcriptsChannel}.`;
+  let description = `${descriptionName} closed by ${interaction.user}.`;
+  if (channelType === 'application' && transcriptsChannel) {
+    const transcriptSaved = await saveTranscript(client, channel, transcriptsChannel, applicant.user.id);
+    if (!transcriptSaved) {
+      await channel.send({
+        content:
+          'Transcript was not saved because the applicant left the server before application was closed.',
+        components: [row]
+      });
+      return;
     }
   }
+  description +=
+    channelType === 'application' && transcriptsChannel
+      ? ` Transcript saved to ${transcriptsChannel}.`
+      : channelType === 'support'
+      ? ''
+      : ` Transcript was not saved because no transcript channel is set.`;
 
   const embed = new EmbedBuilder().setDescription(description);
   await channel.send({ embeds: [embed], components: [row] });

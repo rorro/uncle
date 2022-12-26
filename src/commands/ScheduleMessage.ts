@@ -11,9 +11,10 @@ import { Command, ScheduledMessage } from '../types';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import utc from 'dayjs/plugin/utc';
-import db from '../db';
 import { hasRole, DATE_FORMAT } from '../utils';
 import config from '../config';
+import KnexDB from '../database/knex';
+import { ScheduledMessageType } from '../types';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
@@ -116,7 +117,7 @@ export const scheduleCommand: Command = {
       return;
     }
 
-    const scheduledDate = dayjs(date);
+    const scheduledDate = dayjs.utc(date);
 
     if (scheduledDate.diff(dayjs().utc().format(DATE_FORMAT), 'minute') <= 0) {
       await interaction.followUp(`Given date has already passed.`);
@@ -127,7 +128,7 @@ export const scheduleCommand: Command = {
     const message = interaction.options.getString('message', true);
 
     const messageToSchedule: ScheduledMessage = {
-      date: scheduledDate.format(DATE_FORMAT),
+      date: date,
       channel: channel.id,
       type: 'simple'
     };
@@ -175,12 +176,15 @@ export const scheduleCommand: Command = {
 };
 
 async function scheduleMessage(messageToSchedule: ScheduledMessage) {
-  let messages = db.scheduledMessages.getData('/messages');
-  if (!messages) {
-    messages = [messageToSchedule];
-  } else {
-    messages.push(messageToSchedule);
-  }
-
-  db.scheduledMessages.push(`/messages`, messages);
+  const messageType = messageToSchedule.embed ? ScheduledMessageType.Embed : ScheduledMessageType.Simple;
+  const newMessage = {
+    content: messageToSchedule.content,
+    embed: messageToSchedule.embed
+  };
+  KnexDB.insertScheduledMessage({
+    message: JSON.stringify(newMessage),
+    date: messageToSchedule.date,
+    channel: messageToSchedule.channel,
+    type: messageType
+  });
 }

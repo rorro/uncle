@@ -8,8 +8,8 @@ import {
 import { Command } from 'src/types';
 import { RWAPI, womClient } from '../api/handler';
 import config from '../config';
-import { hasRole } from '../utils';
-import db from '../db';
+import { getLevel, hasRole, SKILLS } from '../utils';
+import KnexDB from '../database/knex';
 
 export const checkApplicantRequirementsCommand: Command = {
   name: 'check_requirements',
@@ -40,8 +40,10 @@ export const checkApplicantRequirementsCommand: Command = {
 
     const reply = new EmbedBuilder()
       .setTitle(`Requirements check for ${rsn}`)
-      .setURL(`https://wiseoldman.net/players/${rsn.replaceAll(' ', '%20')}`)
-      .setThumbnail(db.database.getData('/config/clanIcon'));
+      .setURL(`https://wiseoldman.net/players/${rsn.replaceAll(' ', '%20')}`);
+
+    const clanIcon = (await KnexDB.getConfigItem('clan_icon')) as string;
+    if (clanIcon) reply.setThumbnail(clanIcon);
 
     try {
       await womClient.players.updatePlayer(rsn);

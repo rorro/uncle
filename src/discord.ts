@@ -2,14 +2,16 @@ import {
   Client,
   Guild,
   EmbedBuilder,
-  Permissions,
   User,
   ChannelType,
-  PermissionFlagsBits
+  PermissionFlagsBits,
+  GuildTextBasedChannel
 } from 'discord.js';
-import db from './db';
 import config from './config';
-import { ScheduledMessage, MessageOptions } from './types';
+import { MessageOptions } from './types';
+import KnexDB from './database/knex';
+import dayjs from 'dayjs';
+import { DATE_FORMAT } from './utils';
 
 // Send a message in a specific channel
 export async function sendMessageInChannel(client: Client, channelId: string, options?: MessageOptions) {
@@ -17,20 +19,28 @@ export async function sendMessageInChannel(client: Client, channelId: string, op
   const channel = client.channels.cache.get(channelId);
   if (channel?.type !== ChannelType.GuildText) return;
 
-  const sent = await channel.send({
-    content: options?.message ? options?.message : '\u200b',
-    embeds: options?.embeds ? options?.embeds : [],
-    components: options?.components ? options?.components : [],
-    files: options?.files ? options.files : []
-  });
+  const messageData: MessageOptions = {};
+  if (options?.content) messageData.content = options.content;
+  if (options?.embeds) messageData.embeds = options.embeds;
+  if (options?.components) messageData.components = options.components;
+  if (options?.files) messageData.files = options.files;
+
+  const sent = await channel.send(messageData);
   return sent.id;
 }
 
-export async function createChannel(guild: Guild, categoryId: string, user: User, channelType: string) {
-  const applicationId = !db.database.exists('/channelId') ? 1 : db.database.getData('/channelId') + 1;
-
+export async function createChannel(
+  guild: Guild,
+  categoryId: string,
+  user: User,
+  channelType: string
+): Promise<GuildTextBasedChannel> {
   const channel = await guild.channels.create({
-    name: `${user.username}${user.discriminator}-${channelType}-${applicationId}`,
+    name: `${user.username}${user.discriminator}-${channelType}-${(
+      Math.floor(Math.random() * 10000) + 10000
+    )
+      .toString()
+      .substring(1)}`,
     type: ChannelType.GuildText,
     parent: categoryId,
     permissionOverwrites: [
@@ -54,23 +64,29 @@ export async function createChannel(guild: Guild, categoryId: string, user: User
       }
     ]
   });
-  db.database.push('/channelId', applicationId);
   return channel;
 }
 
-export function sendScheduledMessages(client: Client) {
-  const messages = db.getPassedMessages();
-  messages.forEach((m: ScheduledMessage) => {
-    let options: MessageOptions = {};
-    switch (m.type) {
-      case 'embed':
-        options.message = m.content ? m.content : '';
-        options.embeds = m.embed ? [new EmbedBuilder(m.embed)] : [];
-        break;
-      case 'simple':
-        options.message = m.content;
-        break;
-    }
-    sendMessageInChannel(client, m.channel, options);
-  });
+export async function sendScheduledMessages(client: Client) {
+  const newMessages = await KnexDB.getAllScheduledMessages();
+  let newOptions: MessageOptions = {};
+  for (const scheduled of newMessages) {
+    const scheduledDate = dayjs(scheduled.date);
+    const currentTimeInUTC = dayjs().utc().format(DATE_FORMAT);
+    const datePassed = scheduledDate.diff(currentTimeInUTC, 'minute') <= 0;
+
+    if (!datePassed) continue;
+
+    // Replace because I'm too lazy to do it any other proper way.
+    const message = JSON.parse(scheduled.message.replaceAll('\\\\u200B', '​'));
+
+    newOptions.content = message.content ? message.content : undefined;
+    newOptions.embeds =
+      message.embed && Object.keys(message.embed).length !== 0
+        ? [new EmbedBuilder(message.embed)]
+        : undefined;
+
+    await sendMessageInChannel(client, scheduled.channel, newOptions);
+    await KnexDB.deleteScheduledMessage(scheduled.id);
+  }
 }

@@ -10,9 +10,9 @@ import {
   ChannelType
 } from 'discord.js';
 import config from '../config';
-import db from '../db';
 import { Command } from '../types';
 import { hasRole } from '../utils';
+import KnexDB from '../database/knex';
 
 export const supportCommand: Command = {
   name: 'support',
@@ -58,8 +58,11 @@ export const supportCommand: Command = {
         const embed = new EmbedBuilder()
           .setTitle('Legacy Support')
           .setColor('DarkPurple')
-          .setDescription('If you wish to open a support ticket, click the "Open Ticket" button below.')
-          .setThumbnail(db.database.getData('/config/clanIcon'));
+          .setDescription('If you wish to open a support ticket, click the "Open Ticket" button below.');
+
+        // const clanIcon = await getConfigValue('clanIcon');
+        const clanIcon = (await KnexDB.getConfigItem('clan_icon')) as string;
+        if (clanIcon) embed.setThumbnail(clanIcon);
 
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
           new ButtonBuilder()

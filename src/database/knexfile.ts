@@ -1,7 +1,7 @@
 export default {
   client: 'better-sqlite3',
   connection: {
-    filename: `${__dirname}/../../database.sqlite3`
+    filename: `${__dirname}/../../.database.sqlite3`
   },
   useNullAsDefault: true,
   seeds: {

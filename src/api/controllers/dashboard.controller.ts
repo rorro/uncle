@@ -19,7 +19,7 @@ const authenticate = async (req: Request, res: Response) => {
       const oauthData = await oauth2.tokenRequest({
         clientId: config.client.id,
         clientSecret: config.client.secret,
-        redirectUri: `http://${config.API.url}:${config.API.port}/dashboard/auth`,
+        redirectUri: `${config.API.url}:${config.API.port}/api/uncle/dashboard/auth`,
         code: code.toString(),
         scope: 'identify',
         grantType: 'authorization_code'
@@ -48,22 +48,22 @@ const authenticate = async (req: Request, res: Response) => {
           const encoded = encodeURIComponent(publicEncrypted);
 
           // Everything went fine, send client to login url to save cookie
-          res.redirect(`http://${config.site.url}:${config.site.port}/login/${encoded}`);
+          res.redirect(`${config.site.url}:${config.site.port}/login/${encoded}`);
         } else {
           // User that logged in is not a staff member of the guild, redirect back to front page
           await revokeAccess(oauthData.access_token);
-          res.redirect(`http://${config.site.url}:${config.site.port}`);
+          res.redirect(`${config.site.url}:${config.site.port}`);
         }
       } catch (e) {
         // The user that logged in is not in the guild, redirect to front page
-        res.redirect(`http://${config.site.url}:${config.site.port}`);
+        res.redirect(`${config.site.url}:${config.site.port}`);
       }
     } catch (e) {
       // Something went wrong with getting the token
-      res.redirect(`http://${config.site.url}:${config.site.port}`);
+      res.redirect(`${config.site.url}:${config.site.port}`);
     }
   } else {
-    res.redirect(`http://${config.site.url}:${config.site.port}`);
+    res.redirect(`${config.site.url}:${config.site.port}`);
   }
 };
 

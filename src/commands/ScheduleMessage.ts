@@ -102,7 +102,7 @@ export const scheduleCommand: Command = {
       const URL = config.API.url;
       const PORT = config.API.port;
       interaction.followUp({
-        content: `You can find all the scheduled messages here: http://${URL}:${PORT}/messages`
+        content: `You can find all the scheduled messages here: ${URL}:${PORT}/messages`
       });
       return;
     }

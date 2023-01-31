@@ -14,7 +14,7 @@ export function init(): Express {
   api.use(cors());
   api.use(bodyParser.urlencoded({ extended: true }));
 
-  api.use('/dashboard', dashboardRoutes);
+  api.use('/api/uncle/dashboard', dashboardRoutes);
 
   api.use('/transcripts', express.static(path.join(__dirname, '../..', '.transcripts')));
   api.use('/messages', express.static(path.join(__dirname, '../..', '.scheduledMessages.json')));

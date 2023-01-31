@@ -65,3 +65,7 @@ SITE_PORT=3000
 3. Run the project using `npm i` and then `npm run dev`
 
 <br />
+
+#### Related projects
+
+[Uncle Dashboard](https://github.com/rorro/uncle-dashboard) - A dashboard to change settings, schedule messages and more.

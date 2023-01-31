@@ -215,7 +215,7 @@ async function saveTranscript(
 
   const URL = config.API.url;
   const PORT = config.API.port;
-  const transcriptUrl = `http://${URL}:${PORT}/transcripts/${transcriptName}`;
+  const transcriptUrl = `${URL}:${PORT}/transcripts/${transcriptName}`;
 
   const embed = new EmbedBuilder()
     .setAuthor({

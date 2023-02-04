@@ -47,8 +47,8 @@ export default {
 
     // Skills
     { metric: 'overall', type: 'skill', name: '+ Total', threshold: 1750 },
-    { metric: 'ranged', type: 'skill', name: 'Ranged', threshold: 94 },
-    { metric: 'magic', type: 'skill', name: 'Magic', threshold: 94 },
+    { metric: 'ranged', type: 'skill', name: 'Ranged', threshold: 99 },
+    { metric: 'magic', type: 'skill', name: 'Magic', threshold: 99 },
     { metric: 'agility', type: 'skill', name: 'Agility', threshold: 70 },
     { metric: 'herblore', type: 'skill', name: 'Herblore', threshold: 78 },
     { metric: 'construction', type: 'skill', name: 'Construction', threshold: 82 },

@@ -73,6 +73,10 @@ export interface ConfigEntry {
   requirements_image: string | null;
   diary_top10_message: string | null;
   channels_count: number;
+  welcome_base_message: string;
+  welcome_success_message: string;
+  welcome_error_message: string;
+  welcome_pm_message: string;
 }
 
 export interface OpenApplicationsResponse {

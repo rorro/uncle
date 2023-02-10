@@ -35,7 +35,11 @@ class KnexDB {
         'leaderboard_channel',
         'transcripts_channel',
         'clan_icon',
-        'requirements_image'
+        'requirements_image',
+        'welcome_base_message',
+        'welcome_success_message',
+        'welcome_error_message',
+        'welcome_pm_message'
       )
     )[0];
   }

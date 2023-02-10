@@ -160,23 +160,18 @@ export const acceptApplicationCommand: Command = {
       const clanIcon = (await KnexDB.getConfigItem('clan_icon')) as string;
       if (clanIcon) reply.setThumbnail(clanIcon);
 
-      const DM = `Hi! I'm the official bot of Legacy, Uncle. I'm giving you a copy of our Legacy Diary. Completing tasks and submitting this sheet is required for most of our rank ups. I have already filled in your main account and some tasks have automatically been completed but others will require screenshot evidence of personal bests. Talk to any of our staff if you have any questions!\n\nYour sheet can be found here: ${webViewLink}`;
-      let introMessage = `Welcome <@${
-        discordUser.id
-      }>!\nFeel free to introduce yourself a little in this channel. Please check out <#${await KnexDB.getConfigItem(
-        'assign_roles_channel'
-      )}> and read <#${await KnexDB.getConfigItem(
-        'rules_channel'
-      )}>.\nA staff member can meet you in-game to invite you to the clan. Until then you should join the in-game clan "Legacy" as a guest. If you see a staff member <:staff:995767143159304252> online, ask them to meet you.\n`;
+      const configData = await KnexDB.getAllConfigs();
+      const DM = `${configData.welcome_pm_message}\n\nYour sheet can be found here: ${webViewLink}`;
+      let introMessage = `Welcome <@${discordUser.id}>!\n${configData.welcome_base_message}`;
 
       const diaryChannelId = await KnexDB.getConfigItem('diary_channel');
       await discordUser
         .send({ content: DM })
         .then(() => {
-          introMessage += `I sent you a Legacy Diary sheet in a PM. You can read more about that at <#${diaryChannelId}>.`;
+          introMessage += configData.welcome_success_message;
         })
         .catch(e => {
-          introMessage += `\nI wasn't able to send you a PM with the diary sheet link. Under privacy settings for the server, enable direct messages and a staff member will PM you the link.`;
+          introMessage += configData.welcome_error_message;
         })
         .then(async () => {
           await sendMessageInChannel(client, newMembersChannelId, {

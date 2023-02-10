@@ -149,7 +149,7 @@ unclebot-credentials.json
 # db
 .db.json
 .scheduledMessages.json
-.database.sqlite3
+*.database.sqlite3
 
 # transcripts folder
 .transcripts

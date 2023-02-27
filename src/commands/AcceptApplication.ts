@@ -164,7 +164,6 @@ export const acceptApplicationCommand: Command = {
       const DM = `${configData.welcome_pm_message}\n\nYour sheet can be found here: ${webViewLink}`;
       let introMessage = `Welcome <@${discordUser.id}>!\n${configData.welcome_base_message}`;
 
-      const diaryChannelId = await KnexDB.getConfigItem('diary_channel');
       await discordUser
         .send({ content: DM })
         .then(() => {

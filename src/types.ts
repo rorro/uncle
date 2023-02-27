@@ -100,6 +100,7 @@ export interface ResponseType {
   configs: ConfigEntry;
   messages: MessageEntry[];
   scheduledMessages: ScheduledMessageEntry[];
+  embedConfigs: EmbedConfigs;
 }
 
 export enum ScheduledMessageType {
@@ -121,4 +122,21 @@ export interface ScheduledMessage {
   content?: string;
   embed?: APIEmbed;
   type: string;
+}
+
+interface EmbedConfig {
+  content: string;
+  embed: APIEmbed;
+}
+
+export interface EmbedConfigs {
+  application_embed: EmbedConfig;
+  support_embed: EmbedConfig;
+}
+
+export interface EmbedConfigData {
+  id: number;
+  name: string;
+  title: string;
+  data: string;
 }

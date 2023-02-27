@@ -1,7 +1,14 @@
 import knex, { Knex } from 'knex';
 import knexfile from './knexfile';
 import config from '../config';
-import { ConfigEntry, MessageEntry, MessageType, OauthData, ScheduledMessageEntry } from '../types';
+import {
+  ConfigEntry,
+  EmbedConfigs,
+  MessageEntry,
+  MessageType,
+  OauthData,
+  ScheduledMessageEntry
+} from '../types';
 import { TextChannel, User } from 'discord.js';
 
 class KnexDB {
@@ -26,16 +33,16 @@ class KnexDB {
     return result[configItem as keyof ConfigEntry];
   }
 
+  async getEmbedConfigs(): Promise<EmbedConfigs> {
+    return (await this.db('configs').select('application_embed', 'support_embed'))[0];
+  }
+
   async getAllConfigs(): Promise<ConfigEntry> {
     return (
       await this.db('configs').select(
         'new_members_channel',
-        'assign_roles_channel',
-        'rules_channel',
         'leaderboard_channel',
         'transcripts_channel',
-        'clan_icon',
-        'requirements_image',
         'welcome_base_message',
         'welcome_success_message',
         'welcome_error_message',

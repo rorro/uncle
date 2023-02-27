@@ -4,7 +4,7 @@ import CryptoJS from 'crypto-js';
 import config from '../../config';
 import client from '../../bot';
 import { hasRole } from '../../utils';
-import { ResponseType } from '../../types';
+import { EmbedConfigData, ResponseType } from '../../types';
 import KnexDB from '../../database/knex';
 
 const oauth2 = new DiscordOauth2();
@@ -87,7 +87,8 @@ const getData = async (req: Request, res: Response) => {
       guildChannels: allGuildChannels,
       configs: await KnexDB.getAllConfigs(),
       messages: await KnexDB.getAllMessages(),
-      scheduledMessages: await KnexDB.getAllScheduledMessages()
+      scheduledMessages: await KnexDB.getAllScheduledMessages(),
+      embedConfigs: await KnexDB.getEmbedConfigs()
     };
 
     res.json(response);
@@ -128,6 +129,21 @@ const saveData = async (req: Request, res: Response) => {
         newId: newMessageId.newId,
         message:
           newMessageId.newId !== -1 ? 'Successfully scheduled new message.' : 'Some error happened.'
+      });
+      return;
+    case 'embeds':
+      try {
+        await KnexDB.updateConfig(req.body['name'], req.body['data']);
+      } catch {
+        res.send({
+          message:
+            `Something went wrong when trying to save ${req.body['title']}`
+        })
+        return;
+      }
+      res.send({
+        message:
+          `Successfully saved ${req.body['title']}.`
       });
       return;
   }

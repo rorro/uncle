@@ -64,7 +64,7 @@ export const SPEED_CATEGORIES = [
 ];
 
 enum Ranks {
-  marshal = '<:marshal:997273187412881470>',
+  legacy = '<:legacy:1100009734339309589>',
   templar = '<:templar:996045854962102342>',
   vanguard = '<:vanguard:996045856291704912>',
   warden = '<:warden:996045857633882223>',
@@ -74,7 +74,7 @@ enum Ranks {
   bulwark = '<:bulwark:996045848557387866>',
   protector = '<:protector:996045852013498489>',
   trialist = '<:trialist:996048382789423174>',
-  staff = '<:staff:995767143159304252>'
+  staff = '<:moderator:1089142076861595649>'
 }
 
 export function getLevel(experience: number): number {

@@ -58,10 +58,10 @@ export const SPEED_CATEGORIES = [
   'Hespori',
   'The Mimic',
   'Tombs of Amascut: Normal (Solo)',
-  'Tombs of Amascut: Normal (Teams)',
   'Tombs of Amascut: Expert (Solo)',
   'Tombs of Amascut: Expert (Teams)',
-  'Tombs of Amascut: Raid Level'
+  'Tombs of Amascut: Raid Level',
+  'Phantom Muspah'
 ];
 
 enum Ranks {

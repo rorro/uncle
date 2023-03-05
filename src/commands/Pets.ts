@@ -150,9 +150,8 @@ function buildMessage(emojiData: any, data: any, rank: number): string {
 
   const rsn = data.at(0);
   const pets = data.at(1);
-  const pluses = data.at(2);
 
-  content += '```ini\n[#' + rank + ']: ' + rsn + ' (' + pets + '+' + pluses + ')```';
+  content += '```ini\n[#' + rank + ']: ' + rsn + ' (' + pets + ')```';
 
   //Pets
   let petEmojis = '';
@@ -165,20 +164,7 @@ function buildMessage(emojiData: any, data: any, rank: number): string {
     petEmojis += gotPet ? emojiData.at(i) + ' ' : '';
   }
 
-  //Pluses
-  let plusesEmojis = '';
-  for (
-    let i = config.googleDrive.petsAmount + config.googleDrive.petDataOffset;
-    i <
-    config.googleDrive.petsAmount + config.googleDrive.petPlusAmount + config.googleDrive.petDataOffset;
-    i++
-  ) {
-    const gotPlus = data?.at(i) === 'TRUE';
-    plusesEmojis += gotPlus ? emojiData.at(i) + ' ' : '';
-  }
-
   content += petEmojis ? petEmojis : '';
-  content += plusesEmojis ? '+ ' + plusesEmojis : '';
   return content;
 }
 

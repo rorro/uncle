@@ -77,9 +77,8 @@ export default {
     diarySheetMainName: 'Diary!B5',
     diarySheetTasksComplete: 'Diary!J3',
     petSheetRange: 'Pet Hunters!A3:BH',
-    petDataOffset: 3,
-    petsAmount: 52,
-    petPlusAmount: 7
+    petDataOffset: 2,
+    petsAmount: 52
   },
   API: {
     url: process.env.API_URL as string,

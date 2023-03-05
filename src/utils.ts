@@ -60,7 +60,6 @@ export const SPEED_CATEGORIES = [
   'Tombs of Amascut: Normal (Solo)',
   'Tombs of Amascut: Expert (Solo)',
   'Tombs of Amascut: Expert (Teams)',
-  'Tombs of Amascut: Raid Level',
   'Phantom Muspah'
 ];
 

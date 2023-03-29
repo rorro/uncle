@@ -2,14 +2,14 @@ import { createTranscript, ExportReturnType } from 'discord-html-transcripts';
 import {
   ButtonInteraction,
   Client,
-  GuildTextBasedChannel,
   ActionRowBuilder,
   AttachmentBuilder,
   ButtonBuilder,
   EmbedBuilder,
   ButtonStyle,
   PermissionFlagsBits,
-  ChannelType
+  ChannelType,
+  TextChannel
 } from 'discord.js';
 import * as fs from 'fs';
 import path from 'path';
@@ -135,7 +135,7 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
   );
 
   const channel = interaction.channel;
-  if (!channel) return;
+  if (!channel || channel.type !== ChannelType.GuildText) return;
 
   const databaseCategory = channelType === 'application' ? 'open_applications' : 'open_support_tickets';
   const descriptionName = channelType === 'application' ? 'Application' : 'Support ticket';
@@ -163,7 +163,7 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
 
   const transcriptsChannel =
     transcriptsChannelId !== null
-      ? (client.channels.cache.get(transcriptsChannelId) as GuildTextBasedChannel)
+      ? (client.channels.cache.get(transcriptsChannelId) as TextChannel)
       : undefined;
 
   let description = `${descriptionName} closed by ${interaction.user}.`;
@@ -197,8 +197,8 @@ export async function deleteChannel(interaction: ButtonInteraction) {
 
 async function saveTranscript(
   client: Client,
-  channel: GuildTextBasedChannel,
-  transcriptsChannel: GuildTextBasedChannel,
+  channel: TextChannel,
+  transcriptsChannel: TextChannel,
   applicantId: string
 ): Promise<Boolean> {
   const applicant = client.users.cache.get(applicantId);

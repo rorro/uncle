@@ -5,7 +5,7 @@ import {
   User,
   ChannelType,
   PermissionFlagsBits,
-  GuildTextBasedChannel
+  TextChannel
 } from 'discord.js';
 import config from './config';
 import { MessageOptions } from './types';
@@ -34,7 +34,7 @@ export async function createChannel(
   categoryId: string,
   user: User,
   channelType: string
-): Promise<GuildTextBasedChannel> {
+): Promise<TextChannel> {
   const channel = await guild.channels.create({
     name: `${user.username}${user.discriminator}-${channelType}-${(
       Math.floor(Math.random() * 10000) + 10000

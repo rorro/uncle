@@ -6,7 +6,7 @@
   "author": "Rorro",
   "license": "ISC",
   "dependencies": {
-    "@wise-old-man/utils": "^2.0.10",
+    "@wise-old-man/utils": "^2.1.10",
     "axios": "^0.27.2",
     "better-sqlite3": "^7.6.2",
     "cookie-parser": "^1.4.6",

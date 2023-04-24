@@ -32,6 +32,13 @@ export async function startChannel(interaction: ButtonInteraction, channelType: 
     return;
   }
 
+  const embedFromDB =
+    channelType === 'application'
+      ? await KnexDB.getConfigItem('application_embed')
+      : await KnexDB.getConfigItem('support_embed');
+  if (embedFromDB === null || typeof embedFromDB === 'number') return;
+  const properEmbed = JSON.parse(embedFromDB);
+
   const channelConfig =
     channelType === 'application'
       ? {
@@ -93,8 +100,8 @@ export async function startChannel(interaction: ButtonInteraction, channelType: 
   );
 
   await applicantChannel.send({
-    content: `${interaction.user} Welcome to your ${channelType} channel.`,
-    embeds: [embed],
+    content: `${interaction.user} ${properEmbed.content}`,
+    embeds: [properEmbed.embed],
     components: [row]
   });
 }

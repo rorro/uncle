@@ -15,7 +15,6 @@ switch (process.env.NODE_ENV) {
 dotenv.config({ path: path });
 
 export default {
-  wiseoldmanAPI: 'https://api.wiseoldman.net',
   runewatchAPI: 'https://runewatch.com/api/v2/rsn/',
   client: {
     token: process.env.DISCORD_TOKEN as string,
@@ -24,13 +23,6 @@ export default {
   },
   guild: {
     id: process.env.GUILD_ID as string,
-    channels: {
-      newMembers: process.env.NEW_MEMBERS_CHANNEL as string,
-      assignRoles: process.env.ASSIGN_ROLES_CHANNEL as string,
-      rules: process.env.RULES_CHANNEL as string,
-      legacyDiary: process.env.DIARY_CHANNEL as string,
-      leaderboard: process.env.LEADERBOARD_CHANNEL as string
-    },
     roles: {
       applicationManager: process.env.APPLICATION_MANAGER_ROLE as string,
       staff: process.env.STAFF_ROLE as string,

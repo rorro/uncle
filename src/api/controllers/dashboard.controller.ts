@@ -133,17 +133,19 @@ const saveData = async (req: Request, res: Response) => {
       return;
     case 'embeds':
       try {
-        await KnexDB.updateConfig(req.body['name'], req.body['data']);
-      } catch {
+        await KnexDB.updateEmbed(req.body);
+      } catch (e) {
+        console.log(e);
+        
         res.send({
           message:
-            `Something went wrong when trying to save ${req.body['title']}`
+            `Something went wrong when trying to save ${req.body.title}`
         })
         return;
       }
       res.send({
         message:
-          `Successfully saved ${req.body['title']}.`
+          `Successfully saved ${req.body.title}.`
       });
       return;
   }

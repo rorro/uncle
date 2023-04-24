@@ -3,6 +3,7 @@ import knexfile from './knexfile';
 import config from '../config';
 import {
   ConfigEntry,
+  EmbedConfigData,
   EmbedConfigs,
   MessageEntry,
   MessageType,
@@ -49,6 +50,24 @@ class KnexDB {
         'welcome_pm_message'
       )
     )[0];
+  }
+
+  // Embeds
+  async updateEmbed(input: EmbedConfigData): Promise<void> {
+    const { name, data } = input;
+    
+    try {
+      switch (name) { // No dynamic sql, sad. 
+        case 'application_embed':
+          await this.db('configs').update({ application_embed: data });
+          break;
+        case 'support_embed':
+          await this.db('configs').update({ support_embed: data });
+          break;
+      }
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   // Messages

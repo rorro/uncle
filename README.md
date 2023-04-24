@@ -33,12 +33,6 @@ CLIENT_SECRET={discord_bot_secret}
 
 GUILD_ID={guild_id}
 
-NEW_MEMBERS_CHANNEL={channel_id}
-ASSIGN_ROLES_CHANNEL={channel_id}
-RULES_CHANNEL={channel_id}
-DIARY_CHANNEL={channel_id}
-LEADERBOARD_CHANNEL={channel_id}
-
 APPLICATION_MANAGER_ROLE={role_id}
 STAFF_ROLE={role_id}
 MEMBER_ROLE={role_id}

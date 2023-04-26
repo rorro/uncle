@@ -10,6 +10,7 @@ import { petsCommand } from './commands/Pets';
 import { scheduleCommand } from './commands/ScheduleMessage';
 import { splitsCommand } from './commands/Splits';
 import { supportCommand } from './commands/Suport';
+import { completeCommand } from './commands/Complete';
 import { Command } from './types';
 
 export const commands: Command[] = [
@@ -24,5 +25,6 @@ export const commands: Command[] = [
   applicationCommand,
   supportCommand,
   scheduleCommand,
-  configCommand
+  configCommand,
+  completeCommand
 ];

@@ -1,4 +1,9 @@
-import { ChatInputCommandInteraction, Client, ApplicationCommandType, ApplicationCommandOptionType } from 'discord.js';
+import {
+  ChatInputCommandInteraction,
+  Client,
+  ApplicationCommandType,
+  ApplicationCommandOptionType
+} from 'discord.js';
 import { Command } from '../types';
 import { combinations } from '../utils';
 
@@ -8,27 +13,29 @@ export const completeCommand: Command = {
   type: ApplicationCommandType.ChatInput,
   options: [
     {
-        name: 'drop_rates',
-        description: `Format: 1/50 3;1/300`,
-        type: ApplicationCommandOptionType.String,
-        required: true
+      name: 'drop_rates',
+      description: `Format: 1/50 3;1/300`,
+      type: ApplicationCommandOptionType.String,
+      required: true
     },
     {
-        name: 'decimals',
-        description: 'The amount of decimal points to round to.',
-        type: ApplicationCommandOptionType.Number,
+      name: 'decimals',
+      description: 'The amount of decimal points to round to.',
+      type: ApplicationCommandOptionType.Number
     }
   ],
   run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     const input = interaction.options.getString('drop_rates', true);
 
-    const fractionRegex = new RegExp("^(?:\\d+\\/\\d+|\\d+;\\d+\\/\\d+)(?:\\s+(?:\\d+\\/\\d+|\\d+;\\d+\\/\\d+))*$");
+    const fractionRegex = new RegExp(
+      '^(?:\\d+\\/\\d+|\\d+;\\d+\\/\\d+)(?:\\s+(?:\\d+\\/\\d+|\\d+;\\d+\\/\\d+))*$'
+    );
     if (!fractionRegex.test(input)) {
-        await interaction.reply({
-              content: `The given format was wrong. Please use the following format: amount;numerator/denominator. For example 3;1/150 1/500 5;1/100.`,
-              ephemeral: true
-        });
-        return;
+      await interaction.reply({
+        content: `The given format was wrong. Please use the following format: amount;numerator/denominator. For example 3;1/150 1/500 5;1/100.`,
+        ephemeral: true
+      });
+      return;
     }
 
     const decimals = interaction.options.getNumber('decimals');
@@ -39,16 +46,16 @@ export const completeCommand: Command = {
     const probs = parseInput(input);
 
     for (let i = 0; i < probs.length; i++) {
-        let innerSum = 0;
-        const combs = combinations(probs, i+1);
+      let innerSum = 0;
+      const combs = combinations(probs, i + 1);
 
-        for (const c of combs) {
-            innerSum += 1/(c.reduce((sum, curr) => sum + curr, 0))
-        }
-        avg += sign * innerSum;
-        sign *= -1
+      for (const c of combs) {
+        innerSum += 1 / c.reduce((sum, curr) => sum + curr, 0);
+      }
+      avg += sign * innerSum;
+      sign *= -1;
     }
-    
+
     await interaction.reply({
       content: `${avg.toFixed(roundTo)} rolls needed on average to get all items.`,
       ephemeral: true
@@ -57,20 +64,21 @@ export const completeCommand: Command = {
 };
 
 function parseInput(input: string): number[] {
-    let result: number[] = []
-    const splitInput = input.split(' ');
-    
-    for (const item of splitInput) {
-        let amount, rate = ''
-        if (item.includes(';')) {
-            [amount, rate] = item.split(';');
-        } else {
-            rate = item;
-        }
+  let result: number[] = [];
+  const splitInput = input.split(' ');
 
-        const [numerator, denominator] = rate.split('/').map(x => parseInt(x));
-        result.push(...new Array(amount ? parseInt(amount) : 1).fill(numerator / denominator))
+  for (const item of splitInput) {
+    let amount,
+      rate = '';
+    if (item.includes(';')) {
+      [amount, rate] = item.split(';');
+    } else {
+      rate = item;
     }
 
-    return result;
+    const [numerator, denominator] = rate.split('/').map(x => parseInt(x));
+    result.push(...new Array(amount ? parseInt(amount) : 1).fill(numerator / denominator));
+  }
+
+  return result;
 }

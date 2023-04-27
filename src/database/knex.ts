@@ -55,9 +55,9 @@ class KnexDB {
   // Embeds
   async updateEmbed(input: EmbedConfigData): Promise<void> {
     const { name, data } = input;
-    
+
     try {
-      switch (name) { // No dynamic sql, sad. 
+      switch (name) {
         case 'application_embed':
           await this.db('configs').update({ application_embed: data });
           break;

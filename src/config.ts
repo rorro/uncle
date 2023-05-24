@@ -67,10 +67,7 @@ export default {
     leaderboardSheet: process.env.LEADERBOARD_SHEET as string,
     splitsSheet: process.env.SPLITS_SHEET as string,
     diarySheetMainName: 'Diary!B5',
-    diarySheetTasksComplete: 'Diary!J3',
-    petSheetRange: 'Pet Hunters!A3:BH',
-    petDataOffset: 2,
-    petsAmount: 52
+    diarySheetTasksComplete: 'Diary!J3'
   },
   API: {
     url: process.env.API_URL as string,

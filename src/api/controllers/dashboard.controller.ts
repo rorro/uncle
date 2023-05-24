@@ -88,7 +88,9 @@ const getData = async (req: Request, res: Response) => {
       configs: await KnexDB.getAllConfigs(),
       messages: await KnexDB.getAllMessages(),
       scheduledMessages: await KnexDB.getAllScheduledMessages(),
-      embedConfigs: await KnexDB.getEmbedConfigs()
+      embedConfigs: await KnexDB.getEmbedConfigs(),
+      pets: await KnexDB.getAllPets(),
+      petsLeaderboard: await KnexDB.getPetsLeaderboard()
     };
 
     res.json(response);
@@ -145,6 +147,10 @@ const saveData = async (req: Request, res: Response) => {
       res.send({
         message: `Successfully saved ${req.body.title}.`
       });
+      return;
+    case 'pets':
+      const result = await KnexDB.updateAndInsert(req.body);
+      res.send({ message: result });
       return;
   }
   res.send({ message: 'saved some data' });

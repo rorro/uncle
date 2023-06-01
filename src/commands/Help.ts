@@ -8,6 +8,9 @@ export const helpCommand: Command = {
   type: ApplicationCommandType.ChatInput,
   run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     const content = 'So far I only do stuff for the staff members.';
+    const allPets = await KnexDB.getAllPets();
+    const petsLeaderboard = await KnexDB.getPetsLeaderboard();
+    console.log(petsLeaderboard);
 
     await KnexDB.getAllScheduledMessages();
     await interaction.reply({

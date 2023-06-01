@@ -101,6 +101,8 @@ export interface ResponseType {
   messages: MessageEntry[];
   scheduledMessages: ScheduledMessageEntry[];
   embedConfigs: EmbedConfigs;
+  pets: PetEntry[];
+  petsLeaderboard: PetLeaderboardEntry[];
 }
 
 export enum ScheduledMessageType {
@@ -139,4 +141,67 @@ export interface EmbedConfigData {
   name: string;
   title: string;
   data: string;
+}
+
+export interface PetEntry {
+  name: string;
+  display_name: string;
+  emoji: string;
+}
+
+export interface PetLeaderboardEntry {
+  id: number;
+  username: string;
+  abyssal_sire: boolean;
+  giant_mole: boolean;
+  callisto: boolean;
+  cerberus: boolean;
+  alchemical_hydra: boolean;
+  tzkal_zuk: boolean;
+  kalphite_queen: boolean;
+  theatre_of_blood: boolean;
+  phantom_muspah: boolean;
+  nightmare: boolean;
+  nex: boolean;
+  grotesque_guardians: boolean;
+  chambers_of_xeric: boolean;
+  chaos_elemental: boolean;
+  dagannoth_prime: boolean;
+  dagannoth_rex: boolean;
+  dagannoth_supreme: boolean;
+  corporeal_beast: boolean;
+  general_graardor: boolean;
+  kril_tsutsaroth: boolean;
+  kraken: boolean;
+  kreearra: boolean;
+  thermonuclear_smoke_devil: boolean;
+  zulrah: boolean;
+  commander_zilyana: boolean;
+  king_black_dragon: boolean;
+  scorpia: boolean;
+  skotizo: boolean;
+  sarachnis: boolean;
+  tombs_of_amascut: boolean;
+  tztok_jad: boolean;
+  venenatis: boolean;
+  vetion: boolean;
+  vorkath: boolean;
+  chinchompa: boolean;
+  beaver: boolean;
+  giant_squirrel: boolean;
+  heron: boolean;
+  rift_guardian: boolean;
+  rock_golem: boolean;
+  rocky: boolean;
+  tangleroot: boolean;
+  bloodhound: boolean;
+  chompy_chick: boolean;
+  herbiboar: boolean;
+  lil_creator: boolean;
+  penance_queen: boolean;
+  phoenix: boolean;
+  tempoross: boolean;
+  gauntlet: boolean;
+  zalcano: boolean;
+  abyssal_protector: boolean;
 }

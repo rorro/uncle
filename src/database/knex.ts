@@ -8,6 +8,8 @@ import {
   MessageEntry,
   MessageType,
   OauthData,
+  PetEntry,
+  PetLeaderboardEntry,
   ScheduledMessageEntry
 } from '../types';
 import { TextChannel, User } from 'discord.js';
@@ -201,6 +203,36 @@ class KnexDB {
   async getAllScheduledMessages(): Promise<ScheduledMessageEntry[]> {
     const messages = await this.db('scheduled_messages');
     return messages;
+  }
+
+  // Pets
+  async getAllPets(): Promise<PetEntry[]> {
+    return await this.db('pets');
+  }
+
+  async getPetsLeaderboard(): Promise<PetLeaderboardEntry[]> {
+    return await this.db('pets_leaderboard');
+  }
+
+  async updateAndInsert(data: PetLeaderboardEntry[]): Promise<string> {
+    try {
+      await this.db.transaction(async trx => {
+        const newDataWithoutId = data.map(d => {
+          const { id, ...dataWithoutId } = d;
+          return dataWithoutId;
+        });
+
+        await trx('pets_leaderboard').truncate();
+        await trx('pets_leaderboard').insert(newDataWithoutId);
+        await trx.commit();
+      });
+
+      return 'Successfully saved the pet leaderboard.';
+    } catch (error) {
+      console.log('Error saving pet leaderboard', error);
+
+      return 'Something went wrong while saving the pet leaderboard.';
+    }
   }
 }
 

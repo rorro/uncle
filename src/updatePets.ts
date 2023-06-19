@@ -34,8 +34,6 @@ export async function updatePets(): Promise<string> {
   const data = (await KnexDB.getPetsLeaderboard()).filter(p => !p.removed);
   const [leaderboard, scores] = getTopPetsIndex(data);
 
-  console.log(leaderboard, scores);
-
   for (let i in scores) {
     const pets = scores[i];
 

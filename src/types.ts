@@ -101,8 +101,8 @@ export interface ResponseType {
   messages: MessageEntry[];
   scheduledMessages: ScheduledMessageEntry[];
   embedConfigs: EmbedConfigs;
-  pets: PetEntry[];
   petsLeaderboard: PetLeaderboardEntry[];
+  speedsLeaderboard: SpeedsLeaderboardEntry[];
 }
 
 export enum ScheduledMessageType {
@@ -152,6 +152,7 @@ export interface PetEntry {
 export interface PetLeaderboardEntry {
   id: number;
   username: string;
+  removed: boolean;
   abyssal_sire: boolean;
   giant_mole: boolean;
   callisto: boolean;
@@ -204,4 +205,19 @@ export interface PetLeaderboardEntry {
   gauntlet: boolean;
   zalcano: boolean;
   abyssal_protector: boolean;
+}
+
+export interface SpeedsLeaderboardEntry {
+  id: number;
+  username: string;
+  boss: string;
+  category: string | null;
+  time: string;
+  removed: number;
+}
+
+export interface LeaderboardBoss {
+  boss: string;
+  emoji: string;
+  categories?: string[];
 }

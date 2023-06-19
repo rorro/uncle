@@ -9,5 +9,6 @@ router.post('/logout', controller.logout);
 router.get('/verifylogin', controller.verifyLogin);
 router.post('/savedata', controller.saveData);
 router.delete('/deletemessage', controller.deleteScheduledMessage);
+router.post('/updateleaderboard', controller.updateLeaderboard);
 
 export default router;

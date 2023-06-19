@@ -4,8 +4,10 @@ import CryptoJS from 'crypto-js';
 import config from '../../config';
 import client from '../../bot';
 import { hasRole } from '../../utils';
-import { EmbedConfigData, ResponseType } from '../../types';
+import { LeaderboardBoss, ResponseType } from '../../types';
 import KnexDB from '../../database/knex';
+import { updateSpeed } from '../../updateLeaderboard';
+import { updatePets } from '../../updatePets';
 
 const oauth2 = new DiscordOauth2();
 
@@ -89,8 +91,8 @@ const getData = async (req: Request, res: Response) => {
       messages: await KnexDB.getAllMessages(),
       scheduledMessages: await KnexDB.getAllScheduledMessages(),
       embedConfigs: await KnexDB.getEmbedConfigs(),
-      pets: await KnexDB.getAllPets(),
-      petsLeaderboard: await KnexDB.getPetsLeaderboard()
+      petsLeaderboard: await KnexDB.getPetsLeaderboard(),
+      speedsLeaderboard: await KnexDB.getSpeedsLeaderboard()
     };
 
     res.json(response);
@@ -149,8 +151,15 @@ const saveData = async (req: Request, res: Response) => {
       });
       return;
     case 'pets':
-      const result = await KnexDB.updateAndInsert(req.body);
-      res.send({ message: result });
+      const petsResult = await KnexDB.truncateAndInsert(req.body);
+      res.send({ message: petsResult });
+      return;
+    case 'speeds':
+      const speedsResult = await KnexDB.truncateAndInsert(req.body);
+      res.send({ message: speedsResult });
+      return;
+    default:
+      res.send({ message: `Error: Data of this type can't be saved` });
       return;
   }
   res.send({ message: 'saved some data' });
@@ -230,11 +239,32 @@ async function verifyLogin(req: Request, res: Response) {
   res.send(loggedIn);
 }
 
+async function updateLeaderboard(req: Request, res: Response) {
+  const loggedIn = await hasAccess(decodeURIComponent(req.body.access_token));
+  if (!loggedIn) return;
+
+  const boss: LeaderboardBoss = req.body.boss;
+  const category: string = req.body.category;
+
+  let result = '';
+  switch (category) {
+    case 'speed':
+      result = await updateSpeed(boss);
+      break;
+    case 'pets':
+      result = await updatePets();
+      break;
+  }
+
+  res.send({ message: result });
+}
+
 export default {
   authenticate,
   getData,
   logout,
   verifyLogin,
   saveData,
-  deleteScheduledMessage
+  deleteScheduledMessage,
+  updateLeaderboard
 };

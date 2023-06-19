@@ -8,9 +8,9 @@ import {
   MessageEntry,
   MessageType,
   OauthData,
-  PetEntry,
   PetLeaderboardEntry,
-  ScheduledMessageEntry
+  ScheduledMessageEntry,
+  SpeedsLeaderboardEntry
 } from '../types';
 import { TextChannel, User } from 'discord.js';
 
@@ -205,34 +205,46 @@ class KnexDB {
     return messages;
   }
 
-  // Pets
-  async getAllPets(): Promise<PetEntry[]> {
-    return await this.db('pets');
-  }
-
+  // Pets and Speeds
   async getPetsLeaderboard(): Promise<PetLeaderboardEntry[]> {
     return await this.db('pets_leaderboard');
   }
 
-  async updateAndInsert(data: PetLeaderboardEntry[]): Promise<string> {
+  async getSpeedsLeaderboard(): Promise<SpeedsLeaderboardEntry[]> {
+    return await this.db('speeds_leaderboard');
+  }
+
+  async truncateAndInsert<T>(data: T[]): Promise<string> {
     try {
       await this.db.transaction(async trx => {
         const newDataWithoutId = data.map(d => {
-          const { id, ...dataWithoutId } = d;
+          const { id, ...dataWithoutId } = d as any;
           return dataWithoutId;
         });
 
-        await trx('pets_leaderboard').truncate();
-        await trx('pets_leaderboard').insert(newDataWithoutId);
+        const tableName = this.getTableName<T>(data[0]);
+
+        await trx(tableName).truncate();
+        await trx(tableName).insert(newDataWithoutId);
         await trx.commit();
       });
 
-      return 'Successfully saved the pet leaderboard.';
+      return `Successfully saved the leaderboard.`;
     } catch (error) {
-      console.log('Error saving pet leaderboard', error);
-
-      return 'Something went wrong while saving the pet leaderboard.';
+      console.log('Error saving leaderboard', error);
+      return 'Something went wrong while saving the leaderboard.';
     }
+  }
+
+  getTableName<T>(data: T): string {
+    if (typeof data === 'object' && data !== null) {
+      if ('boss' in data) {
+        return 'speeds_leaderboard';
+      } else if ('abyssal_sire' in data) {
+        return 'pets_leaderboard';
+      }
+    }
+    throw new Error('Unknown interface type');
   }
 }
 

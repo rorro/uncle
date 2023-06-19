@@ -4,6 +4,7 @@ export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTable('pets_leaderboard', (table: Knex.TableBuilder) => {
     table.increments('id').primary();
     table.string('username').defaultTo(null);
+    table.boolean('removed').defaultTo(false);
     table.boolean('abyssal_sire').defaultTo(false);
     table.boolean('giant_mole').defaultTo(false);
     table.boolean('callisto').defaultTo(false);

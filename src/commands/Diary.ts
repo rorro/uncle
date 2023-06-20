@@ -22,19 +22,6 @@ export const diaryCommand: Command = {
   options: [
     {
       type: ApplicationCommandOptionType.Subcommand,
-      name: 'setmessage',
-      description: 'Sets the message in which the top 10 Legacy diary completions will be shown',
-      options: [
-        {
-          type: ApplicationCommandOptionType.String,
-          name: 'message_id',
-          description: 'Id of the message',
-          required: true
-        }
-      ]
-    },
-    {
-      type: ApplicationCommandOptionType.Subcommand,
       name: 'updatetop10',
       description: 'Update the diary task completion top 10 list'
     }
@@ -69,32 +56,6 @@ export const diaryCommand: Command = {
     }
 
     switch (subCommand) {
-      case 'setmessage':
-        const editMessageId = interaction.options.getString('message_id', true);
-
-        try {
-          const configuredMessage = await leaderboardChannel.messages.fetch(editMessageId);
-
-          if (configuredMessage.author !== client.user) throw Error('not me');
-        } catch (e: any) {
-          if (e.message.includes('not me')) {
-            await interaction.followUp({
-              content: `This message was not sent by me, I will not be able to use it.`
-            });
-          } else {
-            await interaction.followUp({
-              content: `The selected message must be in ${leaderboardChannel}.`
-            });
-          }
-          return;
-        }
-
-        await KnexDB.updateConfig('diary_top10_message', editMessageId);
-
-        await interaction.followUp({
-          content: `Top 10 diary message has been set to [this message](<https://discord.com/channels/${interaction.guildId}/${leaderboardChannelId}/${editMessageId}>).`
-        });
-        return;
       case 'updatetop10':
         try {
           const summaryData = await getSheetData(

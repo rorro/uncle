@@ -92,8 +92,6 @@ export async function updateSpeed(boss: LeaderboardBoss): Promise<string> {
     await KnexDB.insertIntoMessages(boss.boss, messageId, `#${channel.name}`, MessageType.Leaderboard);
   }
 
-  console.log(message);
-
   return `Successfully updated ${boss.boss}. Head over to Discord to check out the updated board.`;
 }
 

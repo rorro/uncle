@@ -43,6 +43,11 @@ const LeaderboardBosses: LeaderboardBoss[] = [
     categories: ['Duo', 'Trio', '5 Man', '8 Man']
   },
   {
+    boss: 'Tombs of Amascut: 500 Invocation',
+    emoji: '<:toae:1020399804918014003>',
+    categories: ['Solo', 'Duo', 'Trio']
+  },
+  {
     boss: 'Gauntlet',
     emoji: '<:gauntlet:983752747121799168>'
   },

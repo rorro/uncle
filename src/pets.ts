@@ -28,8 +28,8 @@ const Pets: PetEntry[] = [
   },
   { name: 'corporeal_beast', display_name: 'Corporeal Beast', emoji: '<:corp:983752788733485106>' },
   {
-    name: 'general_graardorGeneral Graardor',
-    display_name: '',
+    name: 'general_graardor',
+    display_name: 'General Graardor',
     emoji: '<:graardor:983752787512946718>'
   },
   { name: 'kril_tsutsaroth', display_name: `K'ril Tsutsaroth`, emoji: '<:kril:983752785663238197>' },

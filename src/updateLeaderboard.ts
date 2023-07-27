@@ -22,7 +22,7 @@ export async function updateSpeed(boss: LeaderboardBoss): Promise<string> {
   }
 
   const bossBoard = speedsLeaderboard.filter(b => b.boss === boss.boss && !b.removed);
-  let message = `${boss.emoji} ${boss.boss} ${boss.emoji}\n\`\`\`ini\n`;
+  let message = `${boss.emoji} ${boss.boss} ${boss.emoji.split(' ').reverse().join(' ')}\n\`\`\`ini\n`;
 
   if (!boss.categories) {
     if (!bossBoard.length) {

@@ -35,30 +35,43 @@ export default {
   // All valid metrics can be found here https://docs.wiseoldman.net/global-type-definitions
   requirements: [
     // requirements to join the clan
-    { metric: 'combatLevel', type: 'other', name: '+ Combat', threshold: 120 },
+    { metric: 'combatLevel', type: 'other', name: '+ Combat', threshold: 125 },
 
     // Skills
     { metric: 'overall', type: 'skill', name: '+ Total', threshold: 1750 },
-    { metric: 'ranged', type: 'skill', name: 'Ranged', threshold: 99 },
-    { metric: 'magic', type: 'skill', name: 'Magic', threshold: 99 },
-    { metric: 'agility', type: 'skill', name: 'Agility', threshold: 70 },
-    { metric: 'herblore', type: 'skill', name: 'Herblore', threshold: 78 },
-    { metric: 'construction', type: 'skill', name: 'Construction', threshold: 82 },
+    { metric: 'ranged', type: 'skill', name: ' Ranged', threshold: 99 },
+    { metric: 'magic', type: 'skill', name: ' Magic', threshold: 99 },
+    { metric: 'agility', type: 'skill', name: ' Agility', threshold: 70 },
+    { metric: 'herblore', type: 'skill', name: ' Herblore', threshold: 78 },
+    { metric: 'construction', type: 'skill', name: ' Construction', threshold: 82 },
 
     // Bosses
     {
       metric: 'chambers_of_xeric',
       type: 'boss',
       name: 'Chambers of Xeric (+CM)',
-      alternative: 'chambers_of_xeric_challenge_mode',
+      alternatives: ['chambers_of_xeric_challenge_mode'],
       threshold: 50
     },
     {
       metric: 'theatre_of_blood',
       type: 'boss',
       name: 'Theatre of Blood (+HM)',
-      alternative: 'theatre_of_blood_hard_mode',
+      alternatives: ['theatre_of_blood_hard_mode'],
       threshold: 50
+    },
+    {
+      metric: 'tombs_of_amascut_expert',
+      type: 'boss',
+      name: 'Tombs of Amascut (Expert)',
+      threshold: 50
+    },
+    {
+      metric: 'the_corrupted_gauntlet',
+      type: 'warning',
+      name: 'SotE Completion',
+      alternatives: ['the_gauntlet'],
+      threshold: 5
     }
   ],
   googleDrive: {

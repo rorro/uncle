@@ -90,7 +90,7 @@ export const checkApplicantRequirementsCommand: Command = {
             const [, skillValue] = skill;
             description += `${skillValue.level >= requirement.threshold ? '✅' : '❌'} ${
               requirement.threshold
-            } ${requirement.name} (${skillValue.level})\n`;
+            }${requirement.name} (${skillValue.level})\n`;
             break;
           case 'boss':
             const boss = bosses.find(([name]) => name === requirement.metric);
@@ -99,17 +99,64 @@ export const checkApplicantRequirementsCommand: Command = {
             const bossKc = Math.max(bossValue.kills, 0);
 
             let altBossKc = 0;
-            if (requirement.alternative) {
-              const altBoss = bosses.find(([name]) => name === requirement.alternative);
-              if (altBoss) {
-                const [, altBossValue] = altBoss;
-                altBossKc = Math.max(altBossValue.kills, 0);
+            if (requirement.alternatives) {
+              for (const alt of requirement.alternatives) {
+                const altBoss = bosses.find(([name]) => name === alt);
+
+                if (altBoss) {
+                  const [, altBossValue] = altBoss;
+                  altBossKc = Math.max(altBossValue.kills, 0);
+                }
               }
             }
 
             description += `${bossKc + altBossKc >= requirement.threshold ? '✅' : '❌'} ${
               requirement.threshold
-            }kc ${requirement.name} (${bossKc}, ${altBossKc})\n`;
+            }kc ${requirement.name} (${bossKc}${requirement.alternatives ? `, ${altBossKc}` : ''})\n`;
+            break;
+          case 'special':
+            if (!requirement.alternatives) break;
+            const altKcs = [];
+            for (const alts of requirement.alternatives) {
+              let altBossKc = 0;
+              for (const alt of alts) {
+                const altBoss = bosses.find(([name]) => name === alt);
+
+                if (altBoss) {
+                  const [, altBossValue] = altBoss;
+                  altBossKc += altBossValue.kills;
+                }
+              }
+              altKcs.push(Math.max(altBossKc, 0));
+            }
+
+            description += `${altKcs.some(kc => kc >= requirement.threshold) ? '✅' : '❌'} ${
+              requirement.threshold
+            }kc ${requirement.name}\n`;
+            break;
+          case 'warning':
+            const warningMetric = bosses.find(([name]) => name === requirement.metric);
+            if (!warningMetric) break;
+            const [, warningMetricValue] = warningMetric;
+            const wmv = Math.max(warningMetricValue.kills, 0);
+
+            let amv = 0;
+            if (requirement.alternatives) {
+              for (const alt of requirement.alternatives) {
+                const altMetric = bosses.find(([name]) => name === alt);
+
+                if (altMetric) {
+                  const [, altMetricValue] = altMetric;
+                  amv = Math.max(altMetricValue.kills, 0);
+                }
+              }
+            }
+
+            description += `${
+              wmv < requirement.threshold && amv < requirement.threshold
+                ? '\n⚠️ SotE might not be completed\n'
+                : ''
+            }`;
             break;
         }
       });

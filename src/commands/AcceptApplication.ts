@@ -17,7 +17,7 @@ import {
 } from '../api/googleHandler';
 import config from '../config';
 import { sendMessageInChannel } from '../discord';
-import { getApplicantRoles, getRoleName, hasRole } from '../utils';
+import { getRoleName, hasRole } from '../utils';
 import KnexDB from '../database/knex';
 
 export const acceptApplicationCommand: Command = {
@@ -71,7 +71,7 @@ export const acceptApplicationCommand: Command = {
       const diaryId = (await copyDiary(rsn)) as string;
       await changePermissions(diaryId);
       const tasksCompleted = await getTasksCompleted(diaryId, rsn);
-      const applicantRoles = getApplicantRoles(tasksCompleted);
+      const applicantRoles = [config.guild.roles.member, config.guild.roles.bulwark];
       const webViewLink = await getWebViewLink(diaryId);
       const todaysDate = `=DATE(${dayjs().format('YYYY,MM,DD')})`;
 

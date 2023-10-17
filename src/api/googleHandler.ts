@@ -65,7 +65,9 @@ export async function getTasksCompleted(sheetId: string, username: string) {
     range: config.googleDrive.diarySheetTasksComplete
   });
 
-  return tasksCompleted.data.values?.at(0)?.pop();
+  const taskAmount = tasksCompleted.data.values?.at(0)?.pop().split(': ')[1];
+
+  return taskAmount;
 }
 
 // Grab a share link a sheet

@@ -78,8 +78,8 @@ export default {
     diarySheetsFolder: process.env.DIARY_SHEETS_FOLDER as string,
     diarySheet: process.env.DIARY_SHEET as string,
     splitsSheet: process.env.SPLITS_SHEET as string,
-    diarySheetMainName: 'Diary!B5',
-    diarySheetTasksComplete: 'Diary!J3'
+    diarySheetMainName: 'Diary!B6',
+    diarySheetTasksComplete: 'Diary!B11'
   },
   API: {
     url: process.env.API_URL as string,

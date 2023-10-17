@@ -114,20 +114,6 @@ export function hasRole(member: GuildMember, roleId: string): boolean {
   return roleId ? member.roles.cache.has(roleId) : false;
 }
 
-// Get the roles that a new clan applicant should get based on Legacy Diary tasks completed.
-export function getApplicantRoles(tasksCompleted: number) {
-  const roles = config.guild.roles;
-  const ranksToGive: string[] = [roles.member];
-
-  tasksCompleted < 10
-    ? ranksToGive.push(roles.protector)
-    : tasksCompleted < 15
-    ? ranksToGive.push(roles.bulwark)
-    : ranksToGive.push(roles.justiciar);
-
-  return ranksToGive;
-}
-
 export function parseMessage(message: string): string {
   const split = message.split('\\n ');
   let result = '';

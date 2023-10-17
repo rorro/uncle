@@ -115,20 +115,18 @@ export const splitsCommand: Command = {
               rank,
               diaryTasks,
               joinDate,
-              advCoxTob,
-              maxCoxTob,
-              advGear,
-              maxGear,
+              introSpeeds,
+              intermediateSpeeds,
+              advancedSpeeds,
               totalPoints,
               botw
             ] = [
-              value.at(3),
+              value.at(2),
               value.at(14).length > 0 ? value.at(14) : '--',
               value.at(15).length > 0 ? value.at(15) : '--',
-              value.at(6),
-              value.at(7),
               value.at(4),
               value.at(5),
+              value.at(6),
               value.at(17),
               value.slice(18, 21)
             ];
@@ -142,18 +140,29 @@ export const splitsCommand: Command = {
               .addFields([
                 { name: 'Total points', value: totalPoints, inline: true },
                 { name: 'Diary tasks completed', value: diaryTasks, inline: true },
-                { name: '\u200b', value: '\u200b' },
+                { name: '\u200b', value: '\u200b', inline: true },
                 {
-                  name: 'CoX and ToB KC',
-                  value: `Advanced ${isTrue(advCoxTob)}, Max ${isTrue(maxCoxTob)}`,
+                  name: '\u200b',
+                  value: `\u200b`,
+                  inline: true
+                },
+                { name: `\u200b`, value: ' **👟 Speeds**', inline: true },
+                { name: '\u200b', value: '\u200b', inline: true },
+                {
+                  name: 'Intro',
+                  value: `${introSpeeds}`,
                   inline: true
                 },
                 {
-                  name: 'Gear',
-                  value: `Advanced ${isTrue(advGear)}, Max ${isTrue(maxGear)}`,
+                  name: 'Intermediate',
+                  value: `${intermediateSpeeds}`,
                   inline: true
                 },
-                { name: '\u200b', value: '\u200b' },
+                {
+                  name: 'Advanced',
+                  value: `${advancedSpeeds}`,
+                  inline: true
+                },
                 {
                   name: 'Boss of the Week',
                   value: `${botw.at(0) ? botw.at(0) : 0}🥇 / ${botw.at(1) ? botw.at(1) : 0}🥈 / ${

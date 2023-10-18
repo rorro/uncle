@@ -135,7 +135,7 @@ async function buildMessage(players: PlayerSummary[]): Promise<EmbedBuilder> {
   for (let i in players) {
     const player = players[i];
 
-    if (uniqueScoresFound === 10 && player.diaryTasks !== lastScore) {
+    if ((uniqueScoresFound === 10 && player.diaryTasks !== lastScore) || !player.diaryTasks) {
       break;
     }
 

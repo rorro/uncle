@@ -133,14 +133,6 @@ export async function cancelClose(interaction: ButtonInteraction) {
 export async function comfirmClose(client: Client, interaction: ButtonInteraction, channelType: string) {
   if (!interaction.inCachedGuild()) return;
 
-  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-    new ButtonBuilder()
-      .setCustomId('delete_channel')
-      .setLabel('Delete')
-      .setStyle(ButtonStyle.Danger)
-      .setEmoji('⛔')
-  );
-
   const channel = interaction.channel;
   if (!channel || channel.type !== ChannelType.GuildText) return;
 
@@ -166,35 +158,24 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
   await KnexDB.deleteFromOpenChannels(applicant.user.id, databaseCategory);
   await interaction.message.delete();
 
-  const transcriptsChannelId = (await KnexDB.getConfigItem('transcripts_channel')) as string;
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`save_transcript:${channelType}/${applicant.user.id}`)
+      .setLabel('Save Transcript')
+      .setStyle(ButtonStyle.Primary)
+      .setEmoji('🧾'),
 
-  const transcriptsChannel =
-    transcriptsChannelId !== null
-      ? (client.channels.cache.get(transcriptsChannelId) as TextChannel)
-      : undefined;
+    new ButtonBuilder()
+      .setCustomId('delete_channel')
+      .setLabel('Delete')
+      .setStyle(ButtonStyle.Danger)
+      .setEmoji('⛔')
+  );
 
-  let description = `${descriptionName} closed by ${interaction.user}.`;
-  if (channelType === 'application' && transcriptsChannel) {
-    const transcriptSaved = await saveTranscript(client, channel, transcriptsChannel, applicant.user.id);
-    if (!transcriptSaved) {
-      await channel.send({
-        content:
-          'Transcript was not saved because the applicant left the server before application was closed.',
-        components: [row]
-      });
-      return;
-    }
-  }
-  description +=
-    channelType === 'application' && transcriptsChannel
-      ? ` Transcript saved to ${transcriptsChannel}.`
-      : channelType === 'support'
-      ? ''
-      : ` Transcript was not saved because no transcript channel is set.`;
-
-  const embed = new EmbedBuilder().setDescription(description);
-  await channel.send({ embeds: [embed], components: [row] });
-  return;
+  await channel.send({
+    content: `${descriptionName} closed by ${interaction.user}.`,
+    components: [row]
+  });
 }
 
 export async function deleteChannel(interaction: ButtonInteraction) {
@@ -202,42 +183,81 @@ export async function deleteChannel(interaction: ButtonInteraction) {
   return;
 }
 
-async function saveTranscript(
+export async function saveTranscript(
   client: Client,
-  channel: TextChannel,
-  transcriptsChannel: TextChannel,
-  applicantId: string
-): Promise<Boolean> {
-  const applicant = client.users.cache.get(applicantId);
-  if (!applicant) return false;
+  interaction: ButtonInteraction,
+  channelInfo: string
+): Promise<void> {
+  if (!interaction.inCachedGuild()) return;
 
-  const transcript = await createTranscript(channel, {
-    returnType: ExportReturnType.Buffer,
-    saveImages: true,
-    poweredBy: false
-  });
+  const channel = interaction.channel;
+  if (!channel || channel.type !== ChannelType.GuildText) return;
+
+  const [channelType, userId] = channelInfo.split('/');
+  const descriptionName = channelType === 'application' ? 'Application' : 'Support';
+
+  const applicant = await client.users.fetch(userId);
+  if (!applicant) {
+    await channel.send({
+      content: 'Didnt find the applicant'
+    });
+    return;
+  }
+
+  const transcriptsChannelId = (await KnexDB.getConfigItem('transcripts_channel')) as string;
+
+  const transcriptsChannel =
+    transcriptsChannelId !== null
+      ? (client.channels.cache.get(transcriptsChannelId) as TextChannel)
+      : undefined;
+
+  if (!transcriptsChannel) {
+    await channel.send({
+      content: 'Transcript was not saved because no transcript channel is set.'
+    });
+    return;
+  }
 
   const transcriptName = `transcript-${channel.name}.html`;
-  fs.writeFileSync(path.join('.transcripts', transcriptName), transcript);
 
   const URL = config.API.url;
   const PORT = config.API.port;
   const transcriptUrl = `${URL}:${PORT}/transcripts/${transcriptName}`;
 
-  const embed = new EmbedBuilder()
-    .setAuthor({
-      name: `${applicant?.username}#${applicant?.discriminator}`,
-      iconURL: applicant.displayAvatarURL()
-    })
-    .addFields([
-      { name: 'Ticket Owner', value: `${applicant}`, inline: true },
-      { name: 'Ticket Name', value: channel.name, inline: true },
-      { name: 'Direct Transcript', value: `[Direct Transcript](${transcriptUrl})`, inline: true }
-    ]);
+  try {
+    const transcript = await createTranscript(channel, {
+      returnType: ExportReturnType.Buffer,
+      saveImages: true,
+      poweredBy: false
+    });
 
-  await transcriptsChannel.send({
-    embeds: [embed],
-    files: [new AttachmentBuilder(transcript, { name: transcriptName })]
-  });
-  return true;
+    fs.writeFileSync(path.join('.transcripts', transcriptName), transcript);
+
+    const embed = new EmbedBuilder()
+      .setAuthor({
+        name: `${descriptionName}: ${applicant.username}${
+          applicant.discriminator === '0' ? '' : applicant.discriminator
+        }`,
+        iconURL: applicant.displayAvatarURL()
+      })
+      .setColor(channelType === 'application' ? 'DarkGold' : 'Navy')
+      .addFields([
+        { name: 'Ticket Owner', value: `${applicant}`, inline: true },
+        { name: 'Ticket Name', value: channel.name, inline: true },
+        { name: 'Direct Transcript', value: `[Direct Transcript](${transcriptUrl})`, inline: true }
+      ]);
+
+    await transcriptsChannel.send({
+      embeds: [embed],
+      files: [new AttachmentBuilder(transcript, { name: transcriptName })]
+    });
+
+    await interaction.reply({
+      content: `Transcript saved to ${transcriptsChannel}.`
+    });
+  } catch (e) {
+    await channel.send({
+      content: `Something went wrong while saving the transcript. The user probably left the server before closing channel.\n${e}`
+    });
+  }
 }

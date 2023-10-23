@@ -1,11 +1,12 @@
-import { ChatInputCommandInteraction, Client, Interaction } from 'discord.js';
+import { ChatInputCommandInteraction, Client, Interaction, TextChannel } from 'discord.js';
 import { commands } from '../commands';
 import {
   cancelClose,
   closeChannel,
   comfirmClose,
   deleteChannel,
-  startChannel
+  startChannel,
+  saveTranscript
 } from '../interactions/channels';
 import { SPEED_CATEGORIES } from '../utils';
 
@@ -43,6 +44,9 @@ export default (client: Client): void => {
           break;
         case 'delete_channel':
           await deleteChannel(interaction);
+          break;
+        case 'save_transcript':
+          await saveTranscript(client, interaction, channel);
           break;
       }
     }

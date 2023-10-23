@@ -36,7 +36,7 @@ export async function createChannel(
   channelType: string
 ): Promise<TextChannel> {
   const channel = await guild.channels.create({
-    name: `${user.username}${user.discriminator}-${channelType}-${(
+    name: `${user.username}${user.discriminator === '0' ? '' : user.discriminator}-${channelType}-${(
       Math.floor(Math.random() * 10000) + 10000
     )
       .toString()

@@ -87,37 +87,27 @@ export const acceptApplicationCommand: Command = {
       for (const { index, value } of (players as any[][]).map((value, index) => ({ index, value }))) {
         if (value.at(0).toString().toLowerCase() === rsn.toLowerCase()) {
           inSplitsSheet = true;
-          const [rank, diaryTasks, totalPoints, altAccount] = [
-            value.at(3),
-            value.at(14),
-            value.at(17),
-            value.at(8)
-          ];
+          const [rank, altAccount] = [value.at(3), value.at(7)];
 
           let inputValues = [
-            value.at(0), // name
-            value.at(1), // rank icon
-            value.at(2), // rank
-            rank, // old rank
-            'FALSE', // adv gear
-            'FALSE', // max gear
-            value.at(6), // adv cox/tob kc
-            value.at(7), // max cox/tob kc
-            altAccount, // alt account name
-            value.at(9), // alt adv gear
-            value.at(10), // alt max gear
-            value.at(11), // alt rank icon
-            value.at(12), // alt rank
-            value.at(13), // alt old rank
-            diaryTasks, // diary tasks
-            todaysDate, // join date
-            value.at(16), // diary link
-            totalPoints // clan points
+            value.at(0), // Primary account name, A
+            value.at(1), // rank icon, B
+            value.at(2), // rank, C
+            rank, // old rank, D
+            value.at(4), // Intro, E
+            value.at(5), // Intermediate, F
+            value.at(6), // Advanced, G
+            altAccount, // Secondary account name, H
+            value.at(8), // Alt Intro, I
+            value.at(9), // Alt Intermediate, J
+            value.at(10), // Alt Advanced. K
+            value.at(11), // alt rank, L
+            value.at(12), // alt old rank, M
+            value.at(13), // Diary tasks (old), N
+            tasksCompleted.split(' / ')[0], // Diary tasks, O
+            todaysDate, // join date, P
+            webViewLink // diary link, Q
           ];
-
-          for (let j = 18; j < value.length; j++) {
-            inputValues.push(value.at(j));
-          }
 
           insertIntoSheet(config.googleDrive.splitsSheet, `Data!A${index + 4}`, [inputValues]);
         }
@@ -129,20 +119,20 @@ export const acceptApplicationCommand: Command = {
           rsn, // name
           players?.at(rowToInsertInto)?.at(1), // icon
           players?.at(rowToInsertInto)?.at(2), // rank
-          getRoleName(applicantRoles[1]), // old rank
-          'FALSE', // adv gear
-          'FALSE', // max gear
-          'FALSE', // adv cox&tob kc
-          'FALSE', // max cox/tob kc
-          '', // alt account name
-          'FALSE', // alt adv gear
-          'FALSE', // alt max gear
-          players?.at(rowToInsertInto)?.at(11), //alt rank icon
-          players?.at(rowToInsertInto)?.at(12), // alt rank
-          players?.at(rowToInsertInto)?.at(13), // alt old rank
-          tasksCompleted, // diary tasks
-          todaysDate, // join date
-          webViewLink // diary link
+          getRoleName(applicantRoles[1]), // old rank, 3
+          0, // Intro, 4
+          0, // Intermediate, 5
+          0, // Advanced, 6
+          '', // alt account name, 7
+          0, // Alt Intro, 8
+          0, // Alt Intermediate, 9
+          0, // Alt Advanced, 10
+          players?.at(rowToInsertInto)?.at(11), //alt rank
+          players?.at(rowToInsertInto)?.at(12), // alt old rank
+          players?.at(rowToInsertInto)?.at(13), // Diary tasks (old)
+          tasksCompleted.split(' / ')[0], // diary tasks, 14
+          todaysDate, // join date, 15
+          webViewLink // diary link, 16
         ];
 
         insertIntoSheet(config.googleDrive.splitsSheet, `Data!A${rowToInsertInto + 4}`, [inputValues]);

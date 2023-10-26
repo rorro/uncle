@@ -77,6 +77,7 @@ export interface ConfigEntry {
   welcome_success_message: string;
   welcome_error_message: string;
   welcome_pm_message: string;
+  inactivity_check_channel: string;
 }
 
 export interface OpenApplicationsResponse {

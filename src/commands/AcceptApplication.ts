@@ -6,7 +6,7 @@ import {
   ApplicationCommandType,
   ApplicationCommandOptionType
 } from 'discord.js';
-import { Command } from 'src/types';
+import { Command, ScheduledMessageEntry, ScheduledMessageType } from '../types';
 import {
   changePermissions,
   copyDiary,
@@ -166,6 +166,34 @@ export const acceptApplicationCommand: Command = {
           await sendMessageInChannel(client, newMembersChannelId, {
             content: introMessage
           });
+
+          const inactivityCheckChannel = (await KnexDB.getConfigItem(
+            'inactivity_check_channel'
+          )) as string;
+          if (inactivityCheckChannel) {
+            const now = dayjs();
+            const scheduledEmbed = new EmbedBuilder().setTitle(`30 day checkup: ${rsn}`).addFields([
+              { name: 'Join date', value: now.format('YYYY-MM-DD HH:mm') },
+              {
+                name: 'Past month gains',
+                value: `[Wise Old Man link](https://wiseoldman.net/players/${rsn.replaceAll(
+                  ' ',
+                  '%20'
+                )}/gained/skilling?period=month)`
+              },
+              {
+                name: 'Discord user',
+                value: `${discordUser}`
+              }
+            ]);
+            const scheduledMessage: ScheduledMessageEntry = {
+              message: JSON.stringify({ content: '', embed: scheduledEmbed }),
+              date: now.add(30, 'day').format('YYYY-MM-DD HH:mm'),
+              channel: inactivityCheckChannel,
+              type: ScheduledMessageType.Embed
+            };
+            await KnexDB.insertScheduledMessage(scheduledMessage);
+          }
         });
 
       interaction.followUp({

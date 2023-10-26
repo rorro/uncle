@@ -190,6 +190,9 @@ export async function saveTranscript(
 ): Promise<void> {
   if (!interaction.inCachedGuild()) return;
 
+  await interaction.deferReply();
+  await interaction.editReply('Saving transcript...');
+
   const channel = interaction.channel;
   if (!channel || channel.type !== ChannelType.GuildText) return;
 
@@ -252,7 +255,7 @@ export async function saveTranscript(
       files: [new AttachmentBuilder(transcript, { name: transcriptName })]
     });
 
-    await interaction.reply({
+    await interaction.editReply({
       content: `Transcript saved to ${transcriptsChannel}.`
     });
   } catch (e) {

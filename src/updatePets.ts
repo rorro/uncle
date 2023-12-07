@@ -31,6 +31,22 @@ export async function updatePets(): Promise<string> {
     console.error('No message IDs found.');
   }
 
+  // Send the header message
+  const headerId = await sendMessageInChannel(client, leaderboardChannelId, {
+    content: '```fix\nPets```'
+  });
+
+  if (headerId === undefined) {
+    return 'Something went wrong when sending pet header message';
+  }
+
+  await KnexDB.insertIntoMessages(
+    `Header: Pets  ${Math.random()}`,
+    headerId,
+    `#${channel.name}`,
+    MessageType.Pets
+  );
+
   const data = (await KnexDB.getPetsLeaderboard()).filter(p => !p.removed);
   const [leaderboard, scores] = getTopPetsIndex(data);
 
@@ -48,7 +64,7 @@ export async function updatePets(): Promise<string> {
       }
 
       await KnexDB.insertIntoMessages(
-        `#${+i + 1} pets: ${player.username}`,
+        `#${+i + 1} pets: ${player.username}  ${Math.random()}`,
         messageId,
         `#${channel.name}`,
         MessageType.Pets

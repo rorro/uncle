@@ -157,12 +157,15 @@ export interface PetLeaderboardEntry {
   abyssal_sire: boolean;
   giant_mole: boolean;
   callisto: boolean;
+  duke_sucellus: boolean;
+  vardorvis: boolean;
   cerberus: boolean;
   alchemical_hydra: boolean;
   tzkal_zuk: boolean;
   kalphite_queen: boolean;
-  theatre_of_blood: boolean;
   phantom_muspah: boolean;
+  the_leviathan: boolean;
+  theatre_of_blood: boolean;
   nightmare: boolean;
   nex: boolean;
   grotesque_guardians: boolean;
@@ -179,15 +182,20 @@ export interface PetLeaderboardEntry {
   thermonuclear_smoke_devil: boolean;
   zulrah: boolean;
   commander_zilyana: boolean;
+  phoenix: boolean;
   king_black_dragon: boolean;
   scorpia: boolean;
   skotizo: boolean;
+  zalcano: boolean;
   sarachnis: boolean;
+  tempoross: boolean;
   tombs_of_amascut: boolean;
   tztok_jad: boolean;
   venenatis: boolean;
   vetion: boolean;
   vorkath: boolean;
+  the_whisperer: boolean;
+  gauntlet: boolean;
   chinchompa: boolean;
   beaver: boolean;
   giant_squirrel: boolean;
@@ -196,16 +204,12 @@ export interface PetLeaderboardEntry {
   rock_golem: boolean;
   rocky: boolean;
   tangleroot: boolean;
+  abyssal_protector: boolean;
   bloodhound: boolean;
   chompy_chick: boolean;
   herbiboar: boolean;
   lil_creator: boolean;
   penance_queen: boolean;
-  phoenix: boolean;
-  tempoross: boolean;
-  gauntlet: boolean;
-  zalcano: boolean;
-  abyssal_protector: boolean;
 }
 
 export interface SpeedsLeaderboardEntry {

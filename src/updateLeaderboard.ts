@@ -1,9 +1,12 @@
 import { LeaderboardBoss, LeaderboardRecord, MessageType, SpeedsLeaderboardEntry } from './types';
 import KnexDB from './database/knex';
 import client from './bot';
-import { ChannelType } from 'discord.js';
+import { ChannelType, EmbedBuilder } from 'discord.js';
 import { timeInHumanReadable, timeInMilliseconds } from './utils';
 import { sendMessageInChannel } from './discord';
+import { createLeaderboardNav } from './leaderboardNav';
+
+const RANK_EMOJIS = [':first_place:', ':second_place:', ':third_place:'];
 
 export async function updateSpeed(boss: LeaderboardBoss): Promise<string> {
   const leaderboardChannelId = (await KnexDB.getConfigItem('leaderboard_channel')) as string;
@@ -22,74 +25,88 @@ export async function updateSpeed(boss: LeaderboardBoss): Promise<string> {
   }
 
   const bossBoard = speedsLeaderboard.filter(b => b.boss === boss.boss && !b.removed);
-  let message = `${boss.emoji} ${boss.boss} ${boss.emoji.split(' ').reverse().join(' ')}\n\`\`\`ini\n`;
+
+  const embed = new EmbedBuilder().setTitle(`${boss.emoji} ${boss.boss}`);
+  let message = ``;
 
   if (!boss.categories) {
     if (!bossBoard.length) {
       for (let i = 0; i < 3; i++) {
-        message += `[#${+i + 1}] \n`;
+        message += `${RANK_EMOJIS[i]} - \n`;
       }
     } else {
       const { values, indexes, top } = getTopSpeedIndexes(bossBoard, 3);
 
       for (let i = 0; i < 3; i++) {
         if (top[i] === undefined) {
-          message += `[#${+i + 1}] \n`;
+          message += `${RANK_EMOJIS[i]} - \n`;
         } else {
-          message += `[#${+i + 1}] ( ${timeInHumanReadable(top[i])} )\n`;
+          message += `${RANK_EMOJIS[i]} **${timeInHumanReadable(top[i])}** \n`;
           let names = [];
           for (let j in indexes[top[i]]) {
             const index = indexes[top[i]][j];
             const leaderboardEntry = values[index];
             names.push('  ' + leaderboardEntry.name);
+            message += `${'\u200b '.repeat(7)} ${leaderboardEntry.name} - ${
+              leaderboardEntry.proof ? '[Proof](' + leaderboardEntry.proof + ')' : 'Proof missing'
+            } \n`;
           }
-
-          message += `${names.join('\n')}\n`;
         }
       }
     }
-    message += `\`\`\``;
   } else {
     for (const category of boss.categories) {
       const categoryBoard = bossBoard.filter(c => c.category === category && !c.removed);
+      message += `**${category}**\n`;
 
       if (!categoryBoard.length) {
-        message += `[${category}]\n`;
+        for (let i = 0; i < 3; i++) {
+          message += `${RANK_EMOJIS[i]} - \n`;
+        }
+        message += '\n';
         continue;
       }
 
-      const { values, top } = getTopSpeedIndexes(categoryBoard, 1);
-      message += `[${category}] ${`( ${timeInHumanReadable(top[0])} )`}\n`;
+      const { values, indexes, top } = getTopSpeedIndexes(categoryBoard, 3);
 
-      let names = [];
-      for (let i = 0; i < values.length; i++) {
-        if (values[i].value === top[0]) {
-          names.push('  ' + values[i].name);
+      for (let i = 0; i < 3; i++) {
+        if (top[i] === undefined) {
+          message += `${RANK_EMOJIS[i]} - \n`;
+        } else {
+          message += `${RANK_EMOJIS[i]} **${timeInHumanReadable(top[i])}** \n`;
+          for (let j in indexes[top[i]]) {
+            const index = indexes[top[i]][j];
+            const leaderboardEntry = values[index];
+            message += `${'\u200b '.repeat(7)} ${leaderboardEntry.name} - ${
+              leaderboardEntry.proof ? '[Proof](' + leaderboardEntry.proof + ')' : 'Proof missing'
+            } \n`;
+          }
         }
       }
-
-      message += names.length === 0 ? '' : `${names.join('\n')}\n`;
+      message += '\n';
     }
-    message += `\`\`\``;
   }
+  embed.setDescription(message);
 
   let messageId = await KnexDB.getMessageIdByName(boss.boss);
+
   try {
     if (!messageId) throw new Error('Message id not found');
-
     // Discord message exists and should be edited instead
 
-    await channel.messages.edit(messageId, { content: message });
+    await channel.messages.edit(messageId, { embeds: [embed] });
+    await createLeaderboardNav(channel);
   } catch {
     // message not found, send it and store message id
     const mId = await sendMessageInChannel(client, leaderboardChannelId, {
-      content: message
+      embeds: [embed]
     });
     if (!mId) {
       return 'Something went wrong when sending the leaderboard message.';
     }
     messageId = mId;
     await KnexDB.insertIntoMessages(boss.boss, messageId, `#${channel.name}`, MessageType.Leaderboard);
+    await createLeaderboardNav(channel, true);
   }
 
   return `Successfully updated ${boss.boss}. Head over to Discord to check out the updated board.`;
@@ -99,7 +116,8 @@ function getTopSpeedIndexes(data: SpeedsLeaderboardEntry[], places: number) {
   const values = data
     .map(entry => ({
       name: entry.username,
-      value: timeInMilliseconds(entry.time)
+      value: timeInMilliseconds(entry.time),
+      proof: entry.proof
     }))
     .sort((e1, e2) => e1.value - e2.value);
 

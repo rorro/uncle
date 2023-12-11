@@ -4,6 +4,7 @@ import KnexDB from './database/knex';
 import { MessageType, PetLeaderboardEntry } from './types';
 import Pets from './pets';
 import { sendMessageInChannel } from './discord';
+import { NAV_MESSAGE_NAME, createLeaderboardNav } from './leaderboardNav';
 
 export async function updatePets(): Promise<string> {
   const leaderboardChannelId = (await KnexDB.getConfigItem('leaderboard_channel')) as string;
@@ -40,12 +41,7 @@ export async function updatePets(): Promise<string> {
     return 'Something went wrong when sending pet header message';
   }
 
-  await KnexDB.insertIntoMessages(
-    `Header: Pets  ${Math.random()}`,
-    headerId,
-    `#${channel.name}`,
-    MessageType.Pets
-  );
+  await KnexDB.insertIntoMessages(`Pets`, headerId, `#${channel.name}`, MessageType.Pets);
 
   const data = (await KnexDB.getPetsLeaderboard()).filter(p => !p.removed);
   const [leaderboard, scores] = getTopPetsIndex(data);
@@ -71,6 +67,7 @@ export async function updatePets(): Promise<string> {
       );
     }
   }
+  await createLeaderboardNav(channel, true);
   return 'Successfully updated pets hiscores.';
 }
 

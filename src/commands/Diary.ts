@@ -15,6 +15,8 @@ import { getRank, hasRole } from '../utils';
 import KnexDB from '../database/knex';
 import { sendMessageInChannel } from '../discord';
 
+const DIARY_MESSAGE_NAME = 'Diary Top 10';
+
 export const diaryCommand: Command = {
   name: 'diary',
   description: 'Show various information about splits',
@@ -71,7 +73,7 @@ export const diaryCommand: Command = {
 
           const embed = await buildMessage(players);
 
-          let messageId = await KnexDB.getMessageIdByName('diary_top10_message');
+          let messageId = await KnexDB.getMessageIdByName(DIARY_MESSAGE_NAME);
 
           if (messageId) {
             try {
@@ -113,7 +115,7 @@ async function sendNewMessage(
     return;
   }
   await KnexDB.insertIntoMessages(
-    'Diary Top 10',
+    DIARY_MESSAGE_NAME,
     mId,
     `#${leaderboardChannel.name}`,
     MessageType.Leaderboard

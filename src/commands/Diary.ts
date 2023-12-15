@@ -113,7 +113,7 @@ async function sendNewMessage(
     return;
   }
   await KnexDB.insertIntoMessages(
-    'diary_top10_message',
+    'Diary Top 10',
     mId,
     `#${leaderboardChannel.name}`,
     MessageType.Leaderboard

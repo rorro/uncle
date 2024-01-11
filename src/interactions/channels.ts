@@ -13,9 +13,11 @@ import {
 } from 'discord.js';
 import * as fs from 'fs';
 import path from 'path';
+import { parse } from 'node-html-parser';
 import config from '../config';
 import { createChannel } from '../discord';
 import KnexDB from '../database/knex';
+import { imgurClient } from '../api/handler';
 
 export async function startChannel(interaction: ButtonInteraction, channelType: string) {
   if (!interaction.inCachedGuild()) return;
@@ -191,7 +193,7 @@ export async function saveTranscript(
   if (!interaction.inCachedGuild()) return;
 
   await interaction.deferReply();
-  await interaction.editReply('Saving transcript...');
+  await interaction.editReply('Creating transcript...');
 
   const channel = interaction.channel;
   if (!channel || channel.type !== ChannelType.GuildText) return;
@@ -215,8 +217,9 @@ export async function saveTranscript(
       : undefined;
 
   if (!transcriptsChannel) {
-    await channel.send({
-      content: 'Transcript was not saved because no transcript channel is set.'
+    await interaction.editReply({
+      content:
+        'Transcript was not created because no transcript channel is set. Go to the dashboard and configure a channel.'
     });
     return;
   }
@@ -228,13 +231,67 @@ export async function saveTranscript(
   const transcriptUrl = `${URL}:${PORT}/transcripts/${transcriptName}`;
 
   try {
-    const transcript = await createTranscript(channel, {
-      returnType: ExportReturnType.Buffer,
+    await interaction.editReply({
+      content: 'Creating transcript...'
+    });
+
+    let transcript = await createTranscript(channel, {
+      returnType: ExportReturnType.String,
       saveImages: true,
       poweredBy: false
     });
 
-    fs.writeFileSync(path.join('.transcripts', transcriptName), transcript);
+    const root = parse(transcript);
+
+    // Find all unique images in the transcript
+    const uniqueImages: string[] = [];
+    const imageAttachments = root
+      .getElementsByTagName('discord-attachment')
+      .filter(i => i.getAttribute('url')?.startsWith('data:image'));
+
+    imageAttachments.forEach(url => {
+      const base64image = url.getAttribute('url');
+      if (base64image !== undefined) {
+        var unique = uniqueImages.find(i => i === base64image);
+        if (unique === undefined) uniqueImages.push(base64image);
+      }
+    });
+
+    await interaction.editReply({
+      content: `Uploading ${uniqueImages.length} images to Imgur...`
+    });
+
+    for (const image of uniqueImages) {
+      // Upload the image to imgur
+      const imgurImage = await imgurClient.upload({
+        image: image.split(',')[1],
+        type: 'base64',
+        album: config.imgur.albumHash
+      });
+
+      // Only try to replace if the upload was successful
+      if (imgurImage.success) {
+        transcript = transcript.replaceAll(image, imgurImage.data.link);
+      } else {
+        // An error occured with uploading the image to imgur
+        // Abort and don't save the transcript
+        const randInt = Math.floor(Math.random() * 100) + 1;
+        const errorContent =
+          randInt === 73
+            ? '<:tzhaarmej:1195023199272964146> You not lucky. Maybe next time, JalYt.'
+            : `:exclamation: An error occured when trying to upload images to Imgur, transcript was not saved. Please try again later.\nError ${imgurImage.status}: ${imgurImage.data}`;
+
+        await interaction.editReply({
+          content: errorContent
+        });
+        return;
+      }
+    }
+
+    await interaction.editReply({
+      content: 'Saving transcript...'
+    });
+    fs.writeFileSync(path.join('.transcripts', transcriptName), Buffer.from(transcript));
 
     const embed = new EmbedBuilder()
       .setAuthor({
@@ -250,9 +307,11 @@ export async function saveTranscript(
         { name: 'Direct Transcript', value: `[Direct Transcript](${transcriptUrl})`, inline: true }
       ]);
 
+    const attachment = new AttachmentBuilder(Buffer.from(transcript), { name: transcriptName });
+
     await transcriptsChannel.send({
       embeds: [embed],
-      files: [new AttachmentBuilder(transcript, { name: transcriptName })]
+      files: [attachment]
     });
 
     await interaction.editReply({

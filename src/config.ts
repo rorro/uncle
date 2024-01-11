@@ -88,5 +88,11 @@ export default {
   site: {
     url: process.env.SITE_URL as string,
     port: process.env.SITE_PORT as string
+  },
+  imgur: {
+    clientId: process.env.IMGUR_CLIENT_ID as string,
+    clientSecret: process.env.IMGUR_CLIENT_SECRET as string,
+    refreshToken: process.env.IMGUR_REFRESH_TOKEN as string,
+    albumHash: process.env.IMGUR_ALBUM_HASH as string
   }
 };

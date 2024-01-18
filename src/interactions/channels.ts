@@ -14,6 +14,7 @@ import {
 import * as fs from 'fs';
 import path from 'path';
 import { parse } from 'node-html-parser';
+import sharp from 'sharp';
 import config from '../config';
 import { createChannel } from '../discord';
 import KnexDB from '../database/knex';
@@ -258,13 +259,16 @@ export async function saveTranscript(
     });
 
     await interaction.editReply({
-      content: `Uploading ${uniqueImages.length} images to Imgur...`
+      content: `Compressing and uploading ${uniqueImages.length} images to Imgur...`
     });
 
     for (const image of uniqueImages) {
+      const imgBuffer = Buffer.from(image.split(',')[1], 'base64');
+      const downsized = (await sharp(imgBuffer).png({ quality: 20 }).toBuffer()).toString('base64');
+
       // Upload the image to imgur
       const imgurImage = await imgurClient.upload({
-        image: image.split(',')[1],
+        image: downsized,
         type: 'base64',
         album: config.imgur.albumHash
       });

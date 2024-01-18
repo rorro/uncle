@@ -22,7 +22,8 @@
     "googleapis": "^100.0.0",
     "imgur": "^2.3.0",
     "knex": "^2.3.0",
-    "node-html-parser": "^6.1.12"
+    "node-html-parser": "^6.1.12",
+    "sharp": "^0.33.2"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.3",

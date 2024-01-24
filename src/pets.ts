@@ -54,6 +54,7 @@ const Pets: PetEntry[] = [
   { name: 'phoenix', display_name: 'Phoenix', emoji: '<:phoenix:983752749650935838>' },
   { name: 'king_black_dragon', display_name: 'King Black Dragon', emoji: '<:kbd:983752777387872288>' },
   { name: 'scorpia', display_name: 'Scorpia', emoji: '<:scorpia:983752776037314591>' },
+  { name: 'scurrius', display_name: 'Scurrius', emoji: '<:scurry:1199722816124231680>' },
   { name: 'skotizo', display_name: 'Skotizo', emoji: '<:skotizo:983752775047467049>' },
   { name: 'zalcano', display_name: 'Zalcano', emoji: '<:zalcano:983752745888669736>' },
   { name: 'sarachnis', display_name: 'Sarachnis', emoji: '<:sarachnis:983752773168402453>' },

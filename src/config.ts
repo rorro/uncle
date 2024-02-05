@@ -23,6 +23,7 @@ export default {
   },
   guild: {
     id: process.env.GUILD_ID as string,
+    leaderboardChangelog: process.env.LEADERBOARD_CHANGELOG_THREAD as string,
     roles: {
       applicationManager: process.env.APPLICATION_MANAGER_ROLE as string,
       staff: process.env.STAFF_ROLE as string,

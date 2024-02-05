@@ -5,6 +5,7 @@ import { ChannelType, EmbedBuilder } from 'discord.js';
 import { timeInHumanReadable, timeInMilliseconds } from './utils';
 import { sendMessageInChannel } from './discord';
 import { createLeaderboardNav } from './leaderboardNav';
+import config from './config';
 
 const RANK_EMOJIS = [':first_place:', ':second_place:', ':third_place:'];
 
@@ -110,6 +111,31 @@ export async function updateSpeed(boss: LeaderboardBoss): Promise<string> {
   }
 
   return `Successfully updated ${boss.boss}. Head over to Discord to check out the updated board.`;
+}
+
+export async function postChangelog(content: string): Promise<string> {
+  const leaderboardChannelId = (await KnexDB.getConfigItem('leaderboard_channel')) as string;
+  if (!leaderboardChannelId) {
+    return 'Leaderboard channel has not been configured. Head over to the config section.';
+  }
+
+  const channel = client.channels.cache.get(leaderboardChannelId);
+  if (!channel || channel.type !== ChannelType.GuildText) {
+    return `The configured leaderboard channel either doesn't exist or is not a text channel`;
+  }
+
+  const changelogThread = channel.threads.cache.get(config.guild.leaderboardChangelog);
+
+  if (!changelogThread) {
+    return 'The changelog thread could not be found.';
+  }
+
+  try {
+    await changelogThread.send({ content: content });
+    return 'Successfully posted changelog.';
+  } catch (e) {
+    return `Something went wrong while sending changelog. ${e}`;
+  }
 }
 
 function getTopSpeedIndexes(data: SpeedsLeaderboardEntry[], places: number) {

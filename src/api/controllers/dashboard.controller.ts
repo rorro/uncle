@@ -6,7 +6,7 @@ import client from '../../bot';
 import { hasRole } from '../../utils';
 import { LeaderboardBoss, ResponseType } from '../../types';
 import KnexDB from '../../database/knex';
-import { updateSpeed } from '../../updateLeaderboard';
+import { postChangelog, updateSpeed } from '../../updateLeaderboard';
 import { updatePets } from '../../updatePets';
 
 const oauth2 = new DiscordOauth2();
@@ -259,6 +259,16 @@ async function updateLeaderboard(req: Request, res: Response) {
   res.send({ message: result });
 }
 
+async function postLeaderboardChangelog(req: Request, res: Response) {
+  const accessToken = req.query.accessToken as string;
+
+  const loggedIn = await hasAccess(decodeURIComponent(accessToken));
+  if (!loggedIn) return;
+
+  const result = await postChangelog(req.body.changelog);
+  res.send({ message: result });
+}
+
 export default {
   authenticate,
   getData,
@@ -266,5 +276,6 @@ export default {
   verifyLogin,
   saveData,
   deleteScheduledMessage,
-  updateLeaderboard
+  updateLeaderboard,
+  postLeaderboardChangelog
 };

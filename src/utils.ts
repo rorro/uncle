@@ -209,17 +209,20 @@ export function timeInHumanReadable(time: number): string {
   let humanReadable = '';
   humanReadable +=
     hours > 0
-      ? `${padNumber(hours)}:${padNumber(minutes)}:${padNumber(seconds)}.${padNumber(milliseconds)}`
+      ? `${padNumber(hours)}:${padNumber(minutes)}:${padNumber(seconds)}.${padNumber(
+          milliseconds,
+          true
+        )}`
       : minutes > 0
-      ? `${padNumber(minutes)}:${padNumber(seconds)}.${padNumber(milliseconds)}`
-      : `${padNumber(seconds)}.${padNumber(milliseconds)}`;
+      ? `${padNumber(minutes)}:${padNumber(seconds)}.${padNumber(milliseconds, true)}`
+      : `${padNumber(seconds)}.${padNumber(milliseconds, true)}`;
 
   return humanReadable;
 }
 
-function padNumber(num: number): string {
+function padNumber(num: number, end: boolean = false): string {
   if (num < 10) {
-    return '0' + num;
+    return end ? num + '0' : '0' + num;
   } else {
     return num + '';
   }

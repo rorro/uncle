@@ -19,11 +19,21 @@ import config from '../config';
 import { createChannel } from '../discord';
 import KnexDB from '../database/knex';
 import { imgurClient } from '../api/handler';
+import dayjs from 'dayjs';
 
 export async function startChannel(interaction: ButtonInteraction, channelType: string) {
   if (!interaction.inCachedGuild()) return;
 
   await interaction.deferReply({ ephemeral: true });
+
+  const memberJoinedAt = dayjs(interaction.member.joinedAt);
+  const memberForFiveMinutes = dayjs().diff(memberJoinedAt, 'seconds') / 60 > 5;
+  if (!memberForFiveMinutes) {
+    interaction.editReply(
+      `You are too new here. You need to be a member of this server for at least 5 minutes. Please take the time to read everything and re-try in 5 minutes.`
+    );
+    return;
+  }
 
   await interaction.editReply({ content: `Starting ${channelType} process...` });
 

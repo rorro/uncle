@@ -50,7 +50,8 @@ class KnexDB {
         'welcome_success_message',
         'welcome_error_message',
         'welcome_pm_message',
-        'inactivity_check_channel'
+        'inactivity_check_channel',
+        'logs_channel'
       )
     )[0];
   }

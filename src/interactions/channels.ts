@@ -15,23 +15,59 @@ import * as fs from 'fs';
 import path from 'path';
 import { parse } from 'node-html-parser';
 import sharp from 'sharp';
+import dayjs from 'dayjs';
 import config from '../config';
-import { createChannel } from '../discord';
+import { createChannel, sendMessageInChannel } from '../discord';
 import KnexDB from '../database/knex';
 import { imgurClient } from '../api/handler';
-import dayjs from 'dayjs';
 
 export async function startChannel(interaction: ButtonInteraction, channelType: string) {
   if (!interaction.inCachedGuild()) return;
 
   await interaction.deferReply({ ephemeral: true });
 
-  const memberJoinedAt = dayjs(interaction.member.joinedAt);
-  const memberForFiveMinutes = dayjs().diff(memberJoinedAt, 'seconds') / 60 > 5;
+  const member = interaction.member;
+  const avatar = member.displayAvatarURL();
+
+  const memberJoinedAt = dayjs(member.joinedAt);
+  const memberAge = dayjs().diff(memberJoinedAt, 'seconds');
+  const ageMinutes = Math.floor(memberAge / 60);
+  const ageSeconds = memberAge % 60;
+
+  const untilEligble = 5 * 60 - memberAge;
+  const untilEligbleMinutes = Math.floor(untilEligble / 60);
+  const untilEligbleSeconds = untilEligble % 60;
+
+  const memberForFiveMinutes = memberAge / 60 > 5;
   if (!memberForFiveMinutes) {
     interaction.editReply(
-      `You are too new here. You need to be a member of this server for at least 5 minutes. Please take the time to read everything and re-try in 5 minutes.`
+      `You are too new here. You need to be a member of this server for at least 5 minutes. Please take the time to read everything and re-try in ${untilEligbleMinutes} minutes ${untilEligbleSeconds} seconds.`
     );
+
+    const embed = new EmbedBuilder()
+      .setColor('DarkRed')
+      .setTitle('Member too new')
+      .setThumbnail(avatar)
+      .setFields([
+        {
+          name: 'ID',
+          value: member.id
+        },
+        {
+          name: 'Username',
+          value: member.user.username
+        }
+      ])
+      .setDescription(
+        `${member} tried to open a(n) ${channelType} channel but is too new to the server. They have only been a server member for ${ageMinutes} minutes ${ageSeconds} seconds.`
+      );
+
+    const logsChannelId = await KnexDB.getConfigItem('logs_channel');
+    if (logsChannelId === null || typeof logsChannelId === 'number') return;
+    await sendMessageInChannel(interaction.client, logsChannelId, {
+      embeds: [embed]
+    });
+
     return;
   }
 

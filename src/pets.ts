@@ -57,6 +57,7 @@ const Pets: PetEntry[] = [
   { name: 'scurrius', display_name: 'Scurrius', emoji: '<:scurry:1199722816124231680>' },
   { name: 'skotizo', display_name: 'Skotizo', emoji: '<:skotizo:983752775047467049>' },
   { name: 'zalcano', display_name: 'Zalcano', emoji: '<:zalcano:983752745888669736>' },
+  { name: 'sol_heredit', display_name: 'Sol Heredit', emoji: '<:heredit:1220469431004561439>' },
   { name: 'sarachnis', display_name: 'Sarachnis', emoji: '<:sarachnis:983752773168402453>' },
   { name: 'tempoross', display_name: 'Tempoross', emoji: '<:tempoross:983752748367495288>' },
   { name: 'tombs_of_amascut', display_name: 'Tombs of Amascut', emoji: '<:toa:1013413759580127336>' },
@@ -83,7 +84,8 @@ const Pets: PetEntry[] = [
   { name: 'chompy_chick', display_name: 'Chompy chick', emoji: '<:chompy:983752754847698944>' },
   { name: 'herbiboar', display_name: 'Herbiboar', emoji: '<:herbi:983752753232875551>' },
   { name: 'lil_creator', display_name: `Lil' creator`, emoji: '<:creator:983752752322707526>' },
-  { name: 'penance_queen', display_name: 'Penance queen', emoji: '<:pq:983752750896676914>' }
+  { name: 'penance_queen', display_name: 'Penance queen', emoji: '<:pq:983752750896676914>' },
+  { name: 'quetzin', display_name: 'Quetzin', emoji: '<:quet:1220469432573493378>' }
 ];
 
 export default Pets;

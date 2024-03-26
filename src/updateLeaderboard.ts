@@ -22,7 +22,7 @@ export async function updateSpeed(boss: LeaderboardBoss): Promise<string> {
 
   const speedsLeaderboard = await KnexDB.getSpeedsLeaderboard();
   if (!speedsLeaderboard) {
-    return 'Could not fetch data from the leaderboard sheet.';
+    return 'Could not fetch leaderboard data.';
   }
 
   const bossBoard = speedsLeaderboard.filter(b => b.boss === boss.boss && !b.removed);

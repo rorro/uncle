@@ -56,6 +56,10 @@ const LeaderboardBosses: LeaderboardBoss[] = [
     emoji: '<:zuk:1004375322671730689>'
   },
   {
+    boss: 'Fortis Colosseum',
+    emoji: '<:heredit:1220469431004561439>'
+  },
+  {
     boss: 'Nightmare of Ashihama',
     emoji: '<:nightmare:983752799533826098>',
     categories: ['Solo', '5 Man']

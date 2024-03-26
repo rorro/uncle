@@ -187,6 +187,7 @@ export interface PetLeaderboardEntry {
   scorpia: boolean;
   skotizo: boolean;
   zalcano: boolean;
+  sol_heredit: boolean;
   sarachnis: boolean;
   tempoross: boolean;
   tombs_of_amascut: boolean;
@@ -210,6 +211,7 @@ export interface PetLeaderboardEntry {
   herbiboar: boolean;
   lil_creator: boolean;
   penance_queen: boolean;
+  quetzin: boolean;
 }
 
 export interface SpeedsLeaderboardEntry {

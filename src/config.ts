@@ -68,6 +68,18 @@ export default {
       threshold: 50
     },
     {
+      metric: 'chambers_of_xeric',
+      type: 'boss',
+      name: 'Raids Combined',
+      alternatives: [
+        'chambers_of_xeric_challenge_mode',
+        'theatre_of_blood',
+        'theatre_of_blood_hard_mode',
+        'tombs_of_amascut_expert'
+      ],
+      threshold: 300
+    },
+    {
       metric: 'the_corrupted_gauntlet',
       type: 'warning',
       name: 'SotE Completion',

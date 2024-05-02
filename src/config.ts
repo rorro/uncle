@@ -39,9 +39,10 @@ export default {
     { metric: 'combatLevel', type: 'other', name: '+ Combat', threshold: 125 },
 
     // Skills
-    { metric: 'overall', type: 'skill', name: '+ Total', threshold: 1750 },
+    { metric: 'overall', type: 'skill', name: '+ Total', threshold: 2000 },
     { metric: 'ranged', type: 'skill', name: ' Ranged', threshold: 99 },
     { metric: 'magic', type: 'skill', name: ' Magic', threshold: 99 },
+    { metric: 'slayer', type: 'skill', name: ' Slayer', threshold: 95 },
     { metric: 'agility', type: 'skill', name: ' Agility', threshold: 70 },
     { metric: 'herblore', type: 'skill', name: ' Herblore', threshold: 78 },
     { metric: 'construction', type: 'skill', name: ' Construction', threshold: 82 },
@@ -66,6 +67,18 @@ export default {
       type: 'boss',
       name: 'Tombs of Amascut (Expert)',
       threshold: 50
+    },
+    {
+      metric: 'chambers_of_xeric',
+      type: 'boss',
+      name: 'Raids Combined',
+      alternatives: [
+        'chambers_of_xeric_challenge_mode',
+        'theatre_of_blood',
+        'theatre_of_blood_hard_mode',
+        'tombs_of_amascut_expert'
+      ],
+      threshold: 300
     },
     {
       metric: 'the_corrupted_gauntlet',

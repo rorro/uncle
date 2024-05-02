@@ -105,34 +105,14 @@ export const checkApplicantRequirementsCommand: Command = {
 
                 if (altBoss) {
                   const [, altBossValue] = altBoss;
-                  altBossKc = Math.max(altBossValue.kills, 0);
+                  altBossKc += Math.max(altBossValue.kills, 0);
                 }
               }
             }
 
             description += `${bossKc + altBossKc >= requirement.threshold ? '✅' : '❌'} ${
               requirement.threshold
-            }kc ${requirement.name} (${bossKc}${requirement.alternatives ? `, ${altBossKc}` : ''})\n`;
-            break;
-          case 'special':
-            if (!requirement.alternatives) break;
-            const altKcs = [];
-            for (const alts of requirement.alternatives) {
-              let altBossKc = 0;
-              for (const alt of alts) {
-                const altBoss = bosses.find(([name]) => name === alt);
-
-                if (altBoss) {
-                  const [, altBossValue] = altBoss;
-                  altBossKc += altBossValue.kills;
-                }
-              }
-              altKcs.push(Math.max(altBossKc, 0));
-            }
-
-            description += `${altKcs.some(kc => kc >= requirement.threshold) ? '✅' : '❌'} ${
-              requirement.threshold
-            }kc ${requirement.name}\n`;
+            }kc ${requirement.name} (${bossKc + (requirement.alternatives ? altBossKc : 0)})\n`;
             break;
           case 'warning':
             const warningMetric = bosses.find(([name]) => name === requirement.metric);

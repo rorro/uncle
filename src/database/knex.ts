@@ -160,11 +160,19 @@ class KnexDB {
   }
 
   async insertIntoOpenChannels(user_id: string, user: string, channel: string, table: string) {
-    return await this.db(table).insert({ user_id, user, channel }, 'id').onConflict('user_id').merge();
+    return await this.db(table).insert({ user_id, user, channel }, 'id');
   }
 
-  async deleteFromOpenChannels(user_id: string, table: string) {
-    await this.db(table).where('user_id', user_id).delete();
+  async deleteFromOpenChannels(user_id: string, channel_id: string, table: string) {
+    const rows = await this.db(table).select('id', 'channel').where('user_id', user_id);
+
+    for (const row of rows) {
+      const channel = JSON.parse(row.channel);
+      if (channel.id === channel_id) {
+        await this.db(table).where('id', row.id).delete();
+        break;
+      }
+    }
   }
 
   // Scheduled Messages

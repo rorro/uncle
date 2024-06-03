@@ -81,6 +81,12 @@ export default {
       threshold: 300
     },
     {
+      metric: 'tzkal_zuk',
+      type: 'boss',
+      name: 'Inferno',
+      threshold: 1
+    },
+    {
       metric: 'the_corrupted_gauntlet',
       type: 'warning',
       name: 'SotE Completion',

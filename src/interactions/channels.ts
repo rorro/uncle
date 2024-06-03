@@ -20,6 +20,7 @@ import config from '../config';
 import { createChannel, sendMessageInChannel } from '../discord';
 import KnexDB from '../database/knex';
 import { imgurClient } from '../api/handler';
+import { hasRole } from '../utils';
 
 export async function startChannel(interaction: ButtonInteraction, channelType: string) {
   if (!interaction.inCachedGuild()) return;
@@ -109,7 +110,11 @@ export async function startChannel(interaction: ButtonInteraction, channelType: 
     channelConfig.databaseCategory
   );
 
-  if (openApplication && interaction.client.channels.cache.has(openApplication.channel.id)) {
+  if (
+    !hasRole(interaction.member, config.guild.roles.staff) &&
+    openApplication &&
+    interaction.client.channels.cache.has(openApplication.channel.id)
+  ) {
     interaction.editReply(
       `You already have an open application. Head over to <#${openApplication.channel.id}> to continue.`
     );
@@ -204,7 +209,7 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
     ]
   });
 
-  await KnexDB.deleteFromOpenChannels(applicant.user.id, databaseCategory);
+  await KnexDB.deleteFromOpenChannels(applicant.user.id, interaction.channelId, databaseCategory);
   await interaction.message.delete();
 
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(

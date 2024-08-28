@@ -109,6 +109,10 @@ const LeaderboardBosses: LeaderboardBoss[] = [
     categories: ['Normal', 'Awakened']
   },
   {
+    boss: 'Araxxor',
+    emoji: '<:nid:1278463230922068018>'
+  },
+  {
     boss: 'Diary Top 10',
     emoji: ':ledger:'
   }

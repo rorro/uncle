@@ -13,12 +13,12 @@ const Pets: PetEntry[] = [
   },
   { name: 'corporeal_beast', display_name: 'Corporeal Beast', emoji: '<:corp:983752788733485106>' },
   { name: 'dagannoth_prime', display_name: 'Dagannoth Prime', emoji: '<:prime:983752792822923314>' },
-  { name: 'dagannoth_rex', display_name: 'Dagannoth Rex', emoji: '<:rex:983752791602393098>' },
   {
     name: 'dagannoth_supreme',
     display_name: 'Dagannoth Supreme',
     emoji: '<:supreme:983752790130184192>'
   },
+  { name: 'dagannoth_rex', display_name: 'Dagannoth Rex', emoji: '<:rex:983752791602393098>' },
   { name: 'tztok_jad', display_name: 'TzTok-Jad', emoji: '<:jad:983752772270837760>' },
   {
     name: 'general_graardor',

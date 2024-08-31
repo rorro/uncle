@@ -162,8 +162,8 @@ export interface PetLeaderboardEntry {
   commander_zilyana: boolean;
   corporeal_beast: boolean;
   dagannoth_prime: boolean;
-  dagannoth_rex: boolean;
   dagannoth_supreme: boolean;
+  dagannoth_rex: boolean;
   tztok_jad: boolean;
   general_graardor: boolean;
   giant_mole: boolean;

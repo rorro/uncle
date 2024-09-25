@@ -215,6 +215,7 @@ export interface PetLeaderboardEntry {
   quetzin: boolean;
   araxxor: boolean;
   the_hueycoatl: boolean;
+  amoxliatl: boolean;
 }
 
 export interface SpeedsLeaderboardEntry {

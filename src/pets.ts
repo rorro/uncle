@@ -80,7 +80,9 @@ const Pets: PetEntry[] = [
   { name: 'scurrius', display_name: 'Scurrius', emoji: '<:scurry:1199722816124231680>' },
   { name: 'sol_heredit', display_name: 'Sol Heredit', emoji: '<:heredit:1220469431004561439>' },
   { name: 'quetzin', display_name: 'Quetzin', emoji: '<:quet:1220469432573493378>' },
-  { name: 'araxxor', display_name: 'Araxxor', emoji: '<:nid:1278463230922068018>' }
+  { name: 'araxxor', display_name: 'Araxxor', emoji: '<:nid:1278463230922068018>' },
+  { name: 'the_hueycoatl', display_name: 'The Hueycoatl', emoji: '<:huberte:1288601208210325525>' },
+  { name: 'amoxliatl', display_name: 'Amoxliatl', emoji: '<:moxi:1288601209820680224>' }
 ];
 
 export default Pets;

@@ -38,7 +38,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "NODE_ENV=production pm2 start dist/bot.js --watch",
+    "start": "NODE_ENV=production pm2 start dist/bot.js --watch --time",
     "deploy": "npm run build && bash deploy.sh",
     "dev": "ts-node-dev --poll --respawn --transpile-only --ignore-watch node_modules src/bot.ts",
     "dev-win": "cross-env NODE_ENV=development nodemon src/bot.ts",

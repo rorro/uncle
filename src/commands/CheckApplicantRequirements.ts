@@ -45,17 +45,23 @@ export const checkApplicantRequirementsCommand: Command = {
     const clanIcon = (await KnexDB.getConfigItem('clan_icon')) as string;
     if (clanIcon) reply.setThumbnail(clanIcon);
 
+    let recentlyUpdated = false;
     try {
       await womClient.players.updatePlayer(rsn);
     } catch (e: any) {
-      if (e.response?.data?.message) {
-        reply.setDescription(e.response?.data?.message);
-      } else {
-        reply.setDescription(`${e.name}\n${e.message}`);
+      if (e.name === 'RateLimitError' && e.message.includes('updated recently')) {
+        recentlyUpdated = true;
       }
-      reply.setColor('#FF0000');
-      await interaction.editReply({ embeds: [reply] });
-      return;
+      if (!recentlyUpdated) {
+        if (e.response?.data?.message) {
+          reply.setDescription(e.response?.data?.message);
+        } else {
+          reply.setDescription(`${e.name}\n${e.message}`);
+        }
+        reply.setColor('#FF0000');
+        await interaction.editReply({ embeds: [reply] });
+        return;
+      }
     }
 
     let rwResult = '';

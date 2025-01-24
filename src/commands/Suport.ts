@@ -11,7 +11,7 @@ import {
 } from 'discord.js';
 import config from '../config';
 import { Command } from '../types';
-import { hasRole } from '../utils';
+import { hasRole, isStaff } from '../utils';
 import KnexDB from '../database/knex';
 
 export const supportCommand: Command = {
@@ -37,7 +37,7 @@ export const supportCommand: Command = {
   run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
 
-    if (!hasRole(interaction.member, config.guild.roles.staff)) {
+    if (!isStaff(interaction.member)) {
       await interaction.reply({
         ephemeral: true,
         content: 'You need to be a staff member to use this command!'

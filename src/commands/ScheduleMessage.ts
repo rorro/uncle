@@ -10,7 +10,7 @@ import { Command, ScheduledMessage } from '../types';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import utc from 'dayjs/plugin/utc';
-import { hasRole, DATE_FORMAT } from '../utils';
+import { hasRole, DATE_FORMAT, isStaff } from '../utils';
 import config from '../config';
 import KnexDB from '../database/knex';
 import { ScheduledMessageType } from '../types';
@@ -47,7 +47,7 @@ export const scheduleCommand: Command = {
   run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
 
-    if (!hasRole(interaction.member, config.guild.roles.staff)) {
+    if (!isStaff(interaction.member)) {
       await interaction.reply({
         ephemeral: true,
         content: 'You need to be a staff member to use this command!'

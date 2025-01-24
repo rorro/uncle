@@ -25,8 +25,8 @@ export default {
     id: process.env.GUILD_ID as string,
     leaderboardChangelog: process.env.LEADERBOARD_CHANGELOG_THREAD as string,
     roles: {
-      applicationManager: process.env.APPLICATION_MANAGER_ROLE as string,
       staff: process.env.STAFF_ROLE as string,
+      juniorStaff: process.env.JUNIOR_STAFF_ROLE as string,
       member: process.env.MEMBER_ROLE as string,
       protector: process.env.PROTECTOR_ROLE as string,
       bulwark: process.env.BULWARK_ROLE as string,

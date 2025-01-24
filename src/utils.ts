@@ -227,3 +227,7 @@ function padNumber(num: number, end: boolean = false): string {
     return num + '';
   }
 }
+
+export function isStaff(member: GuildMember): boolean {
+  return hasRole(member, config.guild.roles.staff) || hasRole(member, config.guild.roles.juniorStaff);
+}

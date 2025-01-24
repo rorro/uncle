@@ -11,7 +11,7 @@ import {
 import { getSheetData } from '../api/googleHandler';
 import config from '../config';
 import { Command, MessageType, PlayerSummary } from '../types';
-import { getRank, hasRole } from '../utils';
+import { getRank, isStaff } from '../utils';
 import KnexDB from '../database/knex';
 import { sendMessageInChannel } from '../discord';
 
@@ -31,7 +31,7 @@ export const diaryCommand: Command = {
   run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
 
-    if (!hasRole(interaction.member, config.guild.roles.staff)) {
+    if (!isStaff(interaction.member)) {
       await interaction.reply({
         content: 'You need to be a staff member to use this command!',
         ephemeral: true

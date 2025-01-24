@@ -7,7 +7,7 @@ import {
   EmbedBuilder
 } from 'discord.js';
 import { Command } from '../types';
-import { hasRole } from '../utils';
+import { hasRole, isStaff } from '../utils';
 import config from '../config';
 
 export const rolesCommand: Command = {
@@ -32,7 +32,7 @@ export const rolesCommand: Command = {
   run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
 
-    if (!hasRole(interaction.member, config.guild.roles.staff)) {
+    if (!isStaff(interaction.member)) {
       await interaction.reply({
         content: 'You need to be a staff member to use this command!'
       });

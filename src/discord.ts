@@ -49,6 +49,10 @@ export async function createChannel(
         allow: [PermissionFlagsBits.ViewChannel]
       },
       {
+        id: config.guild.roles.juniorStaff,
+        allow: [PermissionFlagsBits.ViewChannel]
+      },
+      {
         id: guild.roles.everyone,
         deny: [PermissionFlagsBits.ViewChannel]
       },

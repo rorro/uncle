@@ -17,7 +17,7 @@ import {
 } from '../api/googleHandler';
 import config from '../config';
 import { sendMessageInChannel } from '../discord';
-import { getRoleName, hasRole } from '../utils';
+import { getRoleName, isStaff } from '../utils';
 import KnexDB from '../database/knex';
 
 export const acceptApplicationCommand: Command = {
@@ -41,7 +41,7 @@ export const acceptApplicationCommand: Command = {
 
   run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
-    if (!hasRole(interaction.member, config.guild.roles.applicationManager)) {
+    if (!isStaff(interaction.member)) {
       await interaction.reply({
         ephemeral: true,
         content: 'You need to be an application manager to use this command!'

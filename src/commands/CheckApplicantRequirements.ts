@@ -8,7 +8,7 @@ import {
 import { Command } from 'src/types';
 import { RWAPI, womClient } from '../api/handler';
 import config from '../config';
-import { getLevel, hasRole, SKILLS } from '../utils';
+import { isStaff } from '../utils';
 import KnexDB from '../database/knex';
 
 export const checkApplicantRequirementsCommand: Command = {
@@ -27,7 +27,7 @@ export const checkApplicantRequirementsCommand: Command = {
   run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
 
-    if (!hasRole(interaction.member, config.guild.roles.applicationManager)) {
+    if (!isStaff(interaction.member)) {
       await interaction.reply({
         ephemeral: true,
         content: 'You need to be an application manager to use this command!'

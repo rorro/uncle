@@ -20,7 +20,7 @@ import config from '../config';
 import { createChannel, sendMessageInChannel } from '../discord';
 import KnexDB from '../database/knex';
 import { imgurClient } from '../api/handler';
-import { hasRole } from '../utils';
+import { hasRole, isStaff } from '../utils';
 
 export async function startChannel(interaction: ButtonInteraction, channelType: string) {
   if (!interaction.inCachedGuild()) return;
@@ -111,7 +111,7 @@ export async function startChannel(interaction: ButtonInteraction, channelType: 
   );
 
   if (
-    !hasRole(interaction.member, config.guild.roles.staff) &&
+    !isStaff(interaction.member) &&
     openApplication &&
     interaction.client.channels.cache.has(openApplication.channel.id)
   ) {
@@ -205,6 +205,7 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
   await channel.edit({
     permissionOverwrites: [
       { id: config.guild.roles.staff, allow: [PermissionFlagsBits.ViewChannel] },
+      { id: config.guild.roles.juniorStaff, allow: [PermissionFlagsBits.ViewChannel] },
       { id: interaction.guild.roles.everyone, deny: [PermissionFlagsBits.ViewChannel] }
     ]
   });

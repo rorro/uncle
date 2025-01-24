@@ -6,9 +6,8 @@ import {
   ChannelType
 } from 'discord.js';
 import { Command } from 'src/types';
-import config from '../config';
 import { sendMessageInChannel } from '../discord';
-import { formatMessage, hasRole, parseMessage } from '../utils';
+import { formatMessage, isStaff, parseMessage } from '../utils';
 
 export const messageCommand: Command = {
   name: 'message',
@@ -105,7 +104,7 @@ export const messageCommand: Command = {
   run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
 
-    if (!hasRole(interaction.member, config.guild.roles.staff)) {
+    if (!isStaff(interaction.member)) {
       await interaction.reply({
         ephemeral: true,
         content: 'You need to be a staff member to use this command!'

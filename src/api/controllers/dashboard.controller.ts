@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import CryptoJS from 'crypto-js';
 import config from '../../config';
 import client from '../../bot';
-import { hasRole } from '../../utils';
+import { isStaff } from '../../utils';
 import { LeaderboardBoss, ResponseType } from '../../types';
 import KnexDB from '../../database/knex';
 import { postChangelog, updateSpeed } from '../../updateLeaderboard';
@@ -32,9 +32,8 @@ const authenticate = async (req: Request, res: Response) => {
 
       try {
         const user = await guild.members.fetch(oauth2User.id);
-        const isStaff = hasRole(user, config.guild.roles.staff);
 
-        if (isStaff) {
+        if (isStaff(user)) {
           const data = {
             access_token: encrypt(oauthData.access_token, PRIVATE_KEY),
             token_type: oauthData.token_type,

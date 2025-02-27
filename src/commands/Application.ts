@@ -12,6 +12,7 @@ import {
 import { Command } from '../types';
 import { isStaff } from '../utils';
 import KnexDB from '../database/knex';
+import { getConfigItem } from '../database/operations';
 
 export const applicationCommand: Command = {
   name: 'application',
@@ -73,7 +74,7 @@ export const applicationCommand: Command = {
           .setColor('DarkPurple')
           .setDescription('If you wish to apply, click the "Start Application" button below.');
 
-        const clanIcon = (await KnexDB.getConfigItem('clan_icon')) as string;
+        const clanIcon = getConfigItem('clan_icon') as string;
         if (clanIcon) embed.setThumbnail(clanIcon);
 
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(

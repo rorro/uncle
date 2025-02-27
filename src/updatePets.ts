@@ -4,10 +4,11 @@ import KnexDB from './database/knex';
 import { MessageType, PetLeaderboardEntry } from './types';
 import Pets from './pets';
 import { sendMessageInChannel } from './discord';
-import { NAV_MESSAGE_NAME, createLeaderboardNav } from './leaderboardNav';
+import { createLeaderboardNav } from './leaderboardNav';
+import { getConfigItem } from './database/operations';
 
 export async function updatePets(): Promise<string> {
-  const leaderboardChannelId = (await KnexDB.getConfigItem('leaderboard_channel')) as string;
+  const leaderboardChannelId = getConfigItem('leaderboard_channel') as string;
   if (!leaderboardChannelId) {
     return 'Leaderboard channel has not been configured. Head over to the config section.';
   }

@@ -6,11 +6,12 @@ import { timeInHumanReadable, timeInMilliseconds } from './utils';
 import { sendMessageInChannel } from './discord';
 import { createLeaderboardNav } from './leaderboardNav';
 import config from './config';
+import { getConfigItem } from './database/operations';
 
 const RANK_EMOJIS = [':first_place:', ':second_place:', ':third_place:'];
 
 export async function updateSpeed(boss: LeaderboardBoss): Promise<string> {
-  const leaderboardChannelId = (await KnexDB.getConfigItem('leaderboard_channel')) as string;
+  const leaderboardChannelId = getConfigItem('leaderboard_channel') as string;
   if (!leaderboardChannelId) {
     return 'Leaderboard channel has not been configured. Head over to the config section.';
   }
@@ -114,7 +115,7 @@ export async function updateSpeed(boss: LeaderboardBoss): Promise<string> {
 }
 
 export async function postChangelog(content: string): Promise<string> {
-  const leaderboardChannelId = (await KnexDB.getConfigItem('leaderboard_channel')) as string;
+  const leaderboardChannelId = getConfigItem('leaderboard_channel') as string;
   if (!leaderboardChannelId) {
     return 'Leaderboard channel has not been configured. Head over to the config section.';
   }

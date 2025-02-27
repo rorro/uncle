@@ -19,6 +19,7 @@ import config from '../config';
 import { sendMessageInChannel } from '../discord';
 import { getRoleName, isStaff } from '../utils';
 import KnexDB from '../database/knex';
+import { getConfigItem } from '../database/operations';
 
 export const acceptApplicationCommand: Command = {
   name: 'accept_application',
@@ -57,7 +58,7 @@ export const acceptApplicationCommand: Command = {
       throw Error('User not found');
     }
 
-    const newMembersChannelId = (await KnexDB.getConfigItem('new_members_channel')) as string;
+    const newMembersChannelId = getConfigItem('new_members_channel') as string;
     if (!newMembersChannelId) {
       await interaction.followUp({
         ephemeral: true,
@@ -147,7 +148,7 @@ export const acceptApplicationCommand: Command = {
         { name: 'Diary Sheet Link', value: webViewLink ? webViewLink : 'No link could be created.' }
       ]);
 
-      const clanIcon = (await KnexDB.getConfigItem('clan_icon')) as string;
+      const clanIcon = getConfigItem('clan_icon') as string;
       if (clanIcon) reply.setThumbnail(clanIcon);
 
       const configData = await KnexDB.getAllConfigs();
@@ -167,9 +168,7 @@ export const acceptApplicationCommand: Command = {
             content: introMessage
           });
 
-          const inactivityCheckChannel = (await KnexDB.getConfigItem(
-            'inactivity_check_channel'
-          )) as string;
+          const inactivityCheckChannel = getConfigItem('inactivity_check_channel') as string;
           if (inactivityCheckChannel) {
             const now = dayjs();
             const scheduledEmbed = new EmbedBuilder().setTitle(`30 day checkup: ${rsn}`).addFields([

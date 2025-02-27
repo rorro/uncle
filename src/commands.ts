@@ -9,6 +9,7 @@ import { supportCommand } from './commands/Suport';
 import { completeCommand } from './commands/Complete';
 import { rolesCommand } from './commands/Roles';
 import { Command } from './types';
+import { testCommand } from './commands/Test';
 
 export const commands: Command[] = [
   checkApplicantRequirementsCommand,
@@ -20,5 +21,6 @@ export const commands: Command[] = [
   supportCommand,
   scheduleCommand,
   completeCommand,
-  rolesCommand
+  rolesCommand,
+  testCommand
 ];

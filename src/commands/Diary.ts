@@ -14,6 +14,7 @@ import { Command, MessageType, PlayerSummary } from '../types';
 import { getRank, isStaff } from '../utils';
 import KnexDB from '../database/knex';
 import { sendMessageInChannel } from '../discord';
+import { getConfigItem } from '../database/operations';
 
 const DIARY_MESSAGE_NAME = 'Diary Top 10';
 
@@ -43,7 +44,7 @@ export const diaryCommand: Command = {
 
     const subCommand = interaction.options.getSubcommand();
 
-    const leaderboardChannelId = (await KnexDB.getConfigItem('leaderboard_channel')) as string;
+    const leaderboardChannelId = getConfigItem('leaderboard_channel') as string;
     if (!leaderboardChannelId) {
       await interaction.followUp({ content: `Leaderboard channel has not been configured.` });
       return;
@@ -127,7 +128,7 @@ async function buildMessage(players: PlayerSummary[]): Promise<EmbedBuilder> {
     .setTitle('Diary top 10 completion list')
     .setFooter({ text: `Last updated: ${dayjs().format('MMMM DD, YYYY')}` });
 
-  const clanIcon = (await KnexDB.getConfigItem('clan_icon')) as string;
+  const clanIcon = getConfigItem('clan_icon') as string;
   if (clanIcon) embed.setThumbnail(clanIcon);
 
   let uniqueScoresFound = 0;

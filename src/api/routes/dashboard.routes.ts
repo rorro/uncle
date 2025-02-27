@@ -11,5 +11,6 @@ router.post('/savedata', controller.saveData);
 router.delete('/deletemessage', controller.deleteScheduledMessage);
 router.post('/updateleaderboard', controller.updateLeaderboard);
 router.post('/leaderboardchangelog', controller.postLeaderboardChangelog);
+router.get('/speedboard', controller.getSpeedBoard);
 
 export default router;

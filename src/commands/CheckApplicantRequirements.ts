@@ -10,7 +10,7 @@ import { Command } from 'src/types';
 import { RWAPI, womClient } from '../api/handler';
 import config from '../config';
 import { isStaff } from '../utils';
-import KnexDB from '../database/knex';
+import db from '../database/operations';
 
 export const checkApplicantRequirementsCommand: Command = {
   name: 'check_requirements',
@@ -43,7 +43,7 @@ export const checkApplicantRequirementsCommand: Command = {
       .setTitle(`Requirements check for ${rsn}`)
       .setURL(`https://wiseoldman.net/players/${rsn.replaceAll(' ', '%20')}`);
 
-    const clanIcon = (await KnexDB.getConfigItem('clan_icon')) as string;
+    const clanIcon = db.getConfigItem('clan_icon') as string;
     if (clanIcon) reply.setThumbnail(clanIcon);
 
     let recentlyUpdated = false;

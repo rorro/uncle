@@ -15,6 +15,7 @@ import { Command, MessageType, PlayerSummary } from '../types';
 import { getRank, isStaff } from '../utils';
 import KnexDB from '../database/knex';
 import { sendMessageInChannel } from '../discord';
+import db from '../database/operations';
 
 const DIARY_MESSAGE_NAME = 'Diary Top 10';
 
@@ -44,7 +45,7 @@ export const diaryCommand: Command = {
 
     const subCommand = interaction.options.getSubcommand();
 
-    const leaderboardChannelId = (await KnexDB.getConfigItem('leaderboard_channel')) as string;
+    const leaderboardChannelId = db.getConfigItem('leaderboard_channel') as string;
     if (!leaderboardChannelId) {
       await interaction.followUp({ content: `Leaderboard channel has not been configured.` });
       return;
@@ -74,7 +75,7 @@ export const diaryCommand: Command = {
 
           const embed = await buildMessage(players);
 
-          let messageId = await KnexDB.getMessageIdByName(DIARY_MESSAGE_NAME);
+          let messageId = db.getMessageIdByName(DIARY_MESSAGE_NAME);
 
           if (messageId) {
             try {
@@ -115,12 +116,7 @@ async function sendNewMessage(
     });
     return;
   }
-  await KnexDB.insertIntoMessages(
-    DIARY_MESSAGE_NAME,
-    mId,
-    `#${leaderboardChannel.name}`,
-    MessageType.Leaderboard
-  );
+  db.insertIntoMessages(DIARY_MESSAGE_NAME, mId, `#${leaderboardChannel.name}`, MessageType.Leaderboard);
 }
 
 async function buildMessage(players: PlayerSummary[]): Promise<EmbedBuilder> {
@@ -128,7 +124,7 @@ async function buildMessage(players: PlayerSummary[]): Promise<EmbedBuilder> {
     .setTitle('Diary top 10 completion list')
     .setFooter({ text: `Last updated: ${dayjs().format('MMMM DD, YYYY')}` });
 
-  const clanIcon = (await KnexDB.getConfigItem('clan_icon')) as string;
+  const clanIcon = db.getConfigItem('clan_icon') as string;
   if (clanIcon) embed.setThumbnail(clanIcon);
 
   let uniqueScoresFound = 0;

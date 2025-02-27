@@ -1,16 +1,16 @@
 import { LeaderboardBoss, LeaderboardRecord, MessageType, SpeedsLeaderboardEntry } from './types';
-import KnexDB from './database/knex';
 import client from './bot';
 import { ChannelType, EmbedBuilder } from 'discord.js';
 import { timeInHumanReadable, timeInMilliseconds } from './utils';
 import { sendMessageInChannel } from './discord';
 import { createLeaderboardNav } from './leaderboardNav';
 import config from './config';
+import db from './database/operations';
 
 const RANK_EMOJIS = [':first_place:', ':second_place:', ':third_place:'];
 
 export async function updateSpeed(boss: LeaderboardBoss): Promise<string> {
-  const leaderboardChannelId = (await KnexDB.getConfigItem('leaderboard_channel')) as string;
+  const leaderboardChannelId = db.getConfigItem('leaderboard_channel') as string;
   if (!leaderboardChannelId) {
     return 'Leaderboard channel has not been configured. Head over to the config section.';
   }
@@ -20,7 +20,7 @@ export async function updateSpeed(boss: LeaderboardBoss): Promise<string> {
     return `The configured leaderboard channel either doesn't exist or is not a text channel`;
   }
 
-  const speedsLeaderboard = await KnexDB.getSpeedsLeaderboard();
+  const speedsLeaderboard = db.getSpeedsLeaderboard();
   if (!speedsLeaderboard) {
     return 'Could not fetch leaderboard data.';
   }
@@ -89,7 +89,7 @@ export async function updateSpeed(boss: LeaderboardBoss): Promise<string> {
   }
   embed.setDescription(message);
 
-  let messageId = await KnexDB.getMessageIdByName(boss.boss);
+  let messageId = db.getMessageIdByName(boss.boss);
 
   try {
     if (!messageId) throw new Error('Message id not found');
@@ -106,7 +106,7 @@ export async function updateSpeed(boss: LeaderboardBoss): Promise<string> {
       return 'Something went wrong when sending the leaderboard message.';
     }
     messageId = mId;
-    await KnexDB.insertIntoMessages(boss.boss, messageId, `#${channel.name}`, MessageType.Leaderboard);
+    db.insertIntoMessages(boss.boss, messageId, `#${channel.name}`, MessageType.Leaderboard);
     await createLeaderboardNav(channel, true);
   }
 
@@ -114,7 +114,7 @@ export async function updateSpeed(boss: LeaderboardBoss): Promise<string> {
 }
 
 export async function postChangelog(content: string): Promise<string> {
-  const leaderboardChannelId = (await KnexDB.getConfigItem('leaderboard_channel')) as string;
+  const leaderboardChannelId = db.getConfigItem('leaderboard_channel') as string;
   if (!leaderboardChannelId) {
     return 'Leaderboard channel has not been configured. Head over to the config section.';
   }

@@ -12,8 +12,8 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import utc from 'dayjs/plugin/utc';
 import { DATE_FORMAT, isStaff } from '../utils';
-import KnexDB from '../database/knex';
 import { ScheduledMessageType } from '../types';
+import db from '../database/operations';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
@@ -104,7 +104,7 @@ async function scheduleMessage(messageToSchedule: ScheduledMessage) {
     content: messageToSchedule.content,
     embed: messageToSchedule.embed
   };
-  KnexDB.insertScheduledMessage({
+  db.insertScheduledMessage({
     message: JSON.stringify(newMessage),
     date: messageToSchedule.date,
     channel: messageToSchedule.channel,

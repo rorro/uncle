@@ -5,9 +5,9 @@ import config from '../../config';
 import client from '../../bot';
 import { isStaff } from '../../utils';
 import { LeaderboardBoss, ResponseType } from '../../types';
-import KnexDB from '../../database/knex';
 import { postChangelog, updateSpeed } from '../../updateLeaderboard';
 import { updatePets } from '../../updatePets';
+import db from '../../database/operations';
 
 const oauth2 = new DiscordOauth2();
 
@@ -44,7 +44,7 @@ const authenticate = async (req: Request, res: Response) => {
             date: Date.now()
           };
 
-          KnexDB.insertOauthData(data);
+          db.insertOauthData(data);
           const publicEncrypted = encrypt(oauthData.access_token, PUBLIC_KEY);
           const encoded = encodeURIComponent(publicEncrypted);
 
@@ -85,13 +85,7 @@ const getData = async (req: Request, res: Response) => {
 
     const response: ResponseType = {
       guild: guild,
-      guildChannels: allGuildChannels,
-      configs: await KnexDB.getAllConfigs(),
-      messages: await KnexDB.getAllMessages(),
-      scheduledMessages: await KnexDB.getAllScheduledMessages(),
-      embedConfigs: await KnexDB.getEmbedConfigs(),
-      petsLeaderboard: await KnexDB.getPetsLeaderboard(),
-      speedsLeaderboard: await KnexDB.getSpeedsLeaderboard()
+      guildChannels: allGuildChannels
     };
 
     res.json(response);
@@ -122,21 +116,24 @@ const saveData = async (req: Request, res: Response) => {
 
   switch (category) {
     case 'configs':
-      await KnexDB.updateConfig('', '', req.body);
+      const [key, value] = Object.entries(req.body)[0];
+      db.updateConfig(key, value as string);
       break;
     case 'scheduled_messages':
-      const newMessageId = await KnexDB.insertScheduledMessage(req.body);
+      const newMessageId = db.insertScheduledMessage(req.body);
       if (!newMessageId) return;
 
       res.send({
-        newId: newMessageId.newId,
+        newId: newMessageId,
         message:
-          newMessageId.newId !== -1 ? 'Successfully scheduled new message.' : 'Some error happened.'
+          newMessageId !== -1
+            ? 'Successfully scheduled new message.'
+            : 'Some error happened while trying to schedule the message.'
       });
       return;
     case 'embeds':
       try {
-        await KnexDB.updateEmbed(req.body);
+        db.updateEmbed(req.body);
       } catch (e) {
         console.log(e);
 
@@ -150,12 +147,13 @@ const saveData = async (req: Request, res: Response) => {
       });
       return;
     case 'pets':
-      const petsResult = await KnexDB.truncateAndInsert(req.body);
-      res.send({ message: petsResult });
+      const petsResult = db.savePetsLeaderboard(req.body);
+      res.send(petsResult);
       return;
     case 'speeds':
-      const speedsResult = await KnexDB.truncateAndInsert(req.body);
-      res.send({ message: speedsResult });
+      const speedsResult = db.saveSpeedBoard(req.body);
+
+      res.send(speedsResult);
       return;
     default:
       res.send({ message: `Error: Data of this type can't be saved` });
@@ -179,7 +177,7 @@ const deleteScheduledMessage = async (req: Request, res: Response) => {
     return;
   }
 
-  KnexDB.deleteScheduledMessage(messageId);
+  db.deleteScheduledMessage(messageId);
   res.send({ message: 'Scheduled message deleted' });
 };
 
@@ -188,11 +186,11 @@ const logout = async (req: Request, res: Response) => {
   if (!access_token) return;
 
   const decrypted = decrypt(decodeURIComponent(access_token), PUBLIC_KEY);
-  const tokens = await KnexDB.getAccessTokens();
+  const tokens = db.getAccessTokens();
   const toDelete = tokens.find(t => decrypt(t.access_token, PRIVATE_KEY) === decrypted);
 
   if (toDelete) {
-    await KnexDB.deleteFromOuathData(toDelete?.access_token);
+    db.deleteFromOuathData(toDelete?.access_token);
     await revokeAccess(decrypted);
   }
 };
@@ -210,14 +208,14 @@ async function hasAccess(cookie: string): Promise<boolean> {
 
   const decrypted = decrypt(cookie, PUBLIC_KEY);
 
-  const tokens = await KnexDB.getAccessTokens();
+  const tokens = db.getAccessTokens();
   const hasAccess = tokens.find(t => decrypt(t.access_token, PRIVATE_KEY) === decrypted);
 
   if (!hasAccess) return false;
   // Check if access token has expired
-  const oauthData = (await KnexDB.getOauthData(hasAccess.access_token))[0];
+  const oauthData = db.getOauthData(hasAccess.access_token);
   if (oauthData.date + oauthData.expires_in < Date.now()) {
-    await KnexDB.deleteFromOuathData(hasAccess.access_token);
+    db.deleteFromOuathData(hasAccess.access_token);
     return false;
   }
 
@@ -268,6 +266,66 @@ async function postLeaderboardChangelog(req: Request, res: Response) {
   res.send({ message: result });
 }
 
+async function getSpeedBoard(req: Request, res: Response) {
+  const accessToken = req.query.accessToken as string;
+
+  const loggedIn = await hasAccess(decodeURIComponent(accessToken));
+  if (!loggedIn) return;
+
+  const board = db.getSpeedBoard(req.query.boss as string);
+  res.send(board);
+}
+
+async function getPetsLeaderboard(req: Request, res: Response) {
+  const accessToken = req.query.accessToken as string;
+
+  const loggedIn = await hasAccess(decodeURIComponent(accessToken));
+  if (!loggedIn) return;
+
+  const pets = db.getPetsLeaderboard();
+  res.send(pets);
+}
+
+async function getEmbeds(req: Request, res: Response) {
+  const accessToken = req.query.accessToken as string;
+
+  const loggedIn = await hasAccess(decodeURIComponent(accessToken));
+  if (!loggedIn) return;
+
+  const embedConfigs = db.getEmbedConfigs();
+  res.send(embedConfigs);
+}
+
+async function getScheduledMessages(req: Request, res: Response) {
+  const accessToken = req.query.accessToken as string;
+
+  const loggedIn = await hasAccess(decodeURIComponent(accessToken));
+  if (!loggedIn) return;
+
+  const scheduledMessages = db.getAllScheduledMessages();
+  res.send(scheduledMessages);
+}
+
+async function getSentMessages(req: Request, res: Response) {
+  const accessToken = req.query.accessToken as string;
+
+  const loggedIn = await hasAccess(decodeURIComponent(accessToken));
+  if (!loggedIn) return;
+
+  const sentMessages = db.getAllMessages();
+  res.send(sentMessages);
+}
+
+async function getConfigs(req: Request, res: Response) {
+  const accessToken = req.query.accessToken as string;
+
+  const loggedIn = await hasAccess(decodeURIComponent(accessToken));
+  if (!loggedIn) return;
+
+  const configs = db.getAllConfigs();
+  res.send(configs);
+}
+
 export default {
   authenticate,
   getData,
@@ -276,5 +334,11 @@ export default {
   saveData,
   deleteScheduledMessage,
   updateLeaderboard,
-  postLeaderboardChangelog
+  postLeaderboardChangelog,
+  getSpeedBoard,
+  getPetsLeaderboard,
+  getEmbeds,
+  getScheduledMessages,
+  getSentMessages,
+  getConfigs
 };

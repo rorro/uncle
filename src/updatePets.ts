@@ -1,13 +1,13 @@
 import { ChannelType } from 'discord.js';
 import client from './bot';
-import KnexDB from './database/knex';
 import { MessageType, PetLeaderboardEntry } from './types';
 import Pets from './pets';
 import { sendMessageInChannel } from './discord';
-import { NAV_MESSAGE_NAME, createLeaderboardNav } from './leaderboardNav';
+import { createLeaderboardNav } from './leaderboardNav';
+import db from './database/operations';
 
 export async function updatePets(): Promise<string> {
-  const leaderboardChannelId = (await KnexDB.getConfigItem('leaderboard_channel')) as string;
+  const leaderboardChannelId = db.getConfigItem('leaderboard_channel') as string;
   if (!leaderboardChannelId) {
     return 'Leaderboard channel has not been configured. Head over to the config section.';
   }
@@ -18,7 +18,7 @@ export async function updatePets(): Promise<string> {
   }
 
   try {
-    const messages = await KnexDB.getMessagesByType(MessageType.Pets);
+    const messages = db.getMessagesByType(MessageType.Pets);
     messages.forEach(async message => {
       try {
         // Delete the old pet hiscore messages
@@ -27,7 +27,7 @@ export async function updatePets(): Promise<string> {
         console.error('Old pet message not found.');
       }
     });
-    await KnexDB.deleteFromMessages({ type: MessageType.Pets });
+    db.deleteFromMessages({ type: MessageType.Pets });
   } catch (e) {
     console.error('No message IDs found.');
   }
@@ -41,9 +41,9 @@ export async function updatePets(): Promise<string> {
     return 'Something went wrong when sending pet header message';
   }
 
-  await KnexDB.insertIntoMessages(`Pets`, headerId, `#${channel.name}`, MessageType.Pets);
+  db.insertIntoMessages(`Pets`, headerId, `#${channel.name}`, MessageType.Pets);
 
-  const data = (await KnexDB.getPetsLeaderboard()).filter(p => !p.removed);
+  const data = db.getPetsLeaderboard().filter(p => !p.removed);
   const [leaderboard, scores] = getTopPetsIndex(data);
 
   for (let i in scores) {
@@ -59,7 +59,7 @@ export async function updatePets(): Promise<string> {
         return `Something went wrong when sending message for ${player}`;
       }
 
-      await KnexDB.insertIntoMessages(
+      db.insertIntoMessages(
         `#${+i + 1} pets: ${player.username}  ${Math.random()}`,
         messageId,
         `#${channel.name}`,

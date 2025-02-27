@@ -21,11 +21,11 @@
     "express": "^4.18.1",
     "googleapis": "^100.0.0",
     "imgur": "^2.3.0",
-    "knex": "^2.3.0",
     "node-html-parser": "^6.1.12",
     "sharp": "^0.33.2"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
     "@types/cookie-parser": "^1.4.3",
     "@types/cors": "^2.8.12",
     "@types/crypto-js": "^4.1.1",
@@ -41,7 +41,6 @@
     "start": "NODE_ENV=production pm2 start dist/bot.js --watch --time",
     "deploy": "npm run build && bash deploy.sh",
     "dev": "ts-node-dev --poll --respawn --transpile-only --ignore-watch node_modules src/bot.ts",
-    "dev-win": "cross-env NODE_ENV=development nodemon src/bot.ts",
-    "knex": "cross-env NODE_ENV=development ./node_modules/.bin/knex --knexfile src/database/knexfile.ts"
+    "dev-win": "cross-env NODE_ENV=development nodemon src/bot.ts"
   }
 }

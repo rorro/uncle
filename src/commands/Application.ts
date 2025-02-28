@@ -12,7 +12,7 @@ import {
 import { Command } from '../types';
 import { isStaff } from '../utils';
 import KnexDB from '../database/knex';
-import { getConfigItem } from '../database/operations';
+import { getConfigItem, updateConfig } from '../database/operations';
 
 export const applicationCommand: Command = {
   name: 'application',
@@ -93,11 +93,17 @@ export const applicationCommand: Command = {
       case 'set_transcript_channel':
         const transcriptsChannel = interaction.options.getChannel('transcripts_channel', true);
 
-        await KnexDB.updateConfig('transcripts_channel', transcriptsChannel.id);
+        try {
+          updateConfig('transcripts_channel', transcriptsChannel.id);
 
-        await interaction.followUp({
-          content: `Transcripts channel has been set to ${transcriptsChannel}`
-        });
+          await interaction.followUp({
+            content: `Transcripts channel has been set to ${transcriptsChannel}`
+          });
+        } catch (e) {
+          console.log(e);
+          return;
+        }
+
         return;
     }
 

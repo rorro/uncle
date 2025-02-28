@@ -22,20 +22,6 @@ class KnexDB {
   }
 
   // Configs
-  async updateConfig(configKey: string, configValue: string, configEntry?: ConfigEntry) {
-    if (configEntry) {
-      await this.db('configs').update(configEntry).where('guild_id', config.guild.id);
-    } else {
-      const query = `UPDATE configs SET ${configKey} = '${configValue}' WHERE guild_id=${config.guild.id}`;
-      await this.db.raw(query);
-    }
-  }
-
-  async getConfigItem(configItem: string): Promise<string | number | null> {
-    const result: ConfigEntry = (await this.db('configs'))[0];
-    return result[configItem as keyof ConfigEntry];
-  }
-
   async getEmbedConfigs(): Promise<EmbedConfigs> {
     return (await this.db('configs').select('application_embed', 'support_embed'))[0];
   }

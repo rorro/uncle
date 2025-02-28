@@ -8,6 +8,7 @@ import { LeaderboardBoss, ResponseType } from '../../types';
 import KnexDB from '../../database/knex';
 import { postChangelog, updateSpeed } from '../../updateLeaderboard';
 import { updatePets } from '../../updatePets';
+import { getEmbedConfigs, updateConfig } from '../../database/operations';
 
 const oauth2 = new DiscordOauth2();
 
@@ -122,7 +123,8 @@ const saveData = async (req: Request, res: Response) => {
 
   switch (category) {
     case 'configs':
-      await KnexDB.updateConfig('', '', req.body);
+      const [key, value] = Object.entries(req.body)[0];
+      updateConfig(key, value as string);
       break;
     case 'scheduled_messages':
       const newMessageId = await KnexDB.insertScheduledMessage(req.body);

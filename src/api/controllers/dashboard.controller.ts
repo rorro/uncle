@@ -8,7 +8,17 @@ import { LeaderboardBoss, ResponseType } from '../../types';
 import KnexDB from '../../database/knex';
 import { postChangelog, updateSpeed } from '../../updateLeaderboard';
 import { updatePets } from '../../updatePets';
-import { getEmbedConfigs, updateConfig } from '../../database/operations';
+import {
+  deleteFromOuathData,
+  getAccessTokens,
+  getAllConfigs,
+  getAllMessages,
+  getEmbedConfigs,
+  getOauthData,
+  insertOauthData,
+  updateConfig,
+  updateEmbed
+} from '../../database/operations';
 
 const oauth2 = new DiscordOauth2();
 
@@ -45,7 +55,7 @@ const authenticate = async (req: Request, res: Response) => {
             date: Date.now()
           };
 
-          KnexDB.insertOauthData(data);
+          insertOauthData(data);
           const publicEncrypted = encrypt(oauthData.access_token, PUBLIC_KEY);
           const encoded = encodeURIComponent(publicEncrypted);
 
@@ -87,10 +97,10 @@ const getData = async (req: Request, res: Response) => {
     const response: ResponseType = {
       guild: guild,
       guildChannels: allGuildChannels,
-      configs: await KnexDB.getAllConfigs(),
-      messages: await KnexDB.getAllMessages(),
+      configs: getAllConfigs(),
+      messages: getAllMessages(),
       scheduledMessages: await KnexDB.getAllScheduledMessages(),
-      embedConfigs: await KnexDB.getEmbedConfigs(),
+      embedConfigs: getEmbedConfigs(),
       petsLeaderboard: await KnexDB.getPetsLeaderboard(),
       speedsLeaderboard: await KnexDB.getSpeedsLeaderboard()
     };
@@ -138,7 +148,7 @@ const saveData = async (req: Request, res: Response) => {
       return;
     case 'embeds':
       try {
-        await KnexDB.updateEmbed(req.body);
+        updateEmbed(req.body);
       } catch (e) {
         console.log(e);
 
@@ -190,11 +200,11 @@ const logout = async (req: Request, res: Response) => {
   if (!access_token) return;
 
   const decrypted = decrypt(decodeURIComponent(access_token), PUBLIC_KEY);
-  const tokens = await KnexDB.getAccessTokens();
+  const tokens = getAccessTokens();
   const toDelete = tokens.find(t => decrypt(t.access_token, PRIVATE_KEY) === decrypted);
 
   if (toDelete) {
-    await KnexDB.deleteFromOuathData(toDelete?.access_token);
+    deleteFromOuathData(toDelete?.access_token);
     await revokeAccess(decrypted);
   }
 };
@@ -212,14 +222,14 @@ async function hasAccess(cookie: string): Promise<boolean> {
 
   const decrypted = decrypt(cookie, PUBLIC_KEY);
 
-  const tokens = await KnexDB.getAccessTokens();
+  const tokens = getAccessTokens();
   const hasAccess = tokens.find(t => decrypt(t.access_token, PRIVATE_KEY) === decrypted);
 
   if (!hasAccess) return false;
   // Check if access token has expired
-  const oauthData = (await KnexDB.getOauthData(hasAccess.access_token))[0];
+  const oauthData = getOauthData(hasAccess.access_token);
   if (oauthData.date + oauthData.expires_in < Date.now()) {
-    await KnexDB.deleteFromOuathData(hasAccess.access_token);
+    deleteFromOuathData(hasAccess.access_token);
     return false;
   }
 

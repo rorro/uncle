@@ -21,7 +21,13 @@ import { createChannel, sendMessageInChannel } from '../discord';
 import KnexDB from '../database/knex';
 import { imgurClient } from '../api/handler';
 import { hasRole, isStaff } from '../utils';
-import { getConfigItem } from '../database/operations';
+import {
+  deleteFromOpenChannels,
+  getConfigItem,
+  getOpenChannel,
+  getOpenChannelUser,
+  insertIntoOpenChannels
+} from '../database/operations';
 
 export async function startChannel(interaction: ButtonInteraction, channelType: string) {
   if (!interaction.inCachedGuild()) return;
@@ -104,10 +110,7 @@ export async function startChannel(interaction: ButtonInteraction, channelType: 
           footer: `This channel is visible only to you and staff members.`
         };
 
-  const openApplication = await KnexDB.getOpenChannel(
-    interaction.user.id,
-    channelConfig.databaseCategory
-  );
+  const openApplication = getOpenChannel(interaction.user.id, channelConfig.databaseCategory);
 
   if (
     !isStaff(interaction.member) &&
@@ -127,7 +130,7 @@ export async function startChannel(interaction: ButtonInteraction, channelType: 
     content: `Head over to ${applicantChannel} to continue.`
   });
 
-  await KnexDB.insertIntoOpenChannels(
+  insertIntoOpenChannels(
     interaction.user.id,
     JSON.stringify(interaction.user),
     JSON.stringify(applicantChannel),
@@ -192,7 +195,7 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
   const databaseCategory = channelType === 'application' ? 'open_applications' : 'open_support_tickets';
   const descriptionName = channelType === 'application' ? 'Application' : 'Support ticket';
 
-  const applicant = await KnexDB.getOpenChannelUser(interaction.channelId, databaseCategory);
+  const applicant = getOpenChannelUser(interaction.channelId, databaseCategory);
   if (!applicant) {
     await channel.send({
       content:
@@ -209,7 +212,7 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
     ]
   });
 
-  await KnexDB.deleteFromOpenChannels(applicant.user.id, interaction.channelId, databaseCategory);
+  deleteFromOpenChannels(applicant.user.id, interaction.channelId, databaseCategory);
   await interaction.message.delete();
 
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(

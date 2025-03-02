@@ -6,7 +6,7 @@ import { timeInHumanReadable, timeInMilliseconds } from './utils';
 import { sendMessageInChannel } from './discord';
 import { createLeaderboardNav } from './leaderboardNav';
 import config from './config';
-import { getConfigItem } from './database/operations';
+import { getConfigItem, getMessageIdByName, insertIntoMessages } from './database/operations';
 
 const RANK_EMOJIS = [':first_place:', ':second_place:', ':third_place:'];
 
@@ -90,7 +90,7 @@ export async function updateSpeed(boss: LeaderboardBoss): Promise<string> {
   }
   embed.setDescription(message);
 
-  let messageId = await KnexDB.getMessageIdByName(boss.boss);
+  let messageId = getMessageIdByName(boss.boss);
 
   try {
     if (!messageId) throw new Error('Message id not found');
@@ -107,7 +107,7 @@ export async function updateSpeed(boss: LeaderboardBoss): Promise<string> {
       return 'Something went wrong when sending the leaderboard message.';
     }
     messageId = mId;
-    await KnexDB.insertIntoMessages(boss.boss, messageId, `#${channel.name}`, MessageType.Leaderboard);
+    insertIntoMessages(boss.boss, messageId, `#${channel.name}`, MessageType.Leaderboard);
     await createLeaderboardNav(channel, true);
   }
 

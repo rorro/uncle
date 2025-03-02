@@ -14,7 +14,7 @@ import { Command, MessageType, PlayerSummary } from '../types';
 import { getRank, isStaff } from '../utils';
 import KnexDB from '../database/knex';
 import { sendMessageInChannel } from '../discord';
-import { getConfigItem } from '../database/operations';
+import { getConfigItem, getMessageIdByName, insertIntoMessages } from '../database/operations';
 
 const DIARY_MESSAGE_NAME = 'Diary Top 10';
 
@@ -74,7 +74,7 @@ export const diaryCommand: Command = {
 
           const embed = await buildMessage(players);
 
-          let messageId = await KnexDB.getMessageIdByName(DIARY_MESSAGE_NAME);
+          let messageId = getMessageIdByName(DIARY_MESSAGE_NAME);
 
           if (messageId) {
             try {
@@ -115,12 +115,7 @@ async function sendNewMessage(
     });
     return;
   }
-  await KnexDB.insertIntoMessages(
-    DIARY_MESSAGE_NAME,
-    mId,
-    `#${leaderboardChannel.name}`,
-    MessageType.Leaderboard
-  );
+  insertIntoMessages(DIARY_MESSAGE_NAME, mId, `#${leaderboardChannel.name}`, MessageType.Leaderboard);
 }
 
 async function buildMessage(players: PlayerSummary[]): Promise<EmbedBuilder> {

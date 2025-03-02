@@ -19,7 +19,7 @@ import config from '../config';
 import { sendMessageInChannel } from '../discord';
 import { getRoleName, isStaff } from '../utils';
 import KnexDB from '../database/knex';
-import { getConfigItem } from '../database/operations';
+import { getAllConfigs, getConfigItem } from '../database/operations';
 
 export const acceptApplicationCommand: Command = {
   name: 'accept_application',
@@ -151,7 +151,7 @@ export const acceptApplicationCommand: Command = {
       const clanIcon = getConfigItem('clan_icon') as string;
       if (clanIcon) reply.setThumbnail(clanIcon);
 
-      const configData = await KnexDB.getAllConfigs();
+      const configData = getAllConfigs();
       const DM = `${configData.welcome_pm_message}\n\nYour sheet can be found here: ${webViewLink}`;
       let introMessage = `Welcome <@${discordUser.id}>!\n${configData.welcome_base_message}`;
 

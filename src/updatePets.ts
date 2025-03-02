@@ -5,7 +5,12 @@ import { MessageType, PetLeaderboardEntry } from './types';
 import Pets from './pets';
 import { sendMessageInChannel } from './discord';
 import { createLeaderboardNav } from './leaderboardNav';
-import { getConfigItem } from './database/operations';
+import {
+  deleteFromMessages,
+  getConfigItem,
+  getMessagesByType,
+  insertIntoMessages
+} from './database/operations';
 
 export async function updatePets(): Promise<string> {
   const leaderboardChannelId = getConfigItem('leaderboard_channel') as string;
@@ -19,7 +24,7 @@ export async function updatePets(): Promise<string> {
   }
 
   try {
-    const messages = await KnexDB.getMessagesByType(MessageType.Pets);
+    const messages = getMessagesByType(MessageType.Pets);
     messages.forEach(async message => {
       try {
         // Delete the old pet hiscore messages
@@ -28,7 +33,7 @@ export async function updatePets(): Promise<string> {
         console.error('Old pet message not found.');
       }
     });
-    await KnexDB.deleteFromMessages({ type: MessageType.Pets });
+    deleteFromMessages({ type: MessageType.Pets });
   } catch (e) {
     console.error('No message IDs found.');
   }
@@ -42,7 +47,7 @@ export async function updatePets(): Promise<string> {
     return 'Something went wrong when sending pet header message';
   }
 
-  await KnexDB.insertIntoMessages(`Pets`, headerId, `#${channel.name}`, MessageType.Pets);
+  insertIntoMessages(`Pets`, headerId, `#${channel.name}`, MessageType.Pets);
 
   const data = (await KnexDB.getPetsLeaderboard()).filter(p => !p.removed);
   const [leaderboard, scores] = getTopPetsIndex(data);
@@ -60,7 +65,7 @@ export async function updatePets(): Promise<string> {
         return `Something went wrong when sending message for ${player}`;
       }
 
-      await KnexDB.insertIntoMessages(
+      insertIntoMessages(
         `#${+i + 1} pets: ${player.username}  ${Math.random()}`,
         messageId,
         `#${channel.name}`,

@@ -21,13 +21,7 @@ import { createChannel, sendMessageInChannel } from '../discord';
 import KnexDB from '../database/knex';
 import { imgurClient } from '../api/handler';
 import { hasRole, isStaff } from '../utils';
-import {
-  deleteFromOpenChannels,
-  getConfigItem,
-  getOpenChannel,
-  getOpenChannelUser,
-  insertIntoOpenChannels
-} from '../database/operations';
+import db from '../database/operations';
 
 export async function startChannel(interaction: ButtonInteraction, channelType: string) {
   if (!interaction.inCachedGuild()) return;
@@ -70,7 +64,7 @@ export async function startChannel(interaction: ButtonInteraction, channelType: 
         `${member} tried to open a(n) ${channelType} channel but is too new to the server. They have only been a server member for ${ageMinutes} minutes ${ageSeconds} seconds.`
       );
 
-    const logsChannelId = getConfigItem('logs_channel');
+    const logsChannelId = db.getConfigItem('logs_channel');
     if (logsChannelId === null || typeof logsChannelId === 'number') return;
     await sendMessageInChannel(interaction.client, logsChannelId, {
       embeds: [embed]
@@ -90,7 +84,9 @@ export async function startChannel(interaction: ButtonInteraction, channelType: 
   }
 
   const embedFromDB =
-    channelType === 'application' ? getConfigItem('application_embed') : getConfigItem('support_embed');
+    channelType === 'application'
+      ? db.getConfigItem('application_embed')
+      : db.getConfigItem('support_embed');
   if (embedFromDB === null || typeof embedFromDB === 'number') return;
   const properEmbed = JSON.parse(embedFromDB);
 
@@ -110,7 +106,7 @@ export async function startChannel(interaction: ButtonInteraction, channelType: 
           footer: `This channel is visible only to you and staff members.`
         };
 
-  const openApplication = getOpenChannel(interaction.user.id, channelConfig.databaseCategory);
+  const openApplication = db.getOpenChannel(interaction.user.id, channelConfig.databaseCategory);
 
   if (
     !isStaff(interaction.member) &&
@@ -130,7 +126,7 @@ export async function startChannel(interaction: ButtonInteraction, channelType: 
     content: `Head over to ${applicantChannel} to continue.`
   });
 
-  insertIntoOpenChannels(
+  db.insertIntoOpenChannels(
     interaction.user.id,
     JSON.stringify(interaction.user),
     JSON.stringify(applicantChannel),
@@ -139,10 +135,10 @@ export async function startChannel(interaction: ButtonInteraction, channelType: 
 
   const embed = new EmbedBuilder().setColor('DarkPurple').setDescription(channelConfig.description);
 
-  const clanIcon = getConfigItem('clan_icon') as string;
+  const clanIcon = db.getConfigItem('clan_icon') as string;
   if (clanIcon) embed.setThumbnail(clanIcon);
 
-  const requirementsImage = getConfigItem('requirements_image') as string;
+  const requirementsImage = db.getConfigItem('requirements_image') as string;
   if (requirementsImage && channelType === 'application') embed.setImage(requirementsImage);
 
   if (channelType === 'support' && channelConfig.footer) embed.setFooter({ text: channelConfig.footer });
@@ -195,7 +191,7 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
   const databaseCategory = channelType === 'application' ? 'open_applications' : 'open_support_tickets';
   const descriptionName = channelType === 'application' ? 'Application' : 'Support ticket';
 
-  const applicant = getOpenChannelUser(interaction.channelId, databaseCategory);
+  const applicant = db.getOpenChannelUser(interaction.channelId, databaseCategory);
   if (!applicant) {
     await channel.send({
       content:
@@ -212,7 +208,7 @@ export async function comfirmClose(client: Client, interaction: ButtonInteractio
     ]
   });
 
-  deleteFromOpenChannels(applicant.user.id, interaction.channelId, databaseCategory);
+  db.deleteFromOpenChannels(applicant.user.id, interaction.channelId, databaseCategory);
   await interaction.message.delete();
 
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -264,7 +260,7 @@ export async function saveTranscript(
     return;
   }
 
-  const transcriptsChannelId = getConfigItem('transcripts_channel') as string;
+  const transcriptsChannelId = db.getConfigItem('transcripts_channel') as string;
 
   const transcriptsChannel =
     transcriptsChannelId !== null

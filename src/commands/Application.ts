@@ -12,7 +12,7 @@ import {
 import { Command } from '../types';
 import { isStaff } from '../utils';
 import KnexDB from '../database/knex';
-import { getConfigItem, updateConfig } from '../database/operations';
+import db from '../database/operations';
 
 export const applicationCommand: Command = {
   name: 'application',
@@ -74,7 +74,7 @@ export const applicationCommand: Command = {
           .setColor('DarkPurple')
           .setDescription('If you wish to apply, click the "Start Application" button below.');
 
-        const clanIcon = getConfigItem('clan_icon') as string;
+        const clanIcon = db.getConfigItem('clan_icon') as string;
         if (clanIcon) embed.setThumbnail(clanIcon);
 
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -94,7 +94,7 @@ export const applicationCommand: Command = {
         const transcriptsChannel = interaction.options.getChannel('transcripts_channel', true);
 
         try {
-          updateConfig('transcripts_channel', transcriptsChannel.id);
+          db.updateConfig('transcripts_channel', transcriptsChannel.id);
 
           await interaction.followUp({
             content: `Transcripts channel has been set to ${transcriptsChannel}`

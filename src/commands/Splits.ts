@@ -9,7 +9,7 @@ import { getSheetData } from '../api/googleHandler';
 import config from '../config';
 import { Command, PlayerSummary } from '../types';
 import { getRank } from '../utils';
-import { getConfigItem } from '../database/operations';
+import db from '../database/operations';
 
 export const splitsCommand: Command = {
   name: 'splits',
@@ -43,7 +43,7 @@ export const splitsCommand: Command = {
     const subCommand = interaction.options.getSubcommand();
     let content = '';
 
-    const clanIcon = getConfigItem('clan_icon') as string;
+    const clanIcon = db.getConfigItem('clan_icon') as string;
 
     switch (subCommand) {
       case 'summary':

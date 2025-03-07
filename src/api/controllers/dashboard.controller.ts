@@ -8,17 +8,7 @@ import { LeaderboardBoss, ResponseType } from '../../types';
 import KnexDB from '../../database/knex';
 import { postChangelog, updateSpeed } from '../../updateLeaderboard';
 import { updatePets } from '../../updatePets';
-import {
-  deleteFromOuathData,
-  getAccessTokens,
-  getAllConfigs,
-  getAllMessages,
-  getEmbedConfigs,
-  getOauthData,
-  insertOauthData,
-  updateConfig,
-  updateEmbed
-} from '../../database/operations';
+import db from '../../database/operations';
 
 const oauth2 = new DiscordOauth2();
 
@@ -55,7 +45,7 @@ const authenticate = async (req: Request, res: Response) => {
             date: Date.now()
           };
 
-          insertOauthData(data);
+          db.insertOauthData(data);
           const publicEncrypted = encrypt(oauthData.access_token, PUBLIC_KEY);
           const encoded = encodeURIComponent(publicEncrypted);
 
@@ -97,12 +87,12 @@ const getData = async (req: Request, res: Response) => {
     const response: ResponseType = {
       guild: guild,
       guildChannels: allGuildChannels,
-      configs: getAllConfigs(),
-      messages: getAllMessages(),
-      scheduledMessages: await KnexDB.getAllScheduledMessages(),
-      embedConfigs: getEmbedConfigs(),
-      petsLeaderboard: await KnexDB.getPetsLeaderboard(),
-      speedsLeaderboard: await KnexDB.getSpeedsLeaderboard()
+      configs: db.getAllConfigs(),
+      messages: db.getAllMessages(),
+      scheduledMessages: db.getAllScheduledMessages(),
+      embedConfigs: db.getEmbedConfigs(),
+      petsLeaderboard: db.getPetsLeaderboard(),
+      speedsLeaderboard: db.getSpeedsLeaderboard()
     };
 
     res.json(response);
@@ -134,21 +124,23 @@ const saveData = async (req: Request, res: Response) => {
   switch (category) {
     case 'configs':
       const [key, value] = Object.entries(req.body)[0];
-      updateConfig(key, value as string);
+      db.updateConfig(key, value as string);
       break;
     case 'scheduled_messages':
-      const newMessageId = await KnexDB.insertScheduledMessage(req.body);
+      const newMessageId = db.insertScheduledMessage(req.body);
       if (!newMessageId) return;
 
       res.send({
-        newId: newMessageId.newId,
+        newId: newMessageId,
         message:
-          newMessageId.newId !== -1 ? 'Successfully scheduled new message.' : 'Some error happened.'
+          newMessageId !== -1
+            ? 'Successfully scheduled new message.'
+            : 'Some error happened while trying to schedule the message.'
       });
       return;
     case 'embeds':
       try {
-        updateEmbed(req.body);
+        db.updateEmbed(req.body);
       } catch (e) {
         console.log(e);
 
@@ -191,7 +183,7 @@ const deleteScheduledMessage = async (req: Request, res: Response) => {
     return;
   }
 
-  KnexDB.deleteScheduledMessage(messageId);
+  db.deleteScheduledMessage(messageId);
   res.send({ message: 'Scheduled message deleted' });
 };
 
@@ -200,11 +192,11 @@ const logout = async (req: Request, res: Response) => {
   if (!access_token) return;
 
   const decrypted = decrypt(decodeURIComponent(access_token), PUBLIC_KEY);
-  const tokens = getAccessTokens();
+  const tokens = db.getAccessTokens();
   const toDelete = tokens.find(t => decrypt(t.access_token, PRIVATE_KEY) === decrypted);
 
   if (toDelete) {
-    deleteFromOuathData(toDelete?.access_token);
+    db.deleteFromOuathData(toDelete?.access_token);
     await revokeAccess(decrypted);
   }
 };
@@ -222,14 +214,14 @@ async function hasAccess(cookie: string): Promise<boolean> {
 
   const decrypted = decrypt(cookie, PUBLIC_KEY);
 
-  const tokens = getAccessTokens();
+  const tokens = db.getAccessTokens();
   const hasAccess = tokens.find(t => decrypt(t.access_token, PRIVATE_KEY) === decrypted);
 
   if (!hasAccess) return false;
   // Check if access token has expired
-  const oauthData = getOauthData(hasAccess.access_token);
+  const oauthData = db.getOauthData(hasAccess.access_token);
   if (oauthData.date + oauthData.expires_in < Date.now()) {
-    deleteFromOuathData(hasAccess.access_token);
+    db.deleteFromOuathData(hasAccess.access_token);
     return false;
   }
 
@@ -280,6 +272,16 @@ async function postLeaderboardChangelog(req: Request, res: Response) {
   res.send({ message: result });
 }
 
+async function getSpeedBoard(req: Request, res: Response) {
+  const accessToken = req.query.accessToken as string;
+
+  const loggedIn = await hasAccess(decodeURIComponent(accessToken));
+  if (!loggedIn) return;
+
+  const board = db.getSpeedBoard(req.query.boss as string);
+  res.send(board);
+}
+
 export default {
   authenticate,
   getData,
@@ -288,5 +290,6 @@ export default {
   saveData,
   deleteScheduledMessage,
   updateLeaderboard,
-  postLeaderboardChangelog
+  postLeaderboardChangelog,
+  getSpeedBoard
 };

@@ -12,7 +12,7 @@ import {
 import config from '../config';
 import { Command } from '../types';
 import { hasRole, isStaff } from '../utils';
-import { getConfigItem } from '../database/operations';
+import db from '../database/operations';
 
 export const supportCommand: Command = {
   name: 'support',
@@ -61,7 +61,7 @@ export const supportCommand: Command = {
           .setDescription('If you wish to open a support ticket, click the "Open Ticket" button below.');
 
         // const clanIcon = await getConfigValue('clanIcon');
-        const clanIcon = getConfigItem('clan_icon') as string;
+        const clanIcon = db.getConfigItem('clan_icon') as string;
         if (clanIcon) embed.setThumbnail(clanIcon);
 
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(

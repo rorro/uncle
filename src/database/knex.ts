@@ -21,55 +21,7 @@ class KnexDB {
     this.db = knex(knexfile);
   }
 
-  // Scheduled Messages
-  async insertScheduledMessage(
-    entry: ScheduledMessageEntry | undefined
-  ): Promise<{ newId: number } | undefined> {
-    if (!entry) return;
-
-    const { id, message, date, channel, type } = entry;
-
-    if (id && id >= 1) {
-      // Editing an existing scheduled message
-      try {
-        const messageId: { id: number }[] = await this.db('scheduled_messages')
-          .update({ message, date, channel, type })
-          .where('id', id)
-          .returning('id');
-
-        return messageId ? { newId: messageId[0].id } : { newId: -1 };
-      } catch (e) {
-        return { newId: -1 };
-      }
-    } else {
-      const messageId: { id: number }[] = await this.db('scheduled_messages')
-        .insert({ message, date, channel, type })
-        .returning('id');
-
-      return messageId ? { newId: messageId[0].id } : { newId: -1 };
-    }
-  }
-
-  async deleteScheduledMessage(id: number | undefined) {
-    if (!id) return;
-
-    await this.db('scheduled_messages').where('id', id).delete();
-  }
-
-  async getAllScheduledMessages(): Promise<ScheduledMessageEntry[]> {
-    const messages = await this.db('scheduled_messages');
-    return messages;
-  }
-
   // Pets and Speeds
-  async getPetsLeaderboard(): Promise<PetLeaderboardEntry[]> {
-    return await this.db('pets_leaderboard');
-  }
-
-  async getSpeedsLeaderboard(): Promise<SpeedsLeaderboardEntry[]> {
-    return await this.db('speeds_leaderboard');
-  }
-
   async truncateAndInsert<T>(data: T[]): Promise<string> {
     try {
       await this.db.transaction(async trx => {

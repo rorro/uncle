@@ -9,16 +9,18 @@ import { supportCommand } from './commands/Suport';
 import { completeCommand } from './commands/Complete';
 import { rolesCommand } from './commands/Roles';
 import { Command } from './types';
+import { playerStatsCommand } from './commands/PlayerStats';
 
 export const commands: Command[] = [
   checkApplicantRequirementsCommand,
   acceptApplicationCommand,
   messageCommand,
-  splitsCommand,
-  diaryCommand,
+  //splitsCommand,
+  //diaryCommand,
   applicationCommand,
   supportCommand,
   scheduleCommand,
   completeCommand,
-  rolesCommand
+  rolesCommand,
+  playerStatsCommand
 ];

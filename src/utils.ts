@@ -65,6 +65,12 @@ export const SPEED_CATEGORIES = [
 
 enum Ranks {
   legacy = '<:legacy:1100009734339309589>',
+  trialist = '<:trialist:996048382789423174>',
+  staff = '<:moderator:1089142076861595649>',
+  gamer = '<:gamer:1348062233124536403> ',
+  quester = '<:quester:1348062230343712890>',
+  achiever = '<:achiever:1348062231723507822>',
+  elite = '<:elite:1348062240988729425>',
   templar = '<:templar:996045854962102342>',
   vanguard = '<:vanguard:996045856291704912>',
   warden = '<:warden:996045857633882223>',
@@ -73,8 +79,11 @@ enum Ranks {
   justiciar = '<:justicear:996045850759397437>',
   bulwark = '<:bulwark:996045848557387866>',
   protector = '<:protector:996045852013498489>',
-  trialist = '<:trialist:996048382789423174>',
-  staff = '<:moderator:1089142076861595649>'
+}
+
+enum CombatAchievements {
+  master = '<:mca:1348096176842473694>',
+  grandmaster = '<:gmca:1348096178293702728>'
 }
 
 const timeRegex: RegExp = /^(?:(?:[1-9]\d*:)?(?:[0-5]?\d:[0-5]?\d\.\d{1,2})|(?:[0-5]?\d\.\d{1,2}))$/;
@@ -138,7 +147,12 @@ export function formatMessage(message: string): string {
 
 export function getRank(rank: string): string {
   const r = (<any>Ranks)[rank.toLowerCase()];
-  return r || '❌';
+  return r || `\\-`;
+}
+
+export function getCa(achieved: string): string {
+  const ca = (<any>CombatAchievements)[achieved.toLowerCase()];
+  return ca || ``;
 }
 
 export function getRoleName(roleId: string): string {
@@ -197,7 +211,7 @@ export function timeInHumanReadable(time: number): string {
   const minutes = Math.floor((time - hours * PeriodsInMillseconds.hour) / PeriodsInMillseconds.minute);
   const seconds = Math.floor(
     (time - hours * PeriodsInMillseconds.hour - minutes * PeriodsInMillseconds.minute) /
-      PeriodsInMillseconds.second
+    PeriodsInMillseconds.second
   );
   const milliseconds =
     (time -
@@ -210,12 +224,12 @@ export function timeInHumanReadable(time: number): string {
   humanReadable +=
     hours > 0
       ? `${padNumber(hours)}:${padNumber(minutes)}:${padNumber(seconds)}.${padNumber(
-          milliseconds,
-          true
-        )}`
+        milliseconds,
+        true
+      )}`
       : minutes > 0
-      ? `${padNumber(minutes)}:${padNumber(seconds)}.${padNumber(milliseconds, true)}`
-      : `${padNumber(seconds)}.${padNumber(milliseconds, true)}`;
+        ? `${padNumber(minutes)}:${padNumber(seconds)}.${padNumber(milliseconds, true)}`
+        : `${padNumber(seconds)}.${padNumber(milliseconds, true)}`;
 
   return humanReadable;
 }

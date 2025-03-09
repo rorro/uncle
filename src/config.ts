@@ -2,9 +2,11 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 let path;
+
 switch (process.env.NODE_ENV) {
   case 'development':
     path = `${__dirname}/../.env.development`;
+
     break;
   case 'production':
     path = `${__dirname}/../.env.production`;
@@ -98,6 +100,7 @@ export default {
     diarySheetsFolder: process.env.DIARY_SHEETS_FOLDER as string,
     diarySheet: process.env.DIARY_SHEET as string,
     splitsSheet: process.env.SPLITS_SHEET as string,
+    newSplitsSheet: process.env.NEW_SPLITS_SHEET as string,
     diarySheetMainName: 'Diary!B6',
     diarySheetTasksComplete: 'Diary!B11'
   },

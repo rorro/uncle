@@ -25,11 +25,12 @@ export const playerStatsCommand: Command = {
     run: async (client: Client, interaction: ChatInputCommandInteraction) => {
         const username = interaction.options.getString('username', true);
 
+        await interaction.deferReply({ ephemeral: true })
+
         const data = await getSheetData(config.googleDrive.newSplitsSheet, "New Summary!1:1000", "FORMATTED_VALUE")
         if (data === undefined || data === null) {
-            await interaction.reply({
-                content: `Something went wrong while fetching data from splits sheet.`,
-                ephemeral: true
+            await interaction.followUp({
+                content: `Something went wrong while fetching data from splits sheet.`
             });
             return;
         }
@@ -39,9 +40,8 @@ export const playerStatsCommand: Command = {
         const playerData = data.slice(1).find(p => p[0].toLowerCase() === username.toLowerCase());
 
         if (!playerData) {
-            await interaction.reply({
+            await interaction.followUp({
                 content: `\`${username}\` was not found in the splits sheet. They are either not a member of the clan or have changed their name. Please contact a staff member for further help.`,
-                ephemeral: true
             });
             return
         }
@@ -80,9 +80,8 @@ export const playerStatsCommand: Command = {
 
 
 
-        await interaction.reply({
-            embeds: [result],
-            ephemeral: true
+        await interaction.followUp({
+            embeds: [result]
         });
     }
 };

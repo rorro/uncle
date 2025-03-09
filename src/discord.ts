@@ -12,6 +12,7 @@ import { MessageOptions } from './types';
 import KnexDB from './database/knex';
 import dayjs from 'dayjs';
 import { DATE_FORMAT } from './utils';
+import { insertIntoSheet } from './api/googleHandler';
 
 // Send a message in a specific channel
 export async function sendMessageInChannel(client: Client, channelId: string, options?: MessageOptions) {
@@ -93,4 +94,11 @@ export async function sendScheduledMessages(client: Client) {
     await sendMessageInChannel(client, scheduled.channel, newOptions);
     await KnexDB.deleteScheduledMessage(scheduled.id);
   }
+}
+
+export async function updateUsernameMapping(client: Client) {
+  const members = await (await client.guilds.fetch(config.guild.id)).members.fetch();
+
+  const dataToWrite: string[][] = members.map(m => { return [m.id, m.user.username, m.displayName] })
+  await insertIntoSheet(config.googleDrive.newSplitsSheet, 'Username Mapping!A2', dataToWrite)
 }

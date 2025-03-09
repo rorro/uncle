@@ -67,10 +67,10 @@ export const playerStatsCommand: Command = {
             + `**KC Achievements**\n`
             + `${hasAchieved(kc2Inferno)} 2kc Inferno\n`
             + `${hasAchieved(kc5Colosseum)} 5kc Colosseum\n`
-            + `${hasAchieved(kc1kCombinedRaids)} 1k Combined Raids kc\n`
-            + `${hasAchieved(kc100CoxTobToaExp)} 100kc CoX & ToB & ToA Exp\n`
-            + `${hasAchieved(kc200CoxTobToaExp)} 200kc CoX & ToB & ToA Exp\n`
-            + `${hasAchieved(kc100CmHm)} 100kc CM & HM`;
+            + `${hasAchieved(kc1kCombinedRaids)} 1k Combined Raids kc (CoX, CM, ToB, HM, ToA Exp)\n`
+            + `${hasAchieved(kc100CoxTobToaExp)} 100kc of each CoX & ToB & ToA Exp\n`
+            + `${hasAchieved(kc200CoxTobToaExp)} 200kc of each CoX & ToB & ToA Exp\n`
+            + `${hasAchieved(kc100CmHm)} 100kc of each CM & HM`;
 
         const title = `${getCa(gmCa === 'Yes' ? 'grandmaster' : mCa === 'Yes' ? 'master' : '')} ${name}`
 

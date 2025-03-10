@@ -77,7 +77,7 @@ export const checkApplicantRequirementsCommand: Command = {
 
     try {
       const response = await womClient.players.getPlayerDetails(rsn);
-      if (response === null) return;
+      if (response === null || response.latestSnapshot === null) return;
 
       const skills = Object.entries(response.latestSnapshot.data.skills);
       const bosses = Object.entries(response.latestSnapshot.data.bosses);

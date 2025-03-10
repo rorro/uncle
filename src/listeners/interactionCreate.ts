@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, Client, Interaction, TextChannel } from 'discord.js';
+import { ChatInputCommandInteraction, Client, Interaction, MessageFlags, TextChannel } from 'discord.js';
 import { commands } from '../commands';
 import {
   cancelClose,
@@ -9,6 +9,7 @@ import {
   saveTranscript
 } from '../interactions/channels';
 import { SPEED_CATEGORIES } from '../utils';
+import { denySplit, saveSplit } from '../interactions/splits';
 
 export default (client: Client): void => {
   client.on('interactionCreate', async (interaction: Interaction) => {
@@ -48,6 +49,12 @@ export default (client: Client): void => {
         case 'save_transcript':
           await saveTranscript(client, interaction, channel);
           break;
+        case 'split_approve':
+          await saveSplit(interaction);
+          break;
+        case 'split_deny':
+          await denySplit(interaction);
+          break;
       }
     }
 
@@ -64,7 +71,7 @@ const handleSlashCommand = async (
   const slashCommand = commands.find(c => c.name === interaction.commandName);
 
   if (!slashCommand) {
-    interaction.followUp({ content: 'An error has occured.', ephemeral: true });
+    interaction.followUp({ content: 'An error has occured.', flags: MessageFlags.Ephemeral });
     return;
   }
 

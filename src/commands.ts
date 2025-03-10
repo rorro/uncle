@@ -15,7 +15,7 @@ export const commands: Command[] = [
   checkApplicantRequirementsCommand,
   acceptApplicationCommand,
   messageCommand,
-  //splitsCommand,
+  splitsCommand,
   //diaryCommand,
   applicationCommand,
   supportCommand,

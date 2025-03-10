@@ -6,7 +6,8 @@ import {
   ApplicationCommandType,
   ApplicationCommandOptionType,
   ChannelType,
-  TextChannel
+  TextChannel,
+  MessageFlags
 } from 'discord.js';
 import { getSheetData } from '../api/googleHandler';
 import config from '../config';
@@ -34,12 +35,12 @@ export const diaryCommand: Command = {
     if (!isStaff(interaction.member)) {
       await interaction.reply({
         content: 'You need to be a staff member to use this command!',
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
       return;
     }
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const subCommand = interaction.options.getSubcommand();
 

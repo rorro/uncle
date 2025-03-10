@@ -99,6 +99,8 @@ export async function sendScheduledMessages(client: Client) {
 export async function updateUsernameMapping(client: Client) {
   const members = await (await client.guilds.fetch(config.guild.id)).members.fetch();
 
-  const dataToWrite: string[][] = members.map(m => { return [m.id, m.user.username, m.displayName] })
-  await insertIntoSheet(config.googleDrive.newSplitsSheet, 'Username Mapping!A2', dataToWrite)
+  const dataToWrite: string[][] = members.map(m => {
+    return [m.id, m.user.username, m.displayName];
+  });
+  await insertIntoSheet(config.googleDrive.newSplitsSheet, 'Username Mapping!A2', dataToWrite);
 }

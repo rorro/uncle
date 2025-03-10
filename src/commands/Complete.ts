@@ -2,7 +2,8 @@ import {
   ChatInputCommandInteraction,
   Client,
   ApplicationCommandType,
-  ApplicationCommandOptionType
+  ApplicationCommandOptionType,
+  MessageFlags
 } from 'discord.js';
 import { Command } from '../types';
 import { combinations } from '../utils';
@@ -33,7 +34,7 @@ export const completeCommand: Command = {
     if (!fractionRegex.test(input)) {
       await interaction.reply({
         content: `The given format was wrong. Please use the following format: amount;numerator/denominator. For example 3;1/150 1/500 5;1/100.`,
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
       return;
     }
@@ -58,7 +59,7 @@ export const completeCommand: Command = {
 
     await interaction.reply({
       content: `${avg.toFixed(roundTo)} rolls needed on average to get all items.`,
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     });
   }
 };

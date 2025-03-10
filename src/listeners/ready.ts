@@ -15,7 +15,7 @@ export default (client: Client): void => {
     setInterval(sendScheduledMessages, 1 * 60 * 1000, client);
 
     // Update clan username mappings once an hour
-    setInterval(updateUsernameMapping, 60 * 60 * 1000, client)
+    //setInterval(updateUsernameMapping, 60 * 60 * 1000, client);
 
     console.log(`${client.user.username} is online`);
   });

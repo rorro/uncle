@@ -78,7 +78,7 @@ enum Ranks {
   sentry = '<:sentry:996045853557006456>',
   justiciar = '<:justicear:996045850759397437>',
   bulwark = '<:bulwark:996045848557387866>',
-  protector = '<:protector:996045852013498489>',
+  protector = '<:protector:996045852013498489>'
 }
 
 enum CombatAchievements {
@@ -211,7 +211,7 @@ export function timeInHumanReadable(time: number): string {
   const minutes = Math.floor((time - hours * PeriodsInMillseconds.hour) / PeriodsInMillseconds.minute);
   const seconds = Math.floor(
     (time - hours * PeriodsInMillseconds.hour - minutes * PeriodsInMillseconds.minute) /
-    PeriodsInMillseconds.second
+      PeriodsInMillseconds.second
   );
   const milliseconds =
     (time -
@@ -224,12 +224,12 @@ export function timeInHumanReadable(time: number): string {
   humanReadable +=
     hours > 0
       ? `${padNumber(hours)}:${padNumber(minutes)}:${padNumber(seconds)}.${padNumber(
-        milliseconds,
-        true
-      )}`
+          milliseconds,
+          true
+        )}`
       : minutes > 0
-        ? `${padNumber(minutes)}:${padNumber(seconds)}.${padNumber(milliseconds, true)}`
-        : `${padNumber(seconds)}.${padNumber(milliseconds, true)}`;
+      ? `${padNumber(minutes)}:${padNumber(seconds)}.${padNumber(milliseconds, true)}`
+      : `${padNumber(seconds)}.${padNumber(milliseconds, true)}`;
 
   return humanReadable;
 }

@@ -3,197 +3,145 @@ import {
   Client,
   EmbedBuilder,
   ApplicationCommandType,
-  ApplicationCommandOptionType
+  ApplicationCommandOptionType,
+  Attachment,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  MessageFlags
 } from 'discord.js';
-import { getSheetData } from '../api/googleHandler';
-import config from '../config';
-import { Command, PlayerSummary } from '../types';
-import { getRank } from '../utils';
-import KnexDB from '../database/knex';
+import { Command } from '../types';
 
 export const splitsCommand: Command = {
   name: 'splits',
-  description: 'Show various information about splits',
+  description: 'Show various information about splits.',
   type: ApplicationCommandType.ChatInput,
   options: [
     {
-      type: ApplicationCommandOptionType.Subcommand,
-      name: 'summary',
-      description: 'View summary of clan splits'
+      name: 'value',
+      description: 'The total value of the item in millions.',
+      type: ApplicationCommandOptionType.Number,
+      required: true
     },
     {
-      type: ApplicationCommandOptionType.Subcommand,
-      name: 'search',
-      description: 'See split information of a player',
-      options: [
-        {
-          name: 'rsn',
-          description: 'In-game name of player',
-          type: ApplicationCommandOptionType.String,
-          required: true
-        }
-      ]
+      name: 'screenshot',
+      description: 'Screenshot of drop.',
+      type: ApplicationCommandOptionType.Attachment,
+      required: true
+    },
+    {
+      name: 'player1',
+      description: '1st player you split with.',
+      type: ApplicationCommandOptionType.User,
+      required: true
+    },
+    {
+      name: 'player2',
+      description: '2nd player you split with.',
+      type: ApplicationCommandOptionType.User,
+      required: false
+    },
+    {
+      name: 'player3',
+      description: '3rd player you split with.',
+      type: ApplicationCommandOptionType.User,
+      required: false
+    },
+    {
+      name: 'player4',
+      description: '4th player you split with.',
+      type: ApplicationCommandOptionType.User,
+      required: false
+    },
+    {
+      name: 'player5',
+      description: '5th player you split with.',
+      type: ApplicationCommandOptionType.User,
+      required: false
+    },
+    {
+      name: 'player6',
+      description: '6th player you split with.',
+      type: ApplicationCommandOptionType.User,
+      required: false
+    },
+    {
+      name: 'player7',
+      description: '7th player you split with.',
+      type: ApplicationCommandOptionType.User,
+      required: false
     }
   ],
   run: async (client: Client, interaction: ChatInputCommandInteraction) => {
     if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({});
+    const screenshot = interaction.options.getAttachment('screenshot', true);
 
-    const subCommand = interaction.options.getSubcommand();
-    let content = '';
-
-    const clanIcon = (await KnexDB.getConfigItem('clan_icon')) as string;
-
-    switch (subCommand) {
-      case 'summary':
-        try {
-          const summaryData = await getSheetData(
-            config.googleDrive.splitsSheet,
-            'Summary!A2:AA',
-            'FORMATTED_VALUE'
-          );
-          const totalSplits = summaryData?.at(1)?.at(2);
-          const currentMonthTotalSplits = summaryData?.at(4)?.at(2);
-          const currentMonth = summaryData?.at(4)?.at(4);
-          const currentMonthlySplitter = summaryData?.at(7)?.at(2).split(':');
-
-          const players = Object.values((summaryData as any[]).slice(12)).map(
-            v => <PlayerSummary>{ name: v.at(0), points: v.at(1), diaryTasks: v.at(2), rank: v.at(4) }
-          );
-
-          let topThreePoints = '';
-          players
-            .sort((a, b) => b.points - a.points)
-            .slice(0, 3)
-            .forEach(p => {
-              topThreePoints += `${getRank(p.rank)} ${p.name}: ${p.points}\n`;
-            });
-
-          let topThreeDiary = '';
-          players
-            .sort((a, b) => b.diaryTasks - a.diaryTasks)
-            .slice(0, 3)
-            .forEach(p => {
-              topThreeDiary += `${getRank(p.rank)} ${p.name}: ${p.diaryTasks}\n`;
-            });
-
-          const embed = new EmbedBuilder()
-            .setTitle('Legacy Splits Summary')
-            .setFooter({ text: `Current month: ${currentMonth}` })
-            .setURL(
-              'https://docs.google.com/spreadsheets/d/1Cuc6_MB9E1-6nFXbv6pDxKlwCjS9mXDG5kaPV4B_Wq8/edit?usp=sharing'
-            )
-            .addFields([
-              { name: 'Total splits', value: totalSplits },
-              { name: 'Current month total splits', value: currentMonthTotalSplits },
-              { name: 'Current month top splitter', value: currentMonthlySplitter.join(': ') },
-              { name: 'Top 3 Legacy points', value: topThreePoints, inline: true },
-              { name: 'Top 3 Legacy diary tasks completed', value: topThreeDiary, inline: true }
-            ]);
-
-          if (clanIcon) embed.setThumbnail(clanIcon);
-
-          await interaction.followUp({
-            embeds: [embed]
-          });
-        } catch (e) {
-          console.log(e);
-        }
-        return;
-      case 'search':
-        const username = interaction.options.getString('rsn', true).toLowerCase();
-        const data = await getSheetData(config.googleDrive.splitsSheet, 'Data!1:900', 'FORMATTED_VALUE');
-        const players = data?.slice(3);
-
-        for (const { index, value } of (players as any[][]).map((value, index) => ({
-          index,
-          value
-        }))) {
-          if (value.at(0).toLowerCase() === username) {
-            const [
-              rank,
-              diaryTasks,
-              joinDate,
-              introSpeeds,
-              intermediateSpeeds,
-              advancedSpeeds,
-              totalPoints,
-              botw
-            ] = [
-              value.at(2),
-              value.at(14).length > 0 ? value.at(14) : '--',
-              value.at(15).length > 0 ? value.at(15) : '--',
-              value.at(4),
-              value.at(5),
-              value.at(6),
-              value.at(17),
-              value.slice(18, 21)
-            ];
-
-            const embed = new EmbedBuilder()
-              .setTitle(`Showing player data for ${value.at(0)}`)
-              .setFooter({ text: `Joined Legacy at ${joinDate}` })
-              .setURL(
-                'https://docs.google.com/spreadsheets/d/1Cuc6_MB9E1-6nFXbv6pDxKlwCjS9mXDG5kaPV4B_Wq8/edit?usp=sharing'
-              )
-              .addFields([
-                { name: 'Total points', value: totalPoints, inline: true },
-                { name: 'Diary tasks completed', value: diaryTasks, inline: true },
-                { name: '\u200b', value: '\u200b', inline: true },
-                {
-                  name: '\u200b',
-                  value: `\u200b`,
-                  inline: true
-                },
-                { name: `\u200b`, value: ' **👟 Speeds**', inline: true },
-                { name: '\u200b', value: '\u200b', inline: true },
-                {
-                  name: 'Intro',
-                  value: `${introSpeeds}`,
-                  inline: true
-                },
-                {
-                  name: 'Intermediate',
-                  value: `${intermediateSpeeds}`,
-                  inline: true
-                },
-                {
-                  name: 'Advanced',
-                  value: `${advancedSpeeds}`,
-                  inline: true
-                },
-                {
-                  name: 'Boss of the Week',
-                  value: `${botw.at(0) ? botw.at(0) : 0}🥇 / ${botw.at(1) ? botw.at(1) : 0}🥈 / ${
-                    botw.at(2) ? botw.at(2) : 0
-                  }🥉`,
-                  inline: true
-                },
-                { name: 'Rank', value: `${getRank(rank)} ${rank}`, inline: true }
-              ]);
-
-            if (clanIcon) embed.setThumbnail(clanIcon);
-
-            await interaction.followUp({
-              embeds: [embed]
-            });
-            return;
-          }
-        }
-
-        await interaction.followUp({
-          content: 'Player not found.'
-        });
-        return;
+    if (!isImageAttachment(screenshot)) {
+      await interaction.followUp({
+        content: `Invalid screenshot. Please make sure you attach the correct screenshot when submitting a split.`,
+        flags: MessageFlags.Ephemeral
+      });
+      return;
     }
 
+    const value = interaction.options.getNumber('value', true);
+    const player1 = interaction.options.getUser('player1', true);
+
+    const teamMates = ['player2', 'player3', 'player4', 'player5', 'player6', 'player7'].map(p => {
+      return interaction.options.getUser(p, false);
+    });
+
+    const members = await interaction.guild.members.fetch();
+
+    const p1 = members.get(player1.id);
+    const teamMateNicknames = teamMates
+      .map(t => t && `"${members.get(t.id)?.displayName}"`)
+      .filter(n => n)
+      .join(',');
+
+    const embed = new EmbedBuilder()
+      .setTitle(`${interaction.member.displayName} is splitting ${value}m`)
+      .setDescription(
+        '**Item recipient**\n' +
+          `${interaction.user}\n\n` +
+          `**Split value**\n` +
+          `${value}m\n\n` +
+          '**Splitting with**\n' +
+          `${player1} ${teamMates.filter(p => p)}`
+      )
+      .setImage(screenshot.url)
+      .setColor('DarkGreen');
+
+    const createdAt = interaction.createdAt;
+    const date = `${createdAt.getFullYear()},${createdAt.getMonth() + 1},${createdAt.getDate()}`;
+
+    const content =
+      `[${value},` +
+      `"=DATE(${date})",` +
+      `"${interaction.member.displayName}",` +
+      `"${p1?.displayName}",${teamMateNicknames}` +
+      `]`;
+
+    const actions = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder().setCustomId('split_approve').setLabel('Approve').setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId(`split_deny`).setLabel('Deny').setStyle(ButtonStyle.Danger)
+    );
+
     await interaction.followUp({
-      content: content ? content : 'Something went wrong.'
+      content: `-# ||${content}||`,
+      embeds: [embed],
+      components: [actions]
     });
   }
 };
 
-function isTrue(val: string) {
-  return val === 'TRUE' ? '✅' : '❌';
+export function isImageAttachment(attachment: Attachment): boolean {
+  return (
+    attachment.contentType !== null &&
+    attachment.contentType.startsWith('image/') &&
+    attachment.width !== null &&
+    attachment.height !== null
+  );
 }

@@ -3,7 +3,8 @@ import {
   Client,
   ApplicationCommandType,
   ApplicationCommandOptionType,
-  ChannelType
+  ChannelType,
+  MessageFlags
 } from 'discord.js';
 import { Command } from 'src/types';
 import { sendMessageInChannel } from '../discord';
@@ -106,13 +107,13 @@ export const messageCommand: Command = {
 
     if (!isStaff(interaction.member)) {
       await interaction.reply({
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
         content: 'You need to be a staff member to use this command!'
       });
       return;
     }
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     const subCommand = interaction.options.getSubcommand();
     const channel = interaction.options.getChannel('channel', true);
     if (channel.type !== ChannelType.GuildText) return;

@@ -9,7 +9,8 @@ import {
   ButtonStyle,
   PermissionFlagsBits,
   ChannelType,
-  TextChannel
+  TextChannel,
+  MessageFlags
 } from 'discord.js';
 import * as fs from 'fs';
 import path from 'path';
@@ -20,12 +21,12 @@ import config from '../config';
 import { createChannel, sendMessageInChannel } from '../discord';
 import KnexDB from '../database/knex';
 import { imgurClient } from '../api/handler';
-import { hasRole, isStaff } from '../utils';
+import { isStaff } from '../utils';
 
 export async function startChannel(interaction: ButtonInteraction, channelType: string) {
   if (!interaction.inCachedGuild()) return;
 
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   const member = interaction.member;
   const avatar = member.displayAvatarURL();

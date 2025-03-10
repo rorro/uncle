@@ -3,7 +3,8 @@ import {
   Client,
   EmbedBuilder,
   ApplicationCommandType,
-  ApplicationCommandOptionType
+  ApplicationCommandOptionType,
+  MessageFlags
 } from 'discord.js';
 import { Command } from 'src/types';
 import { RWAPI, womClient } from '../api/handler';
@@ -29,7 +30,7 @@ export const checkApplicantRequirementsCommand: Command = {
 
     if (!isStaff(interaction.member)) {
       await interaction.reply({
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
         content: 'You need to be an application manager to use this command!'
       });
       return;

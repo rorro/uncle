@@ -4,14 +4,14 @@ import {
   InteractionReplyOptions,
   ApplicationCommandType,
   ApplicationCommandOptionType,
-  ChannelType
+  ChannelType,
+  MessageFlags
 } from 'discord.js';
 import { Command, ScheduledMessage } from '../types';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import utc from 'dayjs/plugin/utc';
-import { hasRole, DATE_FORMAT, isStaff } from '../utils';
-import config from '../config';
+import { DATE_FORMAT, isStaff } from '../utils';
 import KnexDB from '../database/knex';
 import { ScheduledMessageType } from '../types';
 
@@ -49,13 +49,13 @@ export const scheduleCommand: Command = {
 
     if (!isStaff(interaction.member)) {
       await interaction.reply({
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
         content: 'You need to be a staff member to use this command!'
       });
       return;
     }
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const date = interaction.options.getString('date', true);
     const validFormat = dayjs(date, DATE_FORMAT, true).utc().isValid();

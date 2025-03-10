@@ -7,11 +7,11 @@ import {
   ButtonStyle,
   ApplicationCommandType,
   ApplicationCommandOptionType,
-  ChannelType
+  ChannelType,
+  MessageFlags
 } from 'discord.js';
-import config from '../config';
 import { Command } from '../types';
-import { hasRole, isStaff } from '../utils';
+import { isStaff } from '../utils';
 import KnexDB from '../database/knex';
 
 export const supportCommand: Command = {
@@ -39,13 +39,13 @@ export const supportCommand: Command = {
 
     if (!isStaff(interaction.member)) {
       await interaction.reply({
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
         content: 'You need to be a staff member to use this command!'
       });
       return;
     }
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const subCommand = interaction.options.getSubcommand();
     let content = '';

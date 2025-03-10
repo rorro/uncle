@@ -4,7 +4,8 @@ import {
   Client,
   EmbedBuilder,
   ApplicationCommandType,
-  ApplicationCommandOptionType
+  ApplicationCommandOptionType,
+  MessageFlags
 } from 'discord.js';
 import { Command, ScheduledMessageEntry, ScheduledMessageType } from '../types';
 import {
@@ -43,7 +44,7 @@ export const acceptApplicationCommand: Command = {
     if (!interaction.inCachedGuild() || !interaction.isCommand()) return;
     if (!isStaff(interaction.member)) {
       await interaction.reply({
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
         content: 'You need to be an application manager to use this command!'
       });
       return;
@@ -60,7 +61,7 @@ export const acceptApplicationCommand: Command = {
     const newMembersChannelId = (await KnexDB.getConfigItem('new_members_channel')) as string;
     if (!newMembersChannelId) {
       await interaction.followUp({
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
         content: 'New members channel where welcome messages are sent has not been configured.'
       });
       return;

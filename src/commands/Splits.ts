@@ -117,12 +117,13 @@ export const splitsCommand: Command = {
     const createdAt = interaction.createdAt;
     const date = `${createdAt.getFullYear()},${createdAt.getMonth() + 1},${createdAt.getDate()}`;
 
-    const content =
+    let content =
       `[${value},` +
       `"=DATE(${date})",` +
       `"${interaction.member.displayName}",` +
-      `"${p1?.displayName}",${teamMateNicknames}` +
-      `]`;
+      `"${p1?.displayName}"`;
+
+    content += (teamMateNicknames ? `,${teamMateNicknames}` : '') + ']';
 
     const actions = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder().setCustomId('split_approve').setLabel('Approve').setStyle(ButtonStyle.Success),

@@ -80,7 +80,8 @@ export const playerStatsCommand: Command = {
       kc1kCombinedRaids,
       kc100CoxTobToaExp,
       kc200CoxTobToaExp,
-      kc100CmHm
+      kc100CmHm,
+      pointsfromKc
     ] = playerData as string[];
 
     let description =
@@ -90,7 +91,8 @@ export const playerStatsCommand: Command = {
       `**Point Summary**\n` +
       `Points from splits (${splits}): ${pointsFromSplits} / ${MAX_POINTS.splits}\n` +
       `Points from events (${eventsAttended}): ${pointsFromEvents} / ${MAX_POINTS.events}\n` +
-      `Points from EHB (${ehb}): ${pointsFromEhb} / ${MAX_POINTS.ehb}\n\n` +
+      `Points from EHB (${ehb}): ${pointsFromEhb} / ${MAX_POINTS.ehb}\n` +
+      `Points from KC: ${pointsfromKc} / ${MAX_POINTS.kc}\n\n` +
       `**Speed Rank**\n` +
       `Current: ${getRank(currentSpeedRank)} ${currentSpeedRank} | Next: ${getRank(
         nextSpeedRank

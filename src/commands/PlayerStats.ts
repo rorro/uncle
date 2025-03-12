@@ -11,6 +11,13 @@ import { getSheetData } from '../api/googleHandler';
 import config from '../config';
 import { getCa, getRank } from '../utils';
 
+const MAX_POINTS = {
+  splits: 100,
+  ehb: 20,
+  events: 50,
+  kc: 45
+}
+
 export const playerStatsCommand: Command = {
   name: 'playerstats',
   description: 'Get information about a clan member',
@@ -78,12 +85,12 @@ export const playerStatsCommand: Command = {
 
     let description =
       `Current rank: ${getRank(diaryRank)} ${diaryRank}\n` +
-      `Total points: ${totalPoints}\n` +
+      `Total points: ${totalPoints} / ${Object.values(MAX_POINTS).reduce((a, c) => a + c, 0)}\n` +
       `Points til next rank: ${pointsTilNextRank}\n\n` +
       `**Point Summary**\n` +
-      `Points from splits (${splits}): ${pointsFromSplits}\n` +
-      `Points from events (${eventsAttended}): ${pointsFromEvents}\n` +
-      `Points from EHB (${ehb}): ${pointsFromEhb}\n\n` +
+      `Points from splits (${splits}): ${pointsFromSplits} / ${MAX_POINTS.splits}\n` +
+      `Points from events (${eventsAttended}): ${pointsFromEvents} / ${MAX_POINTS.events}\n` +
+      `Points from EHB (${ehb}): ${pointsFromEhb} / ${MAX_POINTS.ehb}\n\n` +
       `**Speed Rank**\n` +
       `Current: ${getRank(currentSpeedRank)} ${currentSpeedRank} | Next: ${getRank(
         nextSpeedRank

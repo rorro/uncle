@@ -155,11 +155,6 @@ export function getCa(achieved: string): string {
   return ca || ``;
 }
 
-export function getRoleName(roleId: string): string {
-  const roles = config.guild.roles;
-  return roleId === roles.protector ? 'Protector' : roleId === roles.bulwark ? 'Bulwark' : 'Justiciar';
-}
-
 // Code shamelessly stolen from: https://stackoverflow.com/a/54385026
 function* range(start: number, end: number) {
   for (; start <= end; ++start) {

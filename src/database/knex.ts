@@ -47,8 +47,6 @@ class KnexDB {
         'leaderboard_channel',
         'transcripts_channel',
         'welcome_base_message',
-        'welcome_success_message',
-        'welcome_error_message',
         'welcome_pm_message',
         'inactivity_check_channel',
         'logs_channel'

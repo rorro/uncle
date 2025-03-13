@@ -98,8 +98,6 @@ export const acceptApplicationCommand: Command = {
         const playerData = data.at(index);
         const [, , , , , , , , pointsFromSplits, , pointsFromEvents] = playerData as string[];
 
-        console.log(pointsFromSplits, pointsFromEvents);
-
         totalPoints += Number(pointsFromSplits) + Number(pointsFromEvents);
         description += `Points from splits: ${pointsFromSplits}\nPoints from events: ${pointsFromEvents}`;
       } else {
@@ -206,8 +204,6 @@ function getKcPoints(bosses: MapOf<Boss, BossValue>): number {
     bosses.chambers_of_xeric_challenge_mode.kills >= 100 &&
     bosses.theatre_of_blood_hard_mode.kills >= 100;
   bossPoints += kc100cmhm ? 10 : 0;
-
-  console.log(kc100, kc200, kc1k, kc100cmhm);
 
   return bossPoints;
 }

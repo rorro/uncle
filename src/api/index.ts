@@ -17,7 +17,6 @@ export function init(): Express {
   api.use('/api/uncle/dashboard', dashboardRoutes);
 
   api.use('/transcripts', express.static(path.join(__dirname, '../..', '.transcripts')));
-  api.use('/messages', express.static(path.join(__dirname, '../..', '.scheduledMessages.json')));
 
   api.listen(config.API.port, () => {
     console.log(`Server running on port ${config.API.port}`);

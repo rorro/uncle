@@ -1,15 +1,15 @@
 import { EmbedBuilder, TextChannel } from 'discord.js';
-import KnexDB from './database/knex';
 import { sendMessageInChannel } from './discord';
 import { MessageType } from './types';
 import client from './bot';
 import config from './config';
 import LeaderboardBosses from './leaderboardBosses';
+import db from './database/operations';
 
 export const NAV_MESSAGE_NAME = 'Quick Hop Links';
 
 export async function createLeaderboardNav(leaderboardChannel: TextChannel, remove: boolean = false) {
-  const leaderboardMessages = await KnexDB.getMessagesByType(MessageType.Leaderboard);
+  const leaderboardMessages = db.getMessagesByType(MessageType.Leaderboard);
 
   const embed = new EmbedBuilder().setTitle(NAV_MESSAGE_NAME);
   let description = '';
@@ -21,7 +21,7 @@ export async function createLeaderboardNav(leaderboardChannel: TextChannel, remo
 
   embed.setDescription(description);
 
-  const storedMessageId = await KnexDB.getMessageIdByName(NAV_MESSAGE_NAME);
+  const storedMessageId = db.getMessageIdByName(NAV_MESSAGE_NAME);
   if (storedMessageId !== undefined) {
     // nav message exists
     if (remove) {
@@ -31,7 +31,7 @@ export async function createLeaderboardNav(leaderboardChannel: TextChannel, remo
       } catch (error) {
         console.error('Old nav message not found.');
       }
-      await KnexDB.deleteFromMessages({ name: NAV_MESSAGE_NAME });
+      db.deleteFromMessages({ name: NAV_MESSAGE_NAME });
       await sendNavMessage(leaderboardChannel, embed);
     } else {
       await leaderboardChannel.messages.edit(storedMessageId, { embeds: [embed] });
@@ -48,10 +48,5 @@ async function sendNavMessage(leaderboardChannel: TextChannel, embed: EmbedBuild
     return `Something went wrong when sending nav message`;
   }
 
-  await KnexDB.insertIntoMessages(
-    NAV_MESSAGE_NAME,
-    messageId,
-    `#${leaderboardChannel.name}`,
-    MessageType.Other
-  );
+  db.insertIntoMessages(NAV_MESSAGE_NAME, messageId, `#${leaderboardChannel.name}`, MessageType.Other);
 }

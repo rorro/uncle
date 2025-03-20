@@ -12,9 +12,9 @@ import { getSheetData, insertIntoSheet } from '../api/googleHandler';
 import config from '../config';
 import { sendMessageInChannel } from '../discord';
 import { isStaff } from '../utils';
-import KnexDB from '../database/knex';
 import { womClient } from '../api/handler';
 import { Boss, BossValue, MapOf } from '@wise-old-man/utils';
+import db from '../database/operations';
 
 export const acceptApplicationCommand: Command = {
   name: 'accept_application',
@@ -53,7 +53,7 @@ export const acceptApplicationCommand: Command = {
       throw Error('User not found');
     }
 
-    const newMembersChannelId = (await KnexDB.getConfigItem('new_members_channel')) as string;
+    const newMembersChannelId = db.getConfigItem('new_members_channel') as string;
     if (!newMembersChannelId) {
       await interaction.followUp({
         flags: MessageFlags.Ephemeral,
@@ -119,10 +119,10 @@ export const acceptApplicationCommand: Command = {
         ])
         .setDescription(description);
 
-      const clanIcon = (await KnexDB.getConfigItem('clan_icon')) as string;
+      const clanIcon = db.getConfigItem('clan_icon') as string;
       if (clanIcon) reply.setThumbnail(clanIcon);
 
-      const configData = await KnexDB.getAllConfigs();
+      const configData = await db.getAllConfigs();
       const introMessage = `${configData.welcome_base_message.replaceAll(
         '<@user>',
         `<@${discordUser.id}>`
@@ -136,7 +136,7 @@ export const acceptApplicationCommand: Command = {
         content: introMessage
       });
 
-      const inactivityCheckChannel = (await KnexDB.getConfigItem('inactivity_check_channel')) as string;
+      const inactivityCheckChannel = db.getConfigItem('inactivity_check_channel') as string;
       if (inactivityCheckChannel) {
         const now = dayjs();
         const scheduledEmbed = new EmbedBuilder().setTitle(`30 day checkup: ${rsn}`).addFields([
@@ -159,7 +159,7 @@ export const acceptApplicationCommand: Command = {
           channel: inactivityCheckChannel,
           type: ScheduledMessageType.Embed
         };
-        await KnexDB.insertScheduledMessage(scheduledMessage);
+        db.insertScheduledMessage(scheduledMessage);
       }
 
       interaction.followUp({

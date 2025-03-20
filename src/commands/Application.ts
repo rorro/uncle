@@ -12,7 +12,7 @@ import {
 } from 'discord.js';
 import { Command } from '../types';
 import { isStaff } from '../utils';
-import KnexDB from '../database/knex';
+import db from '../database/operations';
 
 export const applicationCommand: Command = {
   name: 'application',
@@ -74,7 +74,7 @@ export const applicationCommand: Command = {
           .setColor('DarkPurple')
           .setDescription('If you wish to apply, click the "Start Application" button below.');
 
-        const clanIcon = (await KnexDB.getConfigItem('clan_icon')) as string;
+        const clanIcon = db.getConfigItem('clan_icon') as string;
         if (clanIcon) embed.setThumbnail(clanIcon);
 
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -93,11 +93,17 @@ export const applicationCommand: Command = {
       case 'set_transcript_channel':
         const transcriptsChannel = interaction.options.getChannel('transcripts_channel', true);
 
-        await KnexDB.updateConfig('transcripts_channel', transcriptsChannel.id);
+        try {
+          db.updateConfig('transcripts_channel', transcriptsChannel.id);
 
-        await interaction.followUp({
-          content: `Transcripts channel has been set to ${transcriptsChannel}`
-        });
+          await interaction.followUp({
+            content: `Transcripts channel has been set to ${transcriptsChannel}`
+          });
+        } catch (e) {
+          console.log(e);
+          return;
+        }
+
         return;
     }
 

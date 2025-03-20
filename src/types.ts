@@ -98,12 +98,6 @@ export interface OauthData {
 export interface ResponseType {
   guild?: Guild;
   guildChannels: Collection<string, NonThreadGuildBasedChannel | null>;
-  configs: ConfigEntry;
-  messages: MessageEntry[];
-  scheduledMessages: ScheduledMessageEntry[];
-  embedConfigs: EmbedConfigs;
-  petsLeaderboard: PetLeaderboardEntry[];
-  speedsLeaderboard: SpeedsLeaderboardEntry[];
 }
 
 export enum ScheduledMessageType {

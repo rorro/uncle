@@ -9,10 +9,10 @@ import {
 } from 'discord.js';
 import config from './config';
 import { MessageOptions } from './types';
-import KnexDB from './database/knex';
 import dayjs from 'dayjs';
 import { DATE_FORMAT } from './utils';
 import { insertIntoSheet } from './api/googleHandler';
+import db from './database/operations';
 
 // Send a message in a specific channel
 export async function sendMessageInChannel(client: Client, channelId: string, options?: MessageOptions) {
@@ -73,7 +73,7 @@ export async function createChannel(
 }
 
 export async function sendScheduledMessages(client: Client) {
-  const newMessages = await KnexDB.getAllScheduledMessages();
+  const newMessages = db.getAllScheduledMessages();
   let newOptions: MessageOptions = {};
   for (const scheduled of newMessages) {
     const scheduledDate = dayjs(scheduled.date);
@@ -92,7 +92,7 @@ export async function sendScheduledMessages(client: Client) {
         : undefined;
 
     await sendMessageInChannel(client, scheduled.channel, newOptions);
-    await KnexDB.deleteScheduledMessage(scheduled.id);
+    db.deleteScheduledMessage(scheduled.id);
   }
 }
 

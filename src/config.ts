@@ -34,7 +34,7 @@ export default {
       justiciar: process.env.JUSTICIAR_ROLE as string,
       bulwark: process.env.BULWARK_ROLE as string,
       protector: process.env.PROTECTOR_ROLE as string,
-      member: process.env.MEMBER_ROLE as string,
+      member: process.env.MEMBER_ROLE as string
     }
   },
   // All valid metrics can be found here https://docs.wiseoldman.net/global-type-definitions
@@ -43,7 +43,6 @@ export default {
     { metric: 'combatLevel', type: 'other', name: '+ Combat', threshold: 125 },
 
     // Skills
-    { metric: 'overall', type: 'skill', name: '+ Total', threshold: 2000 },
     { metric: 'ranged', type: 'skill', name: ' Ranged', threshold: 99 },
     { metric: 'magic', type: 'skill', name: ' Magic', threshold: 99 },
     { metric: 'slayer', type: 'skill', name: ' Slayer', threshold: 95 },

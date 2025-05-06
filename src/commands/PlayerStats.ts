@@ -16,7 +16,7 @@ const MAX_POINTS = {
   ehb: 20,
   events: 50,
   kc: 45
-}
+};
 
 export const playerStatsCommand: Command = {
   name: 'playerstats',
@@ -61,6 +61,7 @@ export const playerStatsCommand: Command = {
     const [
       name,
       diaryRank,
+      nextDiaryRank,
       currentSpeedRank,
       totalPoints,
       pointsTilNextRank,
@@ -84,7 +85,11 @@ export const playerStatsCommand: Command = {
       pointsfromKc
     ] = playerData as string[];
 
+    const rankUpNotification =
+      diaryRank !== nextDiaryRank ? `## You are due a rank up to ${nextDiaryRank}! :tada:\n\n` : '';
+
     let description =
+      rankUpNotification +
       `Current rank: ${getRank(diaryRank)} ${diaryRank}\n` +
       `Total points: ${totalPoints} / ${Object.values(MAX_POINTS).reduce((a, c) => a + c, 0)}\n` +
       `Points til next rank: ${pointsTilNextRank}\n\n` +

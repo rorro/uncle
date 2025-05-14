@@ -113,6 +113,11 @@ const LeaderboardBosses: LeaderboardBoss[] = [
     emoji: '<:nid:1278463230922068018>'
   },
   {
+    boss: 'Yama',
+    emoji: '<:yama:1372321594021511188>',
+    categories: ['Solo', 'Duo']
+  },
+  {
     boss: 'Diary Top 10',
     emoji: ':ledger:'
   }

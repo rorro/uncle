@@ -9,7 +9,7 @@ import {
   MessageActionRowComponent,
   MessageFlags
 } from 'discord.js';
-import { getSheetData, insertIntoSheet } from '../api/googleHandler';
+import { appendIntoSheet, getSheetData, insertIntoSheet } from '../api/googleHandler';
 import config from '../config';
 import { isStaff } from '../utils';
 
@@ -31,13 +31,7 @@ export async function saveSplit(interaction: ButtonInteraction) {
     const toWrite = JSON.parse(interaction.message.content.replaceAll('||', '').slice(2));
     const embed = new EmbedBuilder(interaction.message.embeds[0].toJSON());
 
-    const currentData = await getSheetData(
-      config.googleDrive.newSplitsSheet,
-      'Bot splits dump!A1:A',
-      'FORMATTED_VALUE'
-    );
-    const index = currentData?.length as number;
-    await insertIntoSheet(config.googleDrive.newSplitsSheet, `Bot splits dump!A${index + 1}`, [toWrite]);
+    await appendIntoSheet(config.googleDrive.newSplitsSheet, `Bot splits dump!A1`, [toWrite]);
 
     embed.setFooter({ text: `Approved by: ${interaction.user.displayName}` });
     await interaction.editReply({ content: '', embeds: [embed], components: [] });

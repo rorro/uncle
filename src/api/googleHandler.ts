@@ -108,3 +108,15 @@ export async function insertIntoSheet(sheetId: string, range: string, values: st
     }
   });
 }
+
+export async function appendIntoSheet(sheetId: string, range: string, values: string[][]) {
+  await sheetsService.spreadsheets.values.append({
+    spreadsheetId: sheetId,
+    range: range,
+    valueInputOption: 'USER_ENTERED',
+    insertDataOption: 'INSERT_ROWS',
+    requestBody: {
+      values
+    }
+  });
+}

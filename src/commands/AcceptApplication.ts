@@ -101,9 +101,7 @@ export const acceptApplicationCommand: Command = {
         totalPoints += Number(pointsFromSplits) + Number(pointsFromEvents);
         description += `Points from splits: ${pointsFromSplits}\nPoints from events: ${pointsFromEvents}`;
       } else {
-        await insertIntoSheet(config.googleDrive.newSplitsSheet, `New Splits Summary!A${index}`, [
-          [rsn]
-        ]);
+        await insertIntoSheet(config.googleDrive.newSplitsSheet, `Clan Rank Data!A${index}`, [[rsn]]);
       }
       description += `\nEHB points: ${ehbPoints}\nKC points: ${kcPoints}\n**Total points**: ${totalPoints}\n`;
 

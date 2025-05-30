@@ -114,8 +114,7 @@ const LeaderboardBosses: LeaderboardBoss[] = [
   },
   {
     boss: 'Yama',
-    emoji: '<:yama:1372321594021511188>',
-    categories: ['Solo', 'Duo']
+    emoji: '<:yama:1372321594021511188>'
   },
   {
     boss: 'Diary Top 10',

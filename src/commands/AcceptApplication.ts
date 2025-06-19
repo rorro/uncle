@@ -78,7 +78,7 @@ export const acceptApplicationCommand: Command = {
 
       const usernames = data.map(value => value.at(0).toLowerCase()).filter(Boolean);
       const previousMember = usernames.includes(rsn.toLowerCase());
-      const index = previousMember ? usernames.indexOf(rsn.toLowerCase()) : usernames.length + 1;
+      const index = previousMember ? usernames.indexOf(rsn.toLowerCase()) : usernames.length + 2;
 
       const womData = await womClient.players.getPlayerDetails(rsn);
       const { ehb, latestSnapshot } = womData;

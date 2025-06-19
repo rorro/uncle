@@ -14,7 +14,7 @@ import { Command } from '../types';
 
 export const splitsCommand: Command = {
   name: 'splits',
-  description: 'Show various information about splits.',
+  description: 'Submit a split.',
   type: ApplicationCommandType.ChatInput,
   options: [
     {

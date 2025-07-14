@@ -4,7 +4,8 @@ import {
   ApplicationCommandType,
   ApplicationCommandOptionType,
   AttachmentBuilder,
-  EmbedBuilder
+  EmbedBuilder,
+  Guild
 } from 'discord.js';
 import { Command } from '../types';
 import { hasRole, isStaff } from '../utils';
@@ -24,6 +25,25 @@ export const rolesCommand: Command = {
           name: 'roles',
           description: `Discord role IDs separated by commas. Example: 691419580438020168, 997287886313500683`,
           type: ApplicationCommandOptionType.String,
+          required: true
+        }
+      ]
+    },
+    {
+      type: ApplicationCommandOptionType.Subcommand,
+      name: 'give',
+      description: 'Give members a new role',
+      options: [
+        {
+          name: 'currentrole',
+          description: `The role to look for when fetching members`,
+          type: ApplicationCommandOptionType.Role,
+          required: true
+        },
+        {
+          name: 'newrole',
+          description: `The new role to assign to everyone`,
+          type: ApplicationCommandOptionType.Role,
           required: true
         }
       ]
@@ -57,19 +77,7 @@ export const rolesCommand: Command = {
 
         const rolesToCheck = roles.split(',');
 
-        await interaction.guild.members.fetch();
-
-        let allMembers = await interaction.guild.members.fetch();
-
-        for (const [memberId, member] of allMembers) {
-          const memberRoles = member.roles.cache.map(r => r.id);
-          if (
-            memberRoles.length < rolesToCheck.length ||
-            !rolesToCheck.every(r => memberRoles.includes(r))
-          ) {
-            allMembers.delete(memberId);
-          }
-        }
+        const allMembers = await fetchMembersWithRole(interaction.guild, rolesToCheck);
 
         const amount = allMembers.size;
         let content = `Total matched: ${amount}\n\n`;
@@ -93,6 +101,45 @@ export const rolesCommand: Command = {
           embeds: [embed],
           files: [attchment]
         });
+        break;
+      case 'give':
+        const roleToFetch = interaction.options.getRole('currentrole', true);
+        const newRole = interaction.options.getRole('newrole', true);
+
+        const membersWithRole = await fetchMembersWithRole(interaction.guild, [roleToFetch.id]);
+
+        for (const [memberId, member] of membersWithRole) {
+          try {
+            await member.roles.add(newRole);
+          } catch (error) {
+            console.log(`Skipped ${member.user.username} while giving role.`, error);
+          }
+        }
+
+        const resultEmbed = new EmbedBuilder();
+        resultEmbed.setDescription(
+          `Gave **${membersWithRole.size}** ${
+            membersWithRole.size === 1 ? 'person' : 'people'
+          } the following role: ${newRole}`
+        );
+
+        await interaction.followUp({
+          embeds: [resultEmbed]
+        });
+        break;
     }
   }
 };
+
+async function fetchMembersWithRole(guild: Guild, rolesToCheck: string[]) {
+  let allMembers = await guild.members.fetch();
+
+  for (const [memberId, member] of allMembers) {
+    const memberRoles = member.roles.cache.map(r => r.id);
+    if (memberRoles.length < rolesToCheck.length || !rolesToCheck.every(r => memberRoles.includes(r))) {
+      allMembers.delete(memberId);
+    }
+  }
+
+  return allMembers;
+}

@@ -79,74 +79,34 @@ export const checkApplicantRequirementsCommand: Command = {
       const response = await womClient.players.getPlayerDetails(rsn);
       if (response === null || response.latestSnapshot === null) return;
 
-      const skills = Object.entries(response.latestSnapshot.data.skills);
-      const bosses = Object.entries(response.latestSnapshot.data.bosses);
+      const skills = response.latestSnapshot.data.skills;
+      const bosses = response.latestSnapshot.data.bosses;
 
       let description = '**Skills and Kill Counts**\n';
 
-      config.requirements.forEach(requirement => {
-        switch (requirement.type) {
-          case 'other': // right now only combat level is others
-            description += `${response.combatLevel >= requirement.threshold ? '✅' : '❌'} ${
-              requirement.threshold
-            }${requirement.name} (${response.combatLevel})\n`;
-            break;
-          case 'skill':
-            const skill = skills.find(([name]) => name === requirement.metric);
-            if (!skill) break;
-            const [, skillValue] = skill;
-            description += `${skillValue.level >= requirement.threshold ? '✅' : '❌'} ${
-              requirement.threshold
-            }${requirement.name} (${skillValue.level})\n`;
-            break;
-          case 'boss':
-            const boss = bosses.find(([name]) => name === requirement.metric);
-            if (!boss) break;
-            const [, bossValue] = boss;
-            const bossKc = Math.max(bossValue.kills, 0);
+      description += `${response.combatLevel >= 115 ? '✅' : '❌'} 115+ Combat (${
+        response.combatLevel
+      })\n`;
 
-            let altBossKc = 0;
-            if (requirement.alternatives) {
-              for (const alt of requirement.alternatives) {
-                const altBoss = bosses.find(([name]) => name === alt);
+      description += `${skills.prayer.level >= 70 ? '✅' : '❌'} 70 Prayer (${skills.prayer.level})\n`;
 
-                if (altBoss) {
-                  const [, altBossValue] = altBoss;
-                  altBossKc += Math.max(altBossValue.kills, 0);
-                }
-              }
-            }
+      description += `${skills.herblore.level >= 70 ? '✅' : '❌'} 78 Herblore (${
+        skills.herblore.level
+      })\n`;
 
-            description += `${bossKc + altBossKc >= requirement.threshold ? '✅' : '❌'} ${
-              requirement.threshold
-            }kc ${requirement.name} (${bossKc + (requirement.alternatives ? altBossKc : 0)})\n`;
-            break;
-          case 'warning':
-            const warningMetric = bosses.find(([name]) => name === requirement.metric);
-            if (!warningMetric) break;
-            const [, warningMetricValue] = warningMetric;
-            const wmv = Math.max(warningMetricValue.kills, 0);
+      const cox = bosses.chambers_of_xeric.kills + bosses.chambers_of_xeric_challenge_mode.kills;
+      const tob = bosses.theatre_of_blood.kills + bosses.theatre_of_blood_hard_mode.kills;
+      const toa = bosses.tombs_of_amascut_expert.kills;
+      const threshold = 25;
 
-            let amv = 0;
-            if (requirement.alternatives) {
-              for (const alt of requirement.alternatives) {
-                const altMetric = bosses.find(([name]) => name === alt);
+      description += `${
+        cox >= threshold || tob >= threshold || toa >= threshold ? '✅' : '❌'
+      } 25kc in any raid (CoX: ${cox}, ToB: ${tob}, ToA: ${toa})\n`;
 
-                if (altMetric) {
-                  const [, altMetricValue] = altMetric;
-                  amv = Math.max(altMetricValue.kills, 0);
-                }
-              }
-            }
-
-            description += `${
-              wmv < requirement.threshold && amv < requirement.threshold
-                ? '\n⚠️ SotE might not be completed\n'
-                : ''
-            }`;
-            break;
-        }
-      });
+      description += `\n**Other stats**\n`;
+      description += `Range: ${skills.ranged.level}\n`;
+      description += `Mage: ${skills.magic.level}\n`;
+      description += `Slayer: ${skills.slayer.level}\n`;
 
       description += `\n**RuneWatch**\n${rwResult}`;
 

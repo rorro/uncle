@@ -94,8 +94,12 @@ export const checkApplicantRequirementsCommand: Command = {
         skills.herblore.level
       })\n`;
 
-      const cox = bosses.chambers_of_xeric.kills + bosses.chambers_of_xeric_challenge_mode.kills;
-      const tob = bosses.theatre_of_blood.kills + bosses.theatre_of_blood_hard_mode.kills;
+      const cox =
+        Math.max(0, bosses.chambers_of_xeric.kills) +
+        Math.max(0, bosses.chambers_of_xeric_challenge_mode.kills);
+      const tob =
+        Math.max(0, bosses.theatre_of_blood.kills) +
+        Math.max(0, bosses.theatre_of_blood_hard_mode.kills);
       const toa = bosses.tombs_of_amascut_expert.kills;
       const threshold = 25;
 

@@ -90,7 +90,7 @@ export const checkApplicantRequirementsCommand: Command = {
 
       description += `${skills.prayer.level >= 70 ? '✅' : '❌'} 70 Prayer (${skills.prayer.level})\n`;
 
-      description += `${skills.herblore.level >= 70 ? '✅' : '❌'} 78 Herblore (${
+      description += `${skills.herblore.level >= 78 ? '✅' : '❌'} 78 Herblore (${
         skills.herblore.level
       })\n`;
 

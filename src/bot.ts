@@ -1,5 +1,4 @@
 import { Client, GatewayIntentBits } from 'discord.js';
-import * as api from './api/index';
 import config from './config';
 import interactionCreate from './listeners/interactionCreate';
 import ready from './listeners/ready';
@@ -21,6 +20,5 @@ ready(client);
 interactionCreate(client);
 
 client.login(config.client.token);
-api.init();
 
 export default client;
